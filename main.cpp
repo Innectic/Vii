@@ -22,6 +22,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	std::unique_ptr<Workspace> workspace = std::make_unique<Workspace>();
+	std::unique_ptr<FileHandler> fileHandler = std::make_unique<FileHandler>();
 	workspace->commentChar = "//"; // TODO: Pull from some-sort of a workspace conf
 
 	for (auto i = 1; i < argc; i++) {
@@ -35,8 +36,8 @@ int main(int argc, char *argv[]) {
 
 		if (current == "-w") {
 			workspace->usingWorkspace = true;
-			workspace->workspaceDirectory = FileHandler::getCurrentDirectory();
-			workspace->files = FileHandler::getFilesInDirectory(true, workspace->workspaceDirectory);
+			workspace->workspaceDirectory = fileHandler->getCurrentDirectory();
+			workspace->files = fileHandler->getFilesInDirectory(true, workspace->workspaceDirectory);
 		}
 		else if (current == "-f") {
 			workspace->usingWorkspace = false;

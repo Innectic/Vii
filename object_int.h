@@ -5,7 +5,7 @@
 
 class ObjectInt : public Object<int> {
 public:
-	inline const ObjectInt(const int value) {
+	inline const ObjectInt(const int& value) {
 		this->value = value;
 	}
 	  

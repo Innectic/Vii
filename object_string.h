@@ -5,7 +5,7 @@
 
 class ObjectString : public Object<std::string> {
 public:
-	inline const ObjectString(const std::string value) {
+	inline const ObjectString(const std::string& value) {
 		this->value = value;
 	};
 

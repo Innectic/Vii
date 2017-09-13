@@ -5,7 +5,7 @@ protected:
 	inline const Object() {}
 	T value;
 public:
-	inline const Object(const T value) : value(value) {
+	inline const Object(const T& value) : value(value) {
 	};
 
 	inline const T get() const {
