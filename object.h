@@ -1,8 +1,16 @@
 #pragma once
 
 template<typename T> class Object {
-public:
+protected:
+	inline const Object() {}
 	T value;
-	inline Object(const T value) : value(value) {
+public:
+	inline const Object(const T value) : value(value) {
 	};
+
+	inline const T get() const {
+		return this->value;
+	}
+
+	virtual const std::string string() = 0;
 };

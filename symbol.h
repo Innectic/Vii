@@ -13,18 +13,10 @@ struct Symbol {
 	int column;
 };
 
-struct Argument {
-	std::string name;
-	std::string value;
-	int line;
-	int column;
-	Type type;
-};
-
 struct Function {
 	int line;
 	int column;
 	std::string name;
 
-	std::vector<Argument> arguments;
+	std::vector<Symbol> arguments;
 };

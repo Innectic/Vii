@@ -7,6 +7,8 @@
 #include <regex>
 #include <memory>
 #include "object.h"
+#include "object_int.h"
+#include "object_string.h"
 
 void displayError(std::string error) {
 	std::cout << "   ERROR: " << error << std::endl;
@@ -47,13 +49,14 @@ int main(int argc, char *argv[]) {
 	//std::unique_ptr<Parser> parser = std::make_unique<Parser>(true);
 	//parser->parseWorkspace(*workspace);
 
-	auto a = new Object<int>(1);
-	std::cout << typeid(a->value).name() << std::endl;
+	auto str = new ObjectString("Hello");
+	auto i = new ObjectInt(1);
 
-	std::cout << std::endl;
+	std::cout << str->string() << std::endl;
+	std::cout << i->string() << std::endl;
 
-	auto b = new Object<std::string>("a");
-	std::cout << typeid(b->value).name() << std::endl;
+	delete str;
+	delete i;
 
 	return 0;
 }
