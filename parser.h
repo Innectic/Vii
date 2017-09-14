@@ -1,21 +1,12 @@
 #pragma once
 
-#include "source_file.h"
 #include <vector>
 #include <fstream>
 #include "util.h"
 #include <iostream>
 #include "typer.h"
 #include <memory>
-
-struct Workspace {
-	bool usingWorkspace;
-	std::string workspaceDirectory;
-	std::string commentChar;
-
-	std::vector<std::string> files;
-	std::vector<SourceFile*> sourceFiles;
-};
+#include "workspace.h"
 
 class Parser {
 private:
@@ -24,6 +15,6 @@ public:
 	Parser(bool debugMode);
 	~Parser();
 
-	std::vector<SourceFile*> parseWorkspace(const Workspace& workspace);
+	std::vector<SourceFile*> parseWorkspace(const WorkSpace& workspace);
 	SourceFile* parse(const std::string& fileName);
 };

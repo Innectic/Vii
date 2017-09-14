@@ -3,16 +3,15 @@
 
 Parser::Parser(bool debugMode) :
 	debugMode(debugMode) {
-
 }
 
 Parser::~Parser() {
 
 }
 
-std::vector<SourceFile*> Parser::parseWorkspace(const Workspace& workspace) {
+std::vector<SourceFile*> Parser::parseWorkspace(const WorkSpace& workspace) {
 	std::vector<SourceFile*> parsed;
-	for (std::string file : workspace.files) {
+	for (std::string file : workspace.originalFiles) {
 		auto sourceFile = this->parse(file);
 		if (sourceFile == nullptr) {
 			std::cout << "File to parse didn't exist?" << std::endl;

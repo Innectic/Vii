@@ -10,6 +10,7 @@
 #include "object.h"
 #include "object_int.h"
 #include "object_string.h"
+#include "workspace.h"
 
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
@@ -18,9 +19,8 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	
-	std::unique_ptr<Workspace> workspace = std::make_unique<Workspace>();
+	std::unique_ptr<WorkSpace> workspace = std::make_unique<WorkSpace>();
 	std::unique_ptr<FileHandler> fileHandler = std::make_unique<FileHandler>();
-	workspace->commentChar = "//"; // TODO: Pull from some-sort of a workspace conf
 
 	for (auto i = 1; i < argc; i++) {
 		std::string current = argv[i];
@@ -32,20 +32,15 @@ int main(int argc, char *argv[]) {
 		}
 
 		if (current == "-w") {
-			workspace->usingWorkspace = true;
-			workspace->workspaceDirectory = fileHandler->getCurrentDirectory();
-			workspace->files = fileHandler->getFilesInDirectory(true, workspace->workspaceDirectory);
-		}
-		else if (current == "-f") {
-			workspace->usingWorkspace = false;
-			workspace->workspaceDirectory = "";
-
-			workspace->files.push_back(next);
+			workspace->directory = fileHandler->getCurrentDirectory();
+			workspace->originalFiles = fileHandler->getFilesInDirectory(true, workspace->directory);
 		}
 	}
 
 	//std::unique_ptr<Parser> parser = std::make_unique<Parser>(true);
 	//parser->parseWorkspace(*workspace);
+
+	workspace->loadConfiguration();
 
 	return 0;
 }

@@ -3,7 +3,7 @@
 #include <string>
 #include <iostream>
 
-const enum Type {
+enum Type {
 	INT, STRING, UNKNOWN
 };
 
