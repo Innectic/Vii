@@ -26,21 +26,15 @@ void WorkSpace::setDefaults() {
 
 void WorkSpace::loadConfiguration() {
 	std::string fileName = this->directory + "/workspace.vii";  // TODO: Maybe this file should be set by a compiler directive. #config ?
-	std::ifstream input;
-	input.open(fileName);
 
-	if (!input) {
-		this->setDefaults();
-		return;
-	}
+	std::vector<std::string> contents = Util::readFileToVector(this->directory + "/workspace.vii", true);
 
-	std::string current = "";
-	while (std::getline(input, current)) {
+	for (auto line : contents) {
 		// Remove all spaces from the string. We don't REALLY need them.
-		std::string::iterator end_pos = std::remove(current.begin(), current.end(), ' ');
-		current.erase(end_pos, current.end());
+		std::string::iterator end_pos = std::remove(line.begin(), line.end(), ' ');
+		line.erase(end_pos, line.end());
 
-		auto dirtyMatches = splitString(current, ":=");
+		auto dirtyMatches = splitString(line, ":=");
 		std::vector<std::string> matches;
 		// TODO: /shrug why is this a thing
 		for (auto dirty : dirtyMatches) {
@@ -61,5 +55,4 @@ void WorkSpace::loadConfiguration() {
 			this->commentPrefix = rhs;
 		}
 	}
-	input.close();
 }
