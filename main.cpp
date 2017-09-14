@@ -6,17 +6,14 @@
 #include "c_converter.h"
 #include <regex>
 #include <memory>
+
 #include "object.h"
 #include "object_int.h"
 #include "object_string.h"
 
-void displayError(std::string error) {
-	std::cout << "   ERROR: " << error << std::endl;
-}
-
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
-		displayError("Must supply at least one file to compile");
+		std::cout << "   ERROR: Must supply at least one file to compile" << std::endl;
 		std::cin.get();
 		return 1;
 	}
@@ -49,15 +46,6 @@ int main(int argc, char *argv[]) {
 
 	//std::unique_ptr<Parser> parser = std::make_unique<Parser>(true);
 	//parser->parseWorkspace(*workspace);
-
-	auto str = new ObjectString("Hello");
-	auto i = new ObjectInt(1);
-
-	std::cout << str->string() << std::endl;
-	std::cout << i->string() << std::endl;
-
-	delete str;
-	delete i;
 
 	return 0;
 }
