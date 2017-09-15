@@ -4,7 +4,7 @@
 #include <iostream>
 
 enum Type {
-	INT, STRING, UNKNOWN
+	INT, STRING, NONE, UNKNOWN
 };
 
 class Typer {

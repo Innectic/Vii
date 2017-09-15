@@ -20,4 +20,7 @@ public:
 	std::string typeToCType(const Type& type);
 	void convert(const SourceFile& file);
 	void emit(const std::string&, std::ofstream& stream);
+
+	void addImport(const std::string& lib, std::ofstream& stream);
+	void emitFunctions(const SourceFile& file, std::ofstream& stream);
 };

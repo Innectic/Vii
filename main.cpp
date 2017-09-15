@@ -20,6 +20,8 @@ int main(int argc, char *argv[]) {
 	std::unique_ptr<WorkSpace> workspace = std::make_unique<WorkSpace>();
 	std::unique_ptr<FileHandler> fileHandler = std::make_unique<FileHandler>();
 
+	std::unique_ptr<C_Converter> converter = std::make_unique<C_Converter>();
+
 	for (auto i = 1; i < argc; i++) {
 		std::string current = argv[i];
 		if (current == "") continue;
@@ -52,6 +54,8 @@ int main(int argc, char *argv[]) {
 	func->name = "magic";
 	func->parentScope = "_";
 	func->scope = ".magic";
+	func->isMain = true;
+	func->returnType = Type::NONE;
 
 	Decleration* decl = new Decleration();
 	decl->column = 1;
@@ -60,7 +64,10 @@ int main(int argc, char *argv[]) {
 	decl->scope = "_";
 	decl->type = Type::STRING;
 
-	func->arguments.push_back(*decl);
+	// func->arguments.push_back(*decl);
+	file->functions.push_back(*func);
+
+	converter->convert(*file);
 
 	delete func;
 	delete decl;

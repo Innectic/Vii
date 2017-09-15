@@ -51,11 +51,16 @@ struct Decleration {
 struct Function {
 	int line;
 	int column;
+
+	// TODO: This will only allow for primitives to be returned, custom objects won't work here.
+	Type returnType;
+
 	std::string name;
 	std::vector<Decleration> arguments;
 
 	std::string parentScope;
 	std::string scope;
+	bool isMain;
 };
 
 struct SourceFile {
