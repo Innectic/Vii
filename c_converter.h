@@ -1,7 +1,6 @@
 #pragma once
 
-#include "symbol.h"
-#include "source_file.h"
+#include "ir.h"
 #include <vector>
 #include <iostream>
 #include <fstream>

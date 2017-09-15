@@ -7,10 +7,8 @@
 #include <regex>
 #include <memory>
 
-#include "object.h"
-#include "object_int.h"
-#include "object_string.h"
 #include "workspace.h"
+#include "ir.h"
 
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
@@ -41,6 +39,32 @@ int main(int argc, char *argv[]) {
 	//parser->parseWorkspace(*workspace);
 
 	workspace->loadConfiguration();
+
+	// Create a fake sourcefile (For testing!)
+	SourceFile* file = new SourceFile();
+
+	file->fileName = "test.vii";
+	file->lines = 20;
+
+	Function* func = new Function();
+	func->column = 1;
+	func->line = 1;
+	func->name = "magic";
+	func->parentScope = "_";
+	func->scope = ".magic";
+
+	Decleration* decl = new Decleration();
+	decl->column = 1;
+	decl->line = 1;
+	decl->name = "test";
+	decl->scope = "_";
+	decl->type = Type::STRING;
+
+	func->arguments.push_back(*decl);
+
+	delete func;
+	delete decl;
+	delete file;
 
 	return 0;
 }

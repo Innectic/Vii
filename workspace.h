@@ -8,7 +8,7 @@
 #include <map>
 #include "util.h"
 
-#include "source_file.h"
+#include "ir.h"
 
 struct WorkSpace {
 	std::string directory;

@@ -17,9 +17,9 @@ const std::vector<std::string> splitString(const std::string& splitting, const s
 
 void WorkSpace::setDefaults() {
 	// TODO: These are all temp values
-	this->blockCommentStart = "/-";
-	this->blockCommentContinue = "-";
-	this->blockCommentEnd = "-/";
+	this->blockCommentStart = "/*";
+	this->blockCommentContinue = "*";
+	this->blockCommentEnd = "*/";
 
 	this->commentPrefix = "//";
 }
