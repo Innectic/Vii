@@ -1,7 +1,6 @@
 
 #include <iostream>
 #include <string>
-#include "parser.h"
 #include "file_handler.h"
 #include "c_converter.h"
 #include <regex>
@@ -9,6 +8,7 @@
 
 #include "workspace.h"
 #include "ir.h"
+#include "scanner.h"
 
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
@@ -21,6 +21,8 @@ int main(int argc, char *argv[]) {
 	std::unique_ptr<FileHandler> fileHandler = std::make_unique<FileHandler>();
 
 	std::unique_ptr<C_Converter> converter = std::make_unique<C_Converter>();
+
+	Scanner* scanner = new Scanner();
 
 	for (auto i = 1; i < argc; i++) {
 		std::string current = argv[i];
@@ -36,9 +38,6 @@ int main(int argc, char *argv[]) {
 			workspace->originalFiles = fileHandler->getFilesInDirectory(true, workspace->directory);
 		}
 	}
-
-	//std::unique_ptr<Parser> parser = std::make_unique<Parser>(true);
-	//parser->parseWorkspace(*workspace);
 
 	workspace->loadConfiguration();
 
@@ -64,14 +63,16 @@ int main(int argc, char *argv[]) {
 	decl->scope = "_";
 	decl->type = Type::STRING;
 
-	// func->arguments.push_back(*decl);
 	file->functions.push_back(*func);
 
-	converter->convert(*file);
+	// converter->convert(*file);
+	scanner->scan("test.vii");
 
 	delete func;
 	delete decl;
 	delete file;
+
+	delete scanner;
 
 	return 0;
 }

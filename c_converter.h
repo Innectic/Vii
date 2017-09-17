@@ -17,7 +17,7 @@ public:
 	C_Converter();
 	C_Converter(std::string& overrideTemplate);
 
-	std::string typeToCType(const Type& type);
+	const std::string typeToCType(const Type& type) const;
 	void convert(const SourceFile& file);
 	void emit(const std::string&, std::ofstream& stream);
 

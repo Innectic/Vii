@@ -10,7 +10,7 @@ C_Converter::C_Converter(std::string& overrideTemplate) :
 	fileTemplate(overrideTemplate) {
 }
 
-std::string C_Converter::typeToCType(const Type& type) {
+const std::string C_Converter::typeToCType(const Type& type) const {
 	switch (type) {
 	case Type::INT:
 		return "int";
@@ -50,6 +50,7 @@ void C_Converter::convert(const SourceFile& file) {
 	std::string fileName = std::regex_replace(file.fileName, std::regex("\\.vii"), ".cpp");
 	fileStream.open(fileName);
 
+	// TODO: Only add imports when needed, and detect other imports that we need
 	this->addImport("<string>", fileStream);
 	this->addImport("<iostream>", fileStream);
 

@@ -67,4 +67,5 @@ struct SourceFile {
 	std::string fileName;
 	int lines;
 	std::vector<Function> functions;
+	std::vector<Decleration> decls;
 };
