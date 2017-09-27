@@ -50,9 +50,15 @@ void WorkSpace::loadConfiguration() {
 		// TODO: lhs should be lowercased
 		std::string lhs = matches[0];
 		std::string rhs = matches[1];
-
-		if (lhs == "commentPrefix") {
-			this->commentPrefix = rhs;
+		
+		if (lhs == "optimization") {
+			if (rhs == "none") this->optimization = OptimizationLevel::OP_NONE;
+			if (rhs == "low") this->optimization = OptimizationLevel::OP_LOW;
+			if (rhs == "medium") this->optimization = OptimizationLevel::OP_MEDIUM;
+			if (rhs == "max") this->optimization = OptimizationLevel::OP_MAX;
+			if (rhs == "size") this->optimization = OptimizationLevel::OP_SIZE;
+			if (rhs == "speed") this->optimization = OptimizationLevel::OP_SPEED;
+			std::cout << "Invalid value for optimization level: " << rhs << std::endl;
 		}
 	}
 }

@@ -10,6 +10,10 @@
 
 #include "ir.h"
 
+enum OptimizationLevel {
+	OP_NONE, OP_LOW, OP_MEDIUM, OP_MAX, OP_SIZE, OP_SPEED
+};
+
 struct WorkSpace {
 	std::string directory;
 
@@ -21,6 +25,8 @@ struct WorkSpace {
 
 	std::vector<std::string> originalFiles;
 	std::vector<SourceFile> sourceFiles;
+
+	OptimizationLevel optimization;
 
 	void loadConfiguration();
 	void setDefaults();
