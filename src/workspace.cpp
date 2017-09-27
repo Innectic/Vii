@@ -7,11 +7,11 @@ const std::vector<std::string> splitString(const std::string& splitting, const s
 	std::size_t current, previous = 0;
 	current = splitting.find_first_of(delim);
 	while (current != std::string::npos) {
-		matches.push_back(splitting.substr(previous, current - previous));
+		matches.emplace_back(splitting.substr(previous, current - previous));
 		previous = current + 1;
 		current = splitting.find_first_of(delim, previous);
 	}
-	matches.push_back(splitting.substr(previous, current - previous));
+	matches.emplace_back(splitting.substr(previous, current - previous));
 	return matches;
 }
 
@@ -39,7 +39,7 @@ void WorkSpace::loadConfiguration() {
 		// TODO: /shrug why is this a thing
 		for (auto dirty : dirtyMatches) {
 			if (dirty == "" || dirty == " ") continue;
-			matches.push_back(dirty);
+			matches.emplace_back(dirty);
 		}
 
 		if (matches.size() < 2) {

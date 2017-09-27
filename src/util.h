@@ -21,7 +21,7 @@ public:
 
 		std::string current = "";
 		while (std::getline(input, current)) {
-			lines.push_back(current);
+			lines.emplace_back(current);
 		}
 		input.close();
 		return lines;
@@ -31,11 +31,5 @@ public:
 		std::string result;
 		for (auto join : joining) result += join;
 		return result;
-	}
-
-	const static inline std::string join(const std::string joining[]) {
-		std::vector<std::string> vectorJoining;
-		vectorJoining.emplace_back(joining);
-		return Util::join(vectorJoining);
 	}
 };

@@ -26,7 +26,7 @@ std::vector<Token> Scanner::lexFile(const std::string& fileName) {
 				continue;
 			}
 			else if (token == "print") {
-				Token t = { TokenType::PRINT, nullptr };
+				Token t = { TokenType::PRINT, "" };
 				tokens.emplace_back(t);
 				token = "";
 				continue;

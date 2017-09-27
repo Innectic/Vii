@@ -1,9 +1,6 @@
 
-#include <iostream>
-#include <string>
 #include "file_handler.h"
 #include "c_converter.h"
-#include <regex>
 #include <memory>
 
 #include "workspace.h"
@@ -64,7 +61,7 @@ int main(int argc, char *argv[]) {
 	decl->scope = "_";
 	decl->type = Type::STRING;
 
-	file->functions.push_back(*func);
+	file->functions.emplace_back(*func);
 
 	converter->convert(*file);
 	//scanner->scan("test.vii");

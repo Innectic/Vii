@@ -23,7 +23,7 @@ private:
 			if (name.extension() == ".vii") {
 				std::string wholeName = entry.path().parent_path().string();
 				wholeName.append(entry.path().root_directory().string()).append(name.string());
-				discoveredFiles.push_back(wholeName);
+				discoveredFiles.emplace_back(wholeName);
 			}
 		}
 		return discoveredFiles;
@@ -36,7 +36,7 @@ private:
 		std::vector<std::string> discoveredFiles;
 		for (directory_entry entry : recursive_directory_iterator(directory))
 			for (auto in : this->checkPath(entry))
-				discoveredFiles.push_back(in);
+				discoveredFiles.emplace_back(in);
 		return discoveredFiles;
 	}
 
@@ -46,7 +46,7 @@ private:
 		std::vector<std::string> discoveredFiles;
 		for (directory_entry entry : directory_iterator(directory))
 			for (auto in : this->checkPath(entry))
-				discoveredFiles.push_back(in);
+				discoveredFiles.emplace_back(in);
 		return discoveredFiles;
 	}
 
