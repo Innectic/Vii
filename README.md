@@ -1,7 +1,7 @@
 
 # The Vii Programming Language
 
-Vii is a next programming language aiming at fast compile speeds, with easy to write code.
+Vii is a new programming language aiming at fast compile speeds, with easy to write code.
 
 Some of the goals are:
 - K.I.S.S - Keep it simple, stupid.
