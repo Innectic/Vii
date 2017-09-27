@@ -11,7 +11,7 @@ public:
 		return std::regex_replace(original, std::regex("^ +| +$|( ) +"), "$1");
 	}
 
-	const static inline std::vector<std::string> readFileToVector(const std::string& file, const bool& ignoreWhitespace) {
+	const static inline std::vector<std::string> readFileToVector(const std::string& file) {
 		std::vector<std::string> lines;
 		
 		std::ifstream input;
@@ -21,13 +21,21 @@ public:
 
 		std::string current = "";
 		while (std::getline(input, current)) {
-			current = eatSpaces(current); // TODO: Should probably be toggleable
-			if (ignoreWhitespace) {
-				if (current == "" || current == " ") continue;
-			}
 			lines.push_back(current);
 		}
 		input.close();
 		return lines;
+	}
+
+	const static inline std::string join(const std::vector<std::string> joining) {
+		std::string result;
+		for (auto join : joining) result += join;
+		return result;
+	}
+
+	const static inline std::string join(const std::string joining[]) {
+		std::vector<std::string> vectorJoining;
+		vectorJoining.emplace_back(joining);
+		return Util::join(vectorJoining);
 	}
 };

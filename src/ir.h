@@ -13,8 +13,8 @@ protected:
 	T value;
 	Object() {}
 public:
-	inline const Object(const T& value) : value(value) {
-	};
+	inline Object(const T& value) : value(value) {
+	}
 
 	inline const T get() const {
 		return this->value;
@@ -25,7 +25,7 @@ public:
 
 class ObjectInt : public Object<int> {
 public:
-	inline const ObjectInt(const int& value) {
+	inline ObjectInt(const int& value) {
 		this->value = value;
 	}
 	const std::string string() override;
@@ -33,7 +33,7 @@ public:
 
 class ObjectString : public Object<std::string> {
 public:
-	inline const ObjectString(const std::string& value) {
+	inline ObjectString(const std::string& value) {
 		this->value = value;
 	}
 	const std::string string() override;

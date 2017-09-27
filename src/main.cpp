@@ -41,6 +41,7 @@ int main(int argc, char *argv[]) {
 
 	workspace->loadConfiguration();
 
+	/*
 	// Create a fake sourcefile (For testing!)
 	SourceFile* file = new SourceFile();
 
@@ -65,12 +66,15 @@ int main(int argc, char *argv[]) {
 
 	file->functions.push_back(*func);
 
-	// converter->convert(*file);
-	scanner->scan("test.vii");
+	converter->convert(*file);
+	//scanner->scan("test.vii");
 
 	delete func;
 	delete decl;
 	delete file;
+	*/
+
+	scanner->lexFile("test.vii");
 
 	delete scanner;
 

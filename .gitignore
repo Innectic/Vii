@@ -30,9 +30,13 @@
 *.exe
 *.out
 *.app
+
+# Visual studio things
 x64/
 Debug/
 Debug/
 Release/
 *vcxproj*
+
+# CMake stuff
 build/

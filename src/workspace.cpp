@@ -27,7 +27,7 @@ void WorkSpace::setDefaults() {
 void WorkSpace::loadConfiguration() {
 	std::string fileName = this->directory + "/workspace.vii";  // TODO: Maybe this file should be set by a compiler directive. #config ?
 
-	std::vector<std::string> contents = Util::readFileToVector(this->directory + "/workspace.vii", true);
+	std::vector<std::string> contents = Util::readFileToVector(this->directory + "/workspace.vii");
 
 	for (auto line : contents) {
 		// Remove all spaces from the string. We don't REALLY need them.
