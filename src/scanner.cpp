@@ -12,6 +12,7 @@ Scanner::~Scanner() {
 std::vector<Token> Scanner::lexFile(const std::string& fileName) {
 	std::vector<std::string> contents = Util::readFileToVector(fileName);
 	std::vector<Token> tokens;
+	if (contents.size() <= 0) return tokens;
 
 	int lineNum = 0;
 	int column = 0;
