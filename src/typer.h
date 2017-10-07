@@ -2,6 +2,7 @@
 
 #include <string>
 #include <iostream>
+#include "util.h"
 
 enum Type {
 	INT, STRING, NONE, UNKNOWN
@@ -12,11 +13,7 @@ class Typer {
 
 public:
 	static inline const Type getType(const std::string value) {
-		for (char c : value) {
-			if (isdigit(c)) {
-				return Type::INT;
-			}
-		}
+		if (Util::isNumber(value)) return Type::INT;
 		return Type::STRING;
 	}
 
