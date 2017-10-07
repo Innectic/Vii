@@ -27,7 +27,8 @@ enum class TokenType {
 	EQ,
 	LEQ,
 	GEQ,
-	DEFINE,
+	COLON,
+	ASSIGN,
 };
 
 // TODO: Operator precedence (AKA: Making order of operations actually apply.)
@@ -54,7 +55,8 @@ static std::map<TokenType, std::string> tokenMap = {
 	{ TokenType::EQ, "==" },   // XXX: Subject to change. I MILDLY DISLIKE this operator.
 	{ TokenType::LEQ, "<=" },
 	{ TokenType::GEQ, ">=" },
-	{ TokenType::DEFINE, ":=" }
+	{ TokenType::COLON, ":" },
+	{ TokenType::ASSIGN, "=" }
 };
 
 static TokenType getTokenType(std::string checking) {

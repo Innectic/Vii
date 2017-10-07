@@ -22,9 +22,11 @@ std::vector<Token> Scanner::lexFile(const std::string& fileName) {
 
 	for (auto line : contents) {
 		lineNum++;
+		column = 0;
 
 		for (char ch : line) {
 			column++;
+			
 			if (pullingIdent) {
 				Token token = { TokenType::IDENTIFIER, current };
 				current = "";
@@ -44,23 +46,21 @@ std::vector<Token> Scanner::lexFile(const std::string& fileName) {
 				pullingValue = true;
 				continue;
 			}
-			else if (ch == ' ' && !pullingValue) {
-				continue;
+			else if (ch == ' ') {
+				if (pullingValue) current += ch;
 			}
-			else {
+			else if (!pullingIdent && !pullingValue) {
 				std::string string_ch;
-				string_ch.push_back(ch);
-				TokenType type = getTokenType(string_ch); // HACK: Do this the right way
-				if (type != TokenType::IDENTIFIER && !pullingValue && !pullingIdent) {
+				string_ch += ch;
+				TokenType type = getTokenType(string_ch);
+				if (type != TokenType::IDENTIFIER /*&& !pullingValue && !pullingIdent*/) {
 					Token token = { type, current };
 					current = "";
 					tokens.emplace_back(token);
 				}
 			}
-
-			if (pullingValue) {
-				current += ch;
-				continue;
+			else {
+				if (pullingIdent || pullingValue) current += ch;
 			}
     	}
 	}

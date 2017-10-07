@@ -1,4 +1,2 @@
-()
-"Hello world"
-
-test := "Cool testing thing"
+a := "a"
+a = "b"
