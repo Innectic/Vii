@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
 
 	workspace->loadConfiguration();
 
-	for (auto a : scanner->lexFile("test.vii")) {
+	for (auto a : scanner->lex_file("test.vii")) {
 		std::cout << tokenMap[a.type] << ", " << a.value << std::endl;
 	}
 

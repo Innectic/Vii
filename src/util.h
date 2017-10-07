@@ -35,7 +35,11 @@ public:
 
 	const static inline bool isNumber(std::string check) {
 		bool allMatch = true;
-		for (auto c : check) allMatch = isdigit(c);
+		for (auto c : check) allMatch = isNumber(c);
 		return allMatch;
+	}
+
+	const static inline bool isNumber(char& check) {
+		return isdigit(check);
 	}
 };

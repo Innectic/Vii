@@ -70,3 +70,10 @@ struct Token {
 	TokenType type;
 	std::string value; // TODO:  Make the type something useful
 };
+
+static std::vector<std::string> keywords = {
+	"if",
+	"else",
+	"true",
+	"false"
+};
