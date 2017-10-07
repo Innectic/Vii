@@ -1,7 +1,7 @@
 
 # The Vii Programming Language
 
-Vii is a new programming language aiming at fast compile speeds, with easy to write code.
+Vii is a new programming language aiming at fast compile time, with easy to write & read code.
 
 Some of the goals are:
 - K.I.S.S - Keep it simple, stupid.
@@ -13,6 +13,6 @@ Some of the goals are:
 
 # Contributing
 
-Write good code if you want to contribute. *PLEASE* avoid managing memory yourself. No one is good at it, just use smart pointers for fuck sake.
+Write good code if you want to contribute. Don't manage your own memory, if you can avoid it. If you can't avoid it, please just do it properly
 
 If you want to know how things should be written, just look at how some of the code in the repo has been written.

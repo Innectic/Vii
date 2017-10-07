@@ -28,38 +28,33 @@ enum class TokenType {
 	LEQ,
 	GEQ,
 	DEFINE,
-
-	// Keywords
-	PRINT
 };
 
 // TODO: Operator precedence (AKA: Making order of operations actually apply.)
 static std::map<TokenType, std::string> tokenMap = {
-	{ TokenType::INVALID, "INVALID"},
-	{ TokenType::END_OF_FILE, "END_OF_FILE"},
-	{ TokenType::IDENTIFIER, "IDENTIFIER"},
-	{ TokenType::COMMENT, "COMMENT"},
-	{ TokenType::OP_ADD, "+"},
-	{ TokenType::OP_SUB, "-"},
-	{ TokenType::OP_MUL, "*"},
-	{ TokenType::OP_DIV, "/"},
-	{ TokenType::OP_AND, "&&"}, // XXX: Subject to change. I HATE this operator.
-	{ TokenType::OP_OR, "||"},  // XXX: Subject to change. I HATE this operator.
-	{ TokenType::LBRACE, "{"},
-	{TokenType::RBRACE, "}"},
-	{TokenType::LPAREN, "("},
-	{TokenType::RPAREN, ")"},
-	{TokenType::IDENTIFIER, "IDENTIFIER"},
-	{TokenType::INT, "INT"},
-	{TokenType::FLOAT, "FLOAT"},
-	{TokenType::CHAR, "CHAR"},
-	{TokenType::STRING, "STRING"},
-	{TokenType::NEQ, "!="},  // XXX: Subject to change. I HATE this operator.
-	{TokenType::EQ, "=="},   // XXX: Subject to change. I MILDLY DISLIKE this operator.
-	{TokenType::LEQ, "<="},
-	{TokenType::GEQ, ">="},
-	{TokenType::DEFINE, ":="},
-	{TokenType::PRINT, "print"}
+	{ TokenType::INVALID, "INVALID" },
+	{ TokenType::END_OF_FILE, "END_OF_FILE" },
+	{ TokenType::COMMENT, "COMMENT" },
+	{ TokenType::OP_ADD, "+" },
+	{ TokenType::OP_SUB, "-" },
+	{ TokenType::OP_MUL, "*" },
+	{ TokenType::OP_DIV, "/" },
+	{ TokenType::OP_AND, "&&" }, // XXX: Subject to change. I HATE this operator.
+	{ TokenType::OP_OR, "||" },  // XXX: Subject to change. I HATE this operator.
+	{ TokenType::LBRACE, "{" },
+	{ TokenType::RBRACE, "}" },
+	{ TokenType::LPAREN, "(" },
+	{ TokenType::RPAREN, ")" },
+	{ TokenType::IDENTIFIER, "IDENTIFIER" },
+	{ TokenType::INT, "INT" },
+	{ TokenType::FLOAT, "FLOAT" },
+	{ TokenType::CHAR, "CHAR" },
+	{ TokenType::STRING, "STRING" },
+	{ TokenType::NEQ, "!=" },  // XXX: Subject to change. I HATE this operator.
+	{ TokenType::EQ, "==" },   // XXX: Subject to change. I MILDLY DISLIKE this operator.
+	{ TokenType::LEQ, "<=" },
+	{ TokenType::GEQ, ">=" },
+	{ TokenType::DEFINE, ":=" }
 };
 
 static TokenType getTokenType(std::string checking) {

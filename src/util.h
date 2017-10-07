@@ -32,4 +32,10 @@ public:
 		for (auto join : joining) result += join;
 		return result;
 	}
+
+	const static inline bool isNumber(std::string check) {
+		bool allMatch = true;
+		for (auto c : check) allMatch = isdigit(c);
+		return allMatch;
+	}
 };

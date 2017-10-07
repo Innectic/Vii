@@ -11,45 +11,58 @@ Scanner::~Scanner() {
 
 std::vector<Token> Scanner::lexFile(const std::string& fileName) {
 	std::vector<std::string> contents = Util::readFileToVector(fileName);
-
 	std::vector<Token> tokens;
 
-	std::string token;
-	std::string str;
-	bool gettingString = false;
+	int lineNum = 0;
+	int column = 0;
+
+	bool pullingValue = false;
+	bool pullingIdent = false;
+	std::string current;
 
 	for (auto line : contents) {
-		for (auto ch : line) {
-			token += ch;
-			if (token == " ") {
-				if (!gettingString) token = "";
+		lineNum++;
+
+		for (char ch : line) {
+			column++;
+			if (pullingIdent) {
+				Token token = { TokenType::IDENTIFIER, current };
+				current = "";
+				tokens.emplace_back(token);
+				pullingIdent = false;
 				continue;
 			}
-			else if (token == "print") {
-				Token t = { TokenType::PRINT, "" };
-				tokens.emplace_back(t);
-				token = "";
-				continue;
-			}
-			else if (token == "\"") {
-				if (!gettingString) {
-					gettingString = true;
-					continue;
-				}
-				else if (gettingString) {
-					Token token = { TokenType::STRING, str };
+
+			if (ch == '\"') {
+				if (pullingValue) {
+					Token token = { TokenType::STRING, current };
 					tokens.emplace_back(token);
-					str = "";
-					gettingString = false;
+					current = "";
+					pullingValue = false;
 					continue;
 				}
-			}
-			else if (gettingString) {
-				str += token;
-				token = "";
+				pullingValue = true;
 				continue;
 			}
-		}
+			else if (ch == ' ' && !pullingValue) {
+				continue;
+			}
+			else {
+				std::string string_ch;
+				string_ch.push_back(ch);
+				TokenType type = getTokenType(string_ch); // HACK: Do this the right way
+				if (type != TokenType::IDENTIFIER && !pullingValue && !pullingIdent) {
+					Token token = { type, current };
+					current = "";
+					tokens.emplace_back(token);
+				}
+			}
+
+			if (pullingValue) {
+				current += ch;
+				continue;
+			}
+    	}
 	}
 	return tokens;
 }

@@ -14,12 +14,12 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	
-	std::unique_ptr<WorkSpace> workspace = std::make_unique<WorkSpace>();
-	std::unique_ptr<FileHandler> fileHandler = std::make_unique<FileHandler>();
+	auto workspace = std::make_unique<WorkSpace>();
+	auto fileHandler = std::make_unique<FileHandler>();
 
-	std::unique_ptr<C_Converter> converter = std::make_unique<C_Converter>();
+	auto converter = std::make_unique<C_Converter>();
 
-	Scanner* scanner = new Scanner();
+	auto scanner = new Scanner();
 
 	for (auto i = 1; i < argc; i++) {
 		std::string current = argv[i];
@@ -71,7 +71,9 @@ int main(int argc, char *argv[]) {
 	delete file;
 	*/
 
-	scanner->lexFile("test.vii");
+	for (auto a : scanner->lexFile("test.vii")) {
+		std::cout << tokenMap[a.type] << ", " << a.value << std::endl;
+	}
 
 	delete scanner;
 
