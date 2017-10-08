@@ -215,7 +215,6 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 				}
 				// Set the iterator
 				it += arguments.size();
-				std::cout << "THIS IS: " << token_map[(*it).type] << std::endl;
 
 				// Now that we have our arguments, let build the AST function call.
 				FunctionCall function = { 0, 0, token.value, arguments };
