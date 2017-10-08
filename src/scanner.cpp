@@ -93,7 +93,11 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
 				std::string a;
 				a += *it;
 
+				// Get the type of the character we're currently looking at
 				auto type = get_token_type(a);
+
+				// If it's an ident, that means it's not something we have.
+				// So, add that to our currently found (for later use) string.
 				if (type == TokenType::IDENTIFIER) {
 					current += *it;
 					it++;
@@ -113,6 +117,7 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
 			continue;
 		}
 	}
+	// Report the time it took
 	auto nowTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 	std::cout << "\033[1;36m> \033[0;32mFrontend time (s): " <<  ((double) (nowTime - time) / 1000000000) << "\033[0m" << std::endl;
 	return tokens;
@@ -201,12 +206,16 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 
 				std::vector<Token> arguments;
 				auto argument_it = (it + 2);
-				auto argument = *argument_it;
 
+				Token argument;
 				while (argument.type != TokenType::RPAREN && argument_it != tokens.end()) {
+					argument = *argument_it;
 					arguments.emplace_back(argument);
 					argument_it++;
 				}
+				// Set the iterator
+				it += arguments.size();
+				std::cout << "THIS IS: " << token_map[(*it).type] << std::endl;
 
 				// Now that we have our arguments, let build the AST function call.
 				FunctionCall function = { 0, 0, token.value, arguments };
@@ -214,6 +223,8 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 			}
 		}
 	}
+
+	// Report the time it took
 	auto nowTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 	std::cout << "\033[1;36m> \033[0;32mBackend time (s): " << ((double)(nowTime - time) / 1000000000) << "\033[0m" << std::endl;
 	return file;

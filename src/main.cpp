@@ -43,11 +43,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	for (auto func : file->function_calls) {
-		std::string argument_string = "";
+		std::cout << "NAME: " << func.function_name << std::endl;
 		for (auto arg : func.arguments) {
-			argument_string += "TYPE: " + token_map[arg.type] + ", VALUE: " + arg.value + ", ";
+			std::cout << "TYPE: " << token_map[arg.type] << ", VALUE: " << arg.value << std::endl;
 		}
-		std::cout << "NAME: " << func.function_name << ", ARGS: " << argument_string << std::endl;
 	}
 
 	delete file;

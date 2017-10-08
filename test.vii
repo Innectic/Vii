@@ -1,6 +1,2 @@
-
-//magic test
-// another test
-
-test := "testing things"; // Test
+test := "testing things";
 print(test);
