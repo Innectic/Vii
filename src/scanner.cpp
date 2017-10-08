@@ -164,7 +164,7 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 				//
 				// We can figure this out based on what the token after this is.
 				// If it's an '=', then we're going to infer the type.
-				// If we find an identifiert there, then we need to set the type
+				// If we find an identifier there, then we need to set the type
 				// to that, if the type is valid.
 				//
 
