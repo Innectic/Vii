@@ -17,17 +17,17 @@ enum OptimizationLevel {
 struct WorkSpace {
 	std::string directory;
 
-	std::string commentPrefix;
+	std::string comment_prefix;
 	
-	std::string blockCommentStart;
-	std::string blockCommentContinue;
-	std::string blockCommentEnd;
+	std::string block_comment_start;
+	std::string block_comment_continue;
+	std::string block_comment_end;
 
-	std::vector<std::string> originalFiles;
-	std::vector<SourceFile> sourceFiles;
+	std::vector<std::string> original_files;
+	std::vector<SourceFile> source_files;
 
 	OptimizationLevel optimization;
 
-	void loadConfiguration();
-	void setDefaults();
+	void load_configuration();
+	void set_defaults();
 };

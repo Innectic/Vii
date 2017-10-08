@@ -23,7 +23,7 @@ public:
 	const std::string read_string();
 	const std::string read_number();
 
-	const std::vector<Token> lex_file(const std::string& filename);
+	const std::vector<Token> tokenize(const std::string& filename);
 	const bool check_comment();
 
 	const inline bool has_next() {

@@ -18,28 +18,29 @@ int main(int argc, char *argv[]) {
 	auto converter = std::make_unique<C_Converter>();
 	auto scanner = std::make_unique<Scanner>(*workspace.get());
 
-	workspace->setDefaults();
+	workspace->set_defaults();
 
 	for (auto i = 1; i < argc; i++) {
 		std::string current = argv[i];
 		if (current == "") continue;
 		std::string next = "";
 
-		if (argv[i + 1]) {
-			next = argv[i + 1];
-		}
+		if (argv[i + 1]) next = argv[i + 1];
 
 		if (current == "-w") {
 			workspace->directory = fileHandler->getCurrentDirectory();
-			workspace->originalFiles = fileHandler->getFilesInDirectory(true, workspace->directory);
+			workspace->original_files = fileHandler->getFilesInDirectory(true, workspace->directory);
 		}
 	}
 
-	workspace->loadConfiguration();
+	workspace->load_configuration();
 
+	std::vector<Token> tokens = scanner->tokenize("test.vii");
+
+	/*
 	for (auto a : scanner->lex_file("test.vii")) {
 		std::cout << tokenMap[a.type] << ", " << a.value << std::endl;
-	}
+	}*/
 
 	return 0;
 }

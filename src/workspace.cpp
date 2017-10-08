@@ -1,7 +1,7 @@
 
 #include "workspace.h"
 
-const std::vector<std::string> splitString(const std::string& splitting, const std::string& delim) {
+const std::vector<std::string> split_string(const std::string& splitting, const std::string& delim) {
 	std::vector<std::string> matches;
 
 	std::size_t current, previous = 0;
@@ -25,17 +25,17 @@ const std::vector<std::string> splitString(const std::string& splitting, const s
 	return clean;
 }
 
-void WorkSpace::setDefaults() {
+void WorkSpace::set_defaults() {
 	// TODO: These are all temp values
-	this->blockCommentStart = "/*";
-	this->blockCommentContinue = "*";
-	this->blockCommentEnd = "*/";
+	this->block_comment_start= "/*";
+	this->block_comment_continue = "*";
+	this->block_comment_end = "*/";
 
-	this->commentPrefix = "//";
+	this->comment_prefix = "//";
 	this->optimization = OptimizationLevel::OP_NONE;
 }
 
-void WorkSpace::loadConfiguration() {
+void WorkSpace::load_configuration() {
 	std::string fileName = this->directory + "/workspace.vii";  // TODO: Maybe this file should be set by a compiler directive. #config ?
 
 	std::vector<std::string> contents = Util::readFileToVector(this->directory + "/workspace.vii");
@@ -46,7 +46,7 @@ void WorkSpace::loadConfiguration() {
 		std::string::iterator end_pos = std::remove(line.begin(), line.end(), ' ');
 		line.erase(end_pos, line.end());
 		
-		auto matches = splitString(line, ":=");		
+		auto matches = split_string(line, ":=");		
 		if (matches.size() < 2) {
 			std::cout << "Configuration option " << matches[0] << " has no value!" << std::endl;
 			continue;

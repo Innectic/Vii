@@ -33,13 +33,13 @@ public:
 		return result;
 	}
 
-	const static inline bool isNumber(std::string check) {
+	const static inline bool is_number(std::string check) {
 		bool allMatch = true;
-		for (auto c : check) allMatch = isNumber(c);
+		for (auto c : check) allMatch = is_number(c);
 		return allMatch;
 	}
 
-	const static inline bool isNumber(char& check) {
+	const static inline bool is_number(char& check) {
 		return isdigit(check);
 	}
 };

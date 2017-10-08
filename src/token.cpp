@@ -34,7 +34,7 @@ enum class TokenType {
 };
 
 // TODO: Operator precedence (AKA: Making order of operations actually apply.)
-static std::map<TokenType, std::string> tokenMap = {
+static std::map<TokenType, std::string> token_map = {
 	{ TokenType::INVALID, "INVALID" },
 	{ TokenType::END_OF_FILE, "END_OF_FILE" },
 	{ TokenType::COMMENT, "COMMENT" },
@@ -63,9 +63,9 @@ static std::map<TokenType, std::string> tokenMap = {
 	{ TokenType::SEMICOLON, ";" }
 };
 
-static TokenType getTokenType(std::string checking) {
+static TokenType get_token_type(std::string checking) {
 	// Check each pair and see if we have a keyword that matches.
-	for (auto entry : tokenMap) if (entry.second == checking) return entry.first;
+	for (auto entry : token_map) if (entry.second == checking) return entry.first;
 	// If not, it's just an identifier.
 	return TokenType::IDENTIFIER;
 }

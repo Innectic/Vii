@@ -37,7 +37,7 @@ const std::string Scanner::read_string() {
 const std::string Scanner::read_number() {
 	std::string found = "";
 	while (it < this->end) {
-		if (!Util::isNumber(*it)) break;
+		if (!Util::is_number(*it)) break;
 		found += *it;
 		it++;
 	}
@@ -51,7 +51,7 @@ const bool Scanner::check_comment() {
 	bool all_have_matched = true;
 
 	// Make sure the iterator starts with the whole comment prefix
-	for (auto c : this->workspace.commentPrefix) {
+	for (auto c : this->workspace.comment_prefix) {
 		if (!has_next(i)) return false;
 		all_have_matched = *i == c;
 		i++;
@@ -60,7 +60,7 @@ const bool Scanner::check_comment() {
 	return all_have_matched;
 }
 
-const std::vector<Token> Scanner::lex_file(const std::string& fileName) {
+const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
 	auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 	std::vector<std::string> contents = Util::readFileToVector(fileName);
 	std::vector<Token> tokens;
@@ -83,7 +83,7 @@ const std::vector<Token> Scanner::lex_file(const std::string& fileName) {
 				it += 2;
 				continue;
 			}
-			else if (Util::isNumber(*it)) {
+			else if (Util::is_number(*it)) {
 				auto taken = this->read_number();
 				Token token = { TokenType::INT, taken };
 				tokens.emplace_back(token);
@@ -93,9 +93,7 @@ const std::vector<Token> Scanner::lex_file(const std::string& fileName) {
 				std::string a;
 				a += *it;
 
-				// std::cout << a << std::endl;
-
-				auto type = getTokenType(a);
+				auto type = get_token_type(a);
 				if (type == TokenType::IDENTIFIER) {
 					current += *it;
 					it++;
