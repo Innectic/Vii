@@ -51,6 +51,8 @@ const std::vector<Token> Scanner::lex_file(const std::string& fileName) {
 		this->it = this->beg;
 		this->end = line.end();
 
+		std::string current = "";
+
 		while (it < end) {
 			if (*it == '"') {
 				auto taken = this->read_string();
@@ -66,6 +68,25 @@ const std::vector<Token> Scanner::lex_file(const std::string& fileName) {
 				Token token = { TokenType::INT, taken };
 				tokens.emplace_back(token);
 				continue;
+			}
+			else {
+				std::string a;
+				a += *it;
+				auto type = getTokenType(a);
+				if (type == TokenType::IDENTIFIER) {
+					current += *it;
+					it++;
+					continue;
+				}
+
+				if (current != "" && current != " ") {
+					Token identToken = { TokenType::IDENTIFIER, current };
+					tokens.emplace_back(identToken);
+					current = "";
+				}
+
+				Token token = { type, "" };
+				tokens.emplace_back(token);
 			}
 			it++;
 			continue;
