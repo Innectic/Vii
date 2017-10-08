@@ -23,7 +23,7 @@ public:
     ~Scanner();
 
     const std::string read_string();
-    const std::string read_number();
+    const Token read_number();
     const bool check_comment();
 
     const bool can_use_name(std::string name);

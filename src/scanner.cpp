@@ -34,14 +34,20 @@ const std::string Scanner::read_string() {
 // TODO: Make this actually do something useful...
 // This only supports things like 123, nothing like 12.3
 //
-const std::string Scanner::read_number() {
+const Token Scanner::read_number() {
     std::string found = "";
+    bool encountered_dot = false;
+
     while (it < this->end) {
-        if (!Util::is_number(*it)) break;
+        if (*it == '.') encountered_dot = true;
+        else if (!Util::is_number(*it)) break;
         found += *it;
         it++;
     }
-    return found;
+    Token token = {};
+    token.type = encountered_dot ? TokenType::FLOAT : TokenType::INT;
+    token.value = found;
+    return token;
 }
 
 const bool Scanner::check_comment() {
@@ -90,8 +96,7 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
                 continue;
             }
             else if (Util::is_number(*it)) {
-                auto taken = this->read_number();
-                Token token = { TokenType::INT, taken };
+                auto token = this->read_number();
                 tokens.emplace_back(token);
                 continue;
             }
