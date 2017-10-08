@@ -1,4 +1,3 @@
-"testing things"
-"I like \"things\""
-123
-things();
+
+test := "testing things"; // Test
+print(test);

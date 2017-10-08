@@ -12,6 +12,7 @@ Scanner::~Scanner() {
 
 const std::string Scanner::read_string() {
 	bool escaped = false;
+	bool taking = false;
 	std::string found = "";
 
 	while (it < this->end) {
@@ -19,10 +20,16 @@ const std::string Scanner::read_string() {
 			found += *it;
 			escaped = false;
 		}
-		else if (*it == '\\' || *it == '"') escaped = true;
-		else found += *it;
+		else if (*it == '\\' && this->hasNext() && *(it + 1) == '"') escaped = true;
+		else if (*it == '"') {
+			if (!escaped && taking) taking = false;
+			else taking = true;
+		}
+		else if (taking) {
+			found += *it;
+		}
 		it++;
-	} 
+	}
 
 	return found;
 }
@@ -72,6 +79,9 @@ const std::vector<Token> Scanner::lex_file(const std::string& fileName) {
 			else {
 				std::string a;
 				a += *it;
+
+				// std::cout << a << std::endl;
+
 				auto type = getTokenType(a);
 				if (type == TokenType::IDENTIFIER) {
 					current += *it;

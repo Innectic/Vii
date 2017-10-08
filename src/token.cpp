@@ -5,6 +5,8 @@ enum class TokenType {
 	INVALID,
 	END_OF_FILE,
 	COMMENT,
+	COMMA,
+	SEMICOLON,
 
 	// Normal things
 	OP_ADD,
@@ -56,7 +58,9 @@ static std::map<TokenType, std::string> tokenMap = {
 	{ TokenType::LEQ, "<=" },
 	{ TokenType::GEQ, ">=" },
 	{ TokenType::COLON, ":" },
-	{ TokenType::ASSIGN, "=" }
+	{ TokenType::ASSIGN, "=" },
+	{ TokenType::COMMA, "," },
+	{ TokenType::SEMICOLON, ";" }
 };
 
 static TokenType getTokenType(std::string checking) {
