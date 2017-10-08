@@ -31,9 +31,6 @@ const std::string Scanner::read_string() {
     return found;
 }
 
-// TODO: Make this actually do something useful...
-// This only supports things like 123, nothing like 12.3
-//
 const Token Scanner::read_number() {
     std::string found = "";
     bool encountered_dot = false;
