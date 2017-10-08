@@ -48,6 +48,14 @@ int main(int argc, char *argv[]) {
             std::cout << "TYPE: " << token_map[arg.type] << ", VALUE: " << arg.value << std::endl;
         }
     }
+    
+    for (auto func : file->functions) {
+        std::cout << "CUSTOM: " << func.function_name << std::endl;
+        for (auto arg : func.arguments) {
+            std::cout << "TYPE: " << token_map[arg.type] << ", VALUE: " << arg.value << std::endl;
+        }
+    }
+
 
     delete file;
 

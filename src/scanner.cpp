@@ -169,6 +169,7 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 // A colon here can mean two things:
                 //   - Variable decleration WITH type
                 //   - Variable decleration WITHOUT type
+                //   - Function decleration
                 //
                 // We can figure this out based on what the token after this is.
                 // If it's an '=', then we're going to infer the type.
@@ -208,6 +209,56 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     file->decls.emplace_back(decl);
                     // Make sure the scanner knows it's been used too!
                     this->usedNames.emplace_back(token.value);
+                }
+                else if (next_token.type == TokenType::COLON) {
+                    // Having another colon here means we might be making a function.
+
+                    // Make sure that we have something more to check.
+                    if (!this->has_next(it + 2, tokens.end()) || !this->has_next(it + 3, tokens.end())) {
+                        // We don't have at least two more, which we need.
+                        
+                        // TODO: See above TODO about error reporting
+                        std::cout << "Function format issue" << std::endl;
+                        continue;
+                    }
+
+                    auto first_next = *(it + 3);
+                    auto second_next = *(it + 4);
+
+                    // Make sure we actually have what we need to make a function
+                    if (first_next.type != TokenType::LPAREN) {
+                        // TODO: See above TODO about error reporting
+                        std::cout << "Function format issue" << std::endl;
+                        continue;
+                    }
+
+                    // Since we have that, everything between that and ) is our arguments.
+                    std::vector<Token> arguments;
+                    auto argument_it = it + 4;
+
+                    auto argument = *argument_it;
+                    // COPYPASTA: This should be a function, was copied from another section
+                    while (argument.type != TokenType::RPAREN && argument_it != tokens.end()) {
+                        arguments.emplace_back(argument);
+                        argument_it++;
+                        argument = *argument_it;
+                    }
+                    // Set the iterator
+                    it += arguments.size();
+
+                    // Now that we have our arguments, lets apply it to a function.
+                    Function function = {  };
+                    function.column = 0;
+                    function.line = 0;
+                    function.arguments = arguments;
+                    function.function_name = token.value;
+                    function.isMain = true; // TODO
+                    function.parent_scope = ""; // TODO
+                    function.return_type = TokenType::INT; // TODO
+                    function.scope = ""; // TODO
+
+                    // Now that we have our function, give it to the file
+                    file->functions.emplace_back(function);
                 }
             }
             else if (the_next_token.type == TokenType::ASSIGN) {
@@ -257,7 +308,7 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 }
 
                 std::vector<Token> arguments;
-                auto argument_it = (it + 2);
+                auto argument_it = it + 2;
 
                 Token argument = *argument_it;
                 while (argument.type != TokenType::RPAREN && argument_it != tokens.end()) {
