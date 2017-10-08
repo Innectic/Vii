@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <algorithm>
 
 class Util {
 public:
@@ -47,5 +48,18 @@ public:
     const static inline bool vectorContains(std::vector<std::string> vec, std::string check) {
         for (auto in : vec) if (in == check) return true;
         return false;
+    }
+
+    const static inline std::string string_to_lower(std::string original) {
+        std::transform(original.begin(), original.end(), original.begin(), ::tolower);
+        return original;
+    }
+
+    const static inline std::string trim_string(std::string original) {
+        const std::string pattern = " \f\n\r\t\v";
+
+        auto new_string = original.substr(0, original.find_last_not_of(pattern) + 1);
+        new_string = new_string.substr(new_string.find_first_not_of(pattern));
+        return new_string;
     }
 };

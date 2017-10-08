@@ -101,12 +101,17 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
                 std::string a;
                 a += *it;
 
+                if (a == " " || a == "") {
+                    it++;
+                    continue;
+                }
+
                 // Get the type of the character we're currently looking at
                 auto type = get_token_type(a);
 
                 // If it's an ident, that means it's not something we have.
                 // So, add that to our currently found (for later use) string.
-                if (type == TokenType::IDENTIFIER) {
+                if (type == TokenType::IDENTIFIER && (a != " " && a != "")) {
                     current += *it;
                     it++;
                     continue;
@@ -210,7 +215,7 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     // Make sure the scanner knows it's been used too!
                     this->usedNames.emplace_back(token.value);
                 }
-                else if (next_token.type == TokenType::COLON) {
+                else if (the_next_token.type == TokenType::COLON && next_token.type == TokenType::COLON) {
                     // Having another colon here means we might be making a function.
 
                     // Make sure that we have something more to check.
@@ -260,8 +265,48 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     // Now that we have our function, give it to the file
                     file->functions.emplace_back(function);
                 }
+                else if (next_token.type == TokenType::IDENTIFIER) {  // TODO: There should probably be a type for this
+                    // Having an identifier here means we're setting a custom type to a variable.
+                    // So, we need to have 3 more arguments following.
+
+                    if (!this->has_next(it + 1, tokens.end())) {
+                        // TODO: See above TODO about error reporting
+                        std::cout << "Expected an =" << std::endl;
+                        continue;
+                    }
+
+                    auto type_token = *(it + 2);
+                    // Lets make sure the type we have even exists.
+                    auto new_type = get_type_from_string(type_token.value);
+                    if (new_type == TokenType::INVALID) {
+                        // The type isn't a thing
+                        std::cout << "Invalid type: '" << type_token.value << "'" << std::endl;
+                        continue;
+                    }
+
+                    // Since the type exists, lets see if we have a value.
+                    if (!this->has_next(it + 2, tokens.end())) {
+                        // TODO: See above TODO about error reporting
+                        std::cout << "Cannot initialize variable without value." << std::endl;
+                        continue;
+                    }
+
+                    // We've got a value, create a new variable
+
+                    // COPYPASTA:
+                    // This is copied from an above if for initializing variables.
+                    // This should become a nice generic function.
+                    //
+                    auto value_token = *(it + 4);
+                    Decleration decl = {
+                        0, 0, value_token.type, token.value, value_token.value, "cool_scope" // TODO: Real scopes
+                    };
+                    file->decls.emplace_back(decl);
+                    // Make sure the scanner knows it's been used too!
+                    this->usedNames.emplace_back(token.value);
+                }
             }
-            else if (the_next_token.type == TokenType::ASSIGN) {
+            else if (the_next_token.type == TokenType::ASSIGN && token.type == TokenType::IDENTIFIER) {
                 // If we have a '=', then we're setting the value of a variable
                 // that's already been declared.
 
@@ -318,7 +363,7 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 }
                 // Set the iterator
                 it += arguments.size();
-
+                
                 // Now that we have our arguments, let build the AST function call.
                 FunctionCall function = { 0, 0, token.value, arguments };
                 file->function_calls.emplace_back(function);

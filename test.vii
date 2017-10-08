@@ -1,8 +1,4 @@
-
-// Basically stealing Haskell's syntax.
-// (I kind of like it, ok...)
-
-main :: () {
-}
-
-test();
+a: string = "Test";
+b := 123;
+c := 1.23;
+d := "A";

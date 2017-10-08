@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include "util.h"
 
 enum class TokenType {
     INVALID,
@@ -54,6 +55,7 @@ static std::map<TokenType, std::string> token_map = {
     { TokenType::FLOAT, "FLOAT" },
     { TokenType::CHAR, "CHAR" },
     { TokenType::STRING, "STRING" },
+    { TokenType::INVALID, "INVALID" },
     { TokenType::NEQ, "!=" },  // XXX: Subject to change. I HATE this operator.
     { TokenType::EQ, "==" },   // XXX: Subject to change. I MILDLY DISLIKE this operator.
     { TokenType::LEQ, "<=" },
@@ -64,11 +66,23 @@ static std::map<TokenType, std::string> token_map = {
     { TokenType::SEMICOLON, ";" }
 };
 
+static std::map<std::string, TokenType> type_map = {
+    { "string", TokenType::STRING },
+    { "int", TokenType::INT },
+    { "float", TokenType::FLOAT },
+    { "char", TokenType::CHAR }
+};
+
 static TokenType get_token_type(std::string checking) {
     // Check each pair and see if we have a keyword that matches.
     for (auto entry : token_map) if (entry.second == checking) return entry.first;
     // If not, it's just an identifier.
     return TokenType::IDENTIFIER;
+}
+
+static TokenType get_type_from_string(std::string checking) {
+    for (auto entry : type_map) if (entry.first == Util::string_to_lower(checking)) return entry.second;
+    return TokenType::INVALID;
 }
 
 struct Token {

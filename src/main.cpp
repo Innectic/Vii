@@ -56,6 +56,12 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    std::cout << "================" << std::endl;
+
+    for (auto a : tokens) {
+        std::cout << token_map[a.type] << ", " << a.value << std::endl;
+    }
+
 
     delete file;
 
