@@ -60,6 +60,12 @@ const bool Scanner::check_comment() {
 	return all_have_matched;
 }
 
+const bool Scanner::can_use_name(std::string name) {
+	// TODO: This needs more checking for the contents of the name too.
+	// We don't want names like: `t-h-e_t-h-i-n-g`. 
+	return !Util::vectorContains(this->usedNames, name) && !Util::vectorContains(keywords, name);
+}
+
 const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
 	auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 	std::vector<std::string> contents = Util::readFileToVector(fileName);
@@ -185,12 +191,20 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 						std::cout << "Variable decleration has no value" << std::endl;
 						continue;
 					}
+					// Make sure that this name hasn't been used
+					if (!this->can_use_name(token.value)) {
+						std::cout << "Cannot use name '" << token.value << "'." << std::endl;
+						continue;
+					}
+
 					// Since we have a value, we can turn this into a real variable!
 					auto value_token = *(it + 3);
 					Decleration decl = {
 						0, 0, value_token.type, token.value, value_token.value, "cool_scope" // TODO: Real scopes
 					};
 					file->decls.emplace_back(decl);
+					// Make sure the scanner knows it's been used too!
+					this->usedNames.emplace_back(token.value);
 				}
 			}
 			else if (the_next_token.type == TokenType::LPAREN) {

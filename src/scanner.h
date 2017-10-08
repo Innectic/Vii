@@ -16,6 +16,8 @@ private:
 	std::string::iterator end;
 
 	WorkSpace& workspace;
+
+	std::vector<std::string> usedNames;
 public:
 	Scanner(WorkSpace& workspace);
 	~Scanner();
@@ -23,6 +25,8 @@ public:
 	const std::string read_string();
 	const std::string read_number();
 	const bool check_comment();
+
+	const bool can_use_name(std::string name);
 
 	const std::vector<Token> tokenize(const std::string& filename);
 	const SourceFile* parse(std::vector<Token>& tokens);

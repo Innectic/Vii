@@ -42,4 +42,10 @@ public:
 	const static inline bool is_number(char& check) {
 		return isdigit(check);
 	}
+
+	// TODO: This is pretty bad, since it only works on the one type.
+	const static inline bool vectorContains(std::vector<std::string> vec, std::string check) {
+		for (auto in : vec) if (in == check) return true;
+		return false;
+	}
 };

@@ -1,3 +1,4 @@
 test := "testing things";
-test2 := 123;
+testing := 123;
 print(test);
+testing := 1;
