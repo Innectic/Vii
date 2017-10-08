@@ -207,11 +207,11 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 				std::vector<Token> arguments;
 				auto argument_it = (it + 2);
 
-				Token argument;
+				Token argument = *argument_it;
 				while (argument.type != TokenType::RPAREN && argument_it != tokens.end()) {
-					argument = *argument_it;
 					arguments.emplace_back(argument);
 					argument_it++;
+					argument = *argument_it;
 				}
 				// Set the iterator
 				it += arguments.size();
@@ -225,6 +225,6 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 
 	// Report the time it took
 	auto nowTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-	std::cout << "\033[1;36m> \033[0;32mBackend time (s): " << ((double)(nowTime - time) / 1000000000) << "\033[0m" << std::endl;
+	std::cout << "\033[1;36m> \033[0;32mBackend time  (s): " << ((double)(nowTime - time) / 1000000000) << "\033[0m" << std::endl;
 	return file;
 }
