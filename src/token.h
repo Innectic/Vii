@@ -82,3 +82,35 @@ static std::vector<std::string> keywords = {
 	"true",
 	"false"
 };
+
+struct Decleration {
+	int line;
+	int column;
+	TokenType type;
+
+	std::string name;
+	std::string scope;
+};
+
+struct Function {
+	int line;
+	int column;
+
+	// TODO: This will only allow for primitives to be returned, custom objects won't work here.
+	TokenType returnType;
+
+	std::string name;
+	std::vector<Decleration> arguments;
+
+	std::string parentScope;
+	std::string scope;
+	bool isMain;
+};
+
+struct SourceFile {
+	std::string fileName;
+	int lines;
+	std::vector<Function> functions;
+	std::vector<Decleration> decls;
+};
+

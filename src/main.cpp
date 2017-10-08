@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "workspace.h"
-#include "ir.h"
+#include "token.h"
 #include "scanner.h"
 
 int main(int argc, char *argv[]) {

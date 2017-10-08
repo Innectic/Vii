@@ -8,7 +8,7 @@
 #include <map>
 #include "util.h"
 
-#include "ir.h"
+#include "token.h"
 
 enum OptimizationLevel {
 	OP_NONE, OP_LOW, OP_MEDIUM, OP_MAX, OP_SIZE, OP_SPEED
