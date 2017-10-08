@@ -16,7 +16,9 @@ int main(int argc, char *argv[]) {
 	auto workspace = std::make_unique<WorkSpace>();
 	auto fileHandler = std::make_unique<FileHandler>();
 	auto converter = std::make_unique<C_Converter>();
-	auto scanner = std::make_unique<Scanner>();
+	auto scanner = std::make_unique<Scanner>(*workspace.get());
+
+	workspace->setDefaults();
 
 	for (auto i = 1; i < argc; i++) {
 		std::string current = argv[i];

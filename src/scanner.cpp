@@ -1,8 +1,7 @@
 
 #include "scanner.h"
-#include <chrono>
 
-Scanner::Scanner() {
+Scanner::Scanner(WorkSpace& workspace) : workspace(workspace) {
 
 }
 
@@ -20,14 +19,12 @@ const std::string Scanner::read_string() {
 			found += *it;
 			escaped = false;
 		}
-		else if (*it == '\\' && this->hasNext() && *(it + 1) == '"') escaped = true;
+		else if (*it == '\\' && this->has_next() && *(it + 1) == '"') escaped = true;
 		else if (*it == '"') {
 			if (!escaped && taking) taking = false;
 			else taking = true;
 		}
-		else if (taking) {
-			found += *it;
-		}
+		else if (taking) found += *it;
 		it++;
 	}
 
@@ -45,6 +42,22 @@ const std::string Scanner::read_number() {
 		it++;
 	}
 	return found;
+}
+
+const bool Scanner::check_comment() {
+	// Clone the iterator
+	auto i = this->it;
+
+	bool all_have_matched = true;
+
+	// Make sure the iterator starts with the whole comment prefix
+	for (auto c : this->workspace.commentPrefix) {
+		if (!has_next(i)) return false;
+		all_have_matched = *i == c;
+		i++;
+	}
+
+	return all_have_matched;
 }
 
 const std::vector<Token> Scanner::lex_file(const std::string& fileName) {
@@ -66,7 +79,7 @@ const std::vector<Token> Scanner::lex_file(const std::string& fileName) {
 				Token token = { TokenType::STRING, taken };
 				tokens.emplace_back(token);
 				continue;
-			} else if (*it == '/' && this->hasNext() && *(this->it + 1) == '/') {
+			} else if (this->check_comment()) {
 				it += 2;
 				continue;
 			}
