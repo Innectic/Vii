@@ -188,7 +188,7 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 					// Since we have a value, we can turn this into a real variable!
 					auto value_token = *(it + 3);
 					Decleration decl = {
-						0, 0, TokenType::IDENTIFIER, token.value, value_token.value, "cool_scope" // TODO: Real scopes
+						0, 0, value_token.type, token.value, value_token.value, "cool_scope" // TODO: Real scopes
 					};
 					file->decls.emplace_back(decl);
 				}

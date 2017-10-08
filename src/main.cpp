@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 	const SourceFile* file = scanner->parse(tokens);
 
 	for (auto decl : file->decls) {
-		std::cout << "NAME: " << decl.name << ", VALUE: " << decl.value << ", SCOPE: " << decl.scope << std::endl;
+		std::cout << "NAME: " << decl.name << ", VALUE: " << decl.value << ", SCOPE: " << decl.scope << ", TYPE: " << token_map[decl.type] << std::endl;
 	}
 
 	for (auto func : file->function_calls) {

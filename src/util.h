@@ -10,7 +10,7 @@ public:
 	const static inline std::string eatSpaces(std::string original) {
 		return std::regex_replace(original, std::regex("^ +| +$|( ) +"), "$1");
 	}
-
+	
 	const static inline std::vector<std::string> readFileToVector(const std::string& file) {
 		std::vector<std::string> lines;
 		
