@@ -116,5 +116,25 @@ struct SourceFile {
 	std::vector<Function> functions;
 	std::vector<FunctionCall> function_calls;
 	std::vector<Decleration> decls;
+
+	inline const Decleration getDecl(std::string name) {
+		for (auto decl : this->decls) if (decl.name == name) return decl;
+		return {-1, -1, TokenType::COMMENT, nullptr, nullptr, nullptr};
+	}
+
+	inline void replaceDecl(Decleration& replacing, Decleration& newDecl) {
+		int pos = -1;
+		for (auto i = 0; i < this->decls.size(); ++i) {
+			auto decl = this->decls[i];
+
+			if (decl.name == replacing.name) {
+				pos = i;
+				break;
+			}
+		}
+
+		if (pos > -1) this->decls[pos] = newDecl;
+	}
 };
+
 

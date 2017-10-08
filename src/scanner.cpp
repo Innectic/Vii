@@ -193,6 +193,7 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 					}
 					// Make sure that this name hasn't been used
 					if (!this->can_use_name(token.value)) {
+						// TODO: See above TODO about error reporting
 						std::cout << "Cannot use name '" << token.value << "'." << std::endl;
 						continue;
 					}
@@ -206,6 +207,41 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 					// Make sure the scanner knows it's been used too!
 					this->usedNames.emplace_back(token.value);
 				}
+			}
+			else if (the_next_token.type == TokenType::ASSIGN) {
+				// If we have a '=', then we're setting the value of a variable
+				// that's already been declared.
+
+				// Before we can, lets make sure we have something to actually assign it to
+				if (!this->has_next(it + 1, tokens.end())) {
+					// TODO: See above TODO about error reporting
+					std::cout << "Cannot set value without a value!" << std::endl;
+					continue;
+				}
+				// Since we have a value, lets see if the variable even exists
+				if (this->can_use_name(token.value)) {
+					// Variable doesn't exist
+					std::cout << "Varible '" << token.value << "' doesn't exist." << std::endl;
+					continue;
+				}
+
+				// Since we have both the value and a variable, set it.
+				auto originalDecl = file->getDecl(token.value);
+				if (originalDecl.line == -1) {
+					std::cout << "Internal compiler error: Found name that doesn't exist: " << token.value << std::endl;
+					break;
+				}
+				auto value_token = *(it + 2);
+
+				// Make sure they're the same types
+				if (originalDecl.type != value_token.type) {
+					std::cout << "Cannot set variable '" << token.value << "', type " << token_map[originalDecl.type] << ", to type of " << token_map[value_token.type] << "." << std::endl;
+					continue;
+				}
+				// Types are the same, and the variable exists. Time to finally set it.
+				auto newDecl = originalDecl;
+				newDecl.value = value_token.value;
+				file->replaceDecl(originalDecl, newDecl);
 			}
 			else if (the_next_token.type == TokenType::LPAREN) {
 				// If we have a left paren, then we MUST be calling a function.

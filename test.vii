@@ -1,4 +1,3 @@
-test := "testing things";
-testing := 123;
-print(test);
-testing := 1;
+magic := 1
+magic = 2
+magic = "a"
