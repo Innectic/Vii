@@ -67,7 +67,7 @@ const std::vector<Token> Scanner::lex_file(const std::string& fileName) {
 				tokens.emplace_back(token);
 				continue;
 			} else if (*it == '/' && this->hasNext() && *(this->it + 1) == '/') {
-				it++;
+				it += 2;
 				continue;
 			}
 			else if (Util::isNumber(*it)) {
