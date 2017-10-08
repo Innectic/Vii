@@ -2,8 +2,7 @@
 
 #include <string>
 #include <vector>
-
-#include "typer.h"
+#include "token.h"
 
 // This exists for the soul purpose of needing a generic type.
 class AbstractObject {};
@@ -42,7 +41,7 @@ public:
 struct Decleration {
 	int line;
 	int column;
-	Type type;
+	TokenType type;
 	
 	std::string name;
 	std::string scope;
@@ -53,7 +52,7 @@ struct Function {
 	int column;
 
 	// TODO: This will only allow for primitives to be returned, custom objects won't work here.
-	Type returnType;
+	TokenType returnType;
 
 	std::string name;
 	std::vector<Decleration> arguments;

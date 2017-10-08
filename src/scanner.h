@@ -6,7 +6,7 @@
 #include <chrono>
 
 #include "util.h"
-#include "token.cpp"
+#include "token.h"
 #include "workspace.h"
 
 class Scanner {
