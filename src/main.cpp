@@ -42,6 +42,14 @@ int main(int argc, char *argv[]) {
 		std::cout << "NAME: " << decl.name << ", VALUE: " << decl.value << ", SCOPE: " << decl.scope << std::endl;
 	}
 
+	for (auto func : file->function_calls) {
+		std::string argument_string = "";
+		for (auto arg : func.arguments) {
+			argument_string += "TYPE: " + token_map[arg.type] + ", VALUE: " + arg.value + ", ";
+		}
+		std::cout << "NAME: " << func.function_name << ", ARGS: " << argument_string << std::endl;
+	}
+
 	delete file;
 
 	return 0;

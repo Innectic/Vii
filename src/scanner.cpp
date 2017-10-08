@@ -163,6 +163,8 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 				// to that, if the type is valid.
 				//
 
+				// TODO: Support for type setting
+
 				if (!this->has_next(it + 1, tokens.end())) {
 					// TODO: See the above TODO about error reporting.
 					std::cout << "Variable decleration isn't finished." << std::endl;
@@ -185,6 +187,30 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 					};
 					file->decls.emplace_back(decl);
 				}
+			}
+			else if (the_next_token.type == TokenType::LPAREN) {
+				// If we have a left paren, then we MUST be calling a function.
+				// So, lets take everything until ) as arguments.
+
+				// But before we can do that, we need to make sure we even *have* args to do that with.
+				if (!this->has_next(it + 1, tokens.end())) {
+					// TODO: See above TODO about error reporting.
+					std::cout << "Function call doesn't have args / end" << std::endl;
+					continue;
+				}
+
+				std::vector<Token> arguments;
+				auto argument_it = (it + 2);
+				auto argument = *argument_it;
+
+				while (argument.type != TokenType::RPAREN && argument_it != tokens.end()) {
+					arguments.emplace_back(argument);
+					argument_it++;
+				}
+
+				// Now that we have our arguments, let build the AST function call.
+				FunctionCall function = { 0, 0, token.value, arguments };
+				file->function_calls.emplace_back(function);
 			}
 		}
 	}

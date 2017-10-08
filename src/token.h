@@ -93,17 +93,19 @@ struct Decleration {
 	std::string scope;
 };
 
-struct Function {
+struct FunctionCall {
 	int line;
 	int column;
 
+	std::string function_name;
+	std::vector<Token> arguments;
+};
+
+struct Function : public FunctionCall {
 	// TODO: This will only allow for primitives to be returned, custom objects won't work here.
-	TokenType returnType;
+	TokenType return_type;
 
-	std::string name;
-	std::vector<Decleration> arguments;
-
-	std::string parentScope;
+	std::string parent_scope;
 	std::string scope;
 	bool isMain;
 };
@@ -112,6 +114,7 @@ struct SourceFile {
 	std::string fileName;
 	int lines;
 	std::vector<Function> functions;
+	std::vector<FunctionCall> function_calls;
 	std::vector<Decleration> decls;
 };
 

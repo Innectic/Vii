@@ -28,15 +28,15 @@ void C_Converter::add_import(const std::string& lib, std::ofstream& stream) {
 
 void C_Converter::emit_functions(const SourceFile& file, std::ofstream& stream) {
 	for (auto function : file.functions) {
-		std::string functionName = function.isMain ? "realMain" : function.name;
+		std::string functionName = function.isMain ? "realMain" : function.function_name;
 		std::cout << functionName << std::endl;
 
-		std::string returnType = this->type_to_c_type(function.returnType);
+		std::string returnType = this->type_to_c_type(function.return_type);
 		std::string argumentString = "";
 
 		for (auto arg : function.arguments) {
 			std::string argType = this->type_to_c_type(arg.type);
-			argumentString += argType + " " + arg.name;
+			argumentString += argType + " " + arg.value;
 		}
 
 		this->emit(returnType + " " + functionName + "(" + argumentString +  ") {\n", stream);
