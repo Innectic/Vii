@@ -86,9 +86,10 @@ static std::vector<std::string> keywords = {
 struct Decleration {
 	int line;
 	int column;
-	TokenType type;
+	TokenType type; // TODO: Having the type here is probably redundant.
 
 	std::string name;
+	std::string value; // TODO: Might want to turn this into some-sort of a custom type;
 	std::string scope;
 };
 

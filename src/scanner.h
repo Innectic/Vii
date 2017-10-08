@@ -22,9 +22,12 @@ public:
 
 	const std::string read_string();
 	const std::string read_number();
+	const bool check_comment();
 
 	const std::vector<Token> tokenize(const std::string& filename);
-	const bool check_comment();
+	const SourceFile* parse(std::vector<Token>& tokens);
+
+	// TODO: #TooManyOverloads - This can probably just be templated, tbh
 
 	const inline bool has_next() {
 		return this->has_next(this->it, this->end);
@@ -35,6 +38,10 @@ public:
 	}
 
 	const inline bool has_next(std::string::iterator& it, std::string::iterator& end) {
+		return it < end;
+	}
+
+	const inline bool has_next(std::vector<Token>::iterator& it, std::vector<Token>::iterator& end) {
 		return it < end;
 	}
 };

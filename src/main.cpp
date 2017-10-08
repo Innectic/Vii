@@ -36,11 +36,13 @@ int main(int argc, char *argv[]) {
 	workspace->load_configuration();
 
 	std::vector<Token> tokens = scanner->tokenize("test.vii");
+	const SourceFile* file = scanner->parse(tokens);
 
-	/*
-	for (auto a : scanner->lex_file("test.vii")) {
-		std::cout << tokenMap[a.type] << ", " << a.value << std::endl;
-	}*/
+	for (auto decl : file->decls) {
+		std::cout << "NAME: " << decl.name << ", VALUE: " << decl.value << ", SCOPE: " << decl.scope << std::endl;
+	}
+
+	delete file;
 
 	return 0;
 }

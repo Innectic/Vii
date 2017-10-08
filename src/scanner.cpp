@@ -114,6 +114,81 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
 		}
 	}
 	auto nowTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-	std::cout << "\033[1;36m> \033[0;32mFrontend time (s): " <<  ((double) (nowTime - time) / 1000000000) << "\033[0m\n" << std::endl;
+	std::cout << "\033[1;36m> \033[0;32mFrontend time (s): " <<  ((double) (nowTime - time) / 1000000000) << "\033[0m" << std::endl;
 	return tokens;
+}
+
+const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
+	auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+	SourceFile* file = new SourceFile();
+
+	// Start by making sure we even have any tokens to parse.
+	if (tokens.size() == 0) return file;
+
+	// We have things to check, so lets just start going through.
+	for (auto it = tokens.begin(); it < tokens.end(); ++it) {
+		auto token = *it;
+		// Check the type of the token
+		
+		if (token.type == TokenType::IDENTIFIER) {
+			// If we have an identifier type, this can be four different things.
+			//   - Function call
+			//   - Function decleration
+			//
+			//   - Variable reassignment
+			//   - Variable decleration
+			//
+			// So, lets see what we have after this, to assess what we're
+			// even doing with this.
+			//
+
+			// Before we can do so, lets make sure we even have things after this
+			if (!this->has_next(it, tokens.end())) {
+				// We don't have anything next, so we need to display a friendly error.
+				// TODO: Real error reporting that actually helps the user solve the problem
+				std::cout << "No useful information about the ident." << std::endl;
+				continue;
+			}
+
+			// Since we have something after this, lets see what we have.
+			auto the_next_token = *(it + 1);
+			if (the_next_token.type == TokenType::COLON) {
+				// A colon here can mean two things:
+				//   - Variable decleration WITH type
+				//   - Variable decleration WITHOUT type
+				//
+				// We can figure this out based on what the token after this is.
+				// If it's an '=', then we're going to infer the type.
+				// If we find an identifiert there, then we need to set the type
+				// to that, if the type is valid.
+				//
+
+				if (!this->has_next(it + 1, tokens.end())) {
+					// TODO: See the above TODO about error reporting.
+					std::cout << "Variable decleration isn't finished." << std::endl;
+					continue;
+				}
+
+				// Since we have something, lets check it out.
+				auto next_token = *(it + 2);
+				if (next_token.type == TokenType::ASSIGN) {
+					// Since it's an assign, we need to do one more check - Make sure there's a value!
+					if (!this->has_next(it + 2, tokens.end())) {
+						// TODO: See the above TODO about error reporting
+						std::cout << "Variable decleration has no value" << std::endl;
+						continue;
+					}
+					// Since we have a value, we can turn this into a real variable!
+					auto value_token = *(it + 3);
+					Decleration decl = {
+						0, 0, TokenType::IDENTIFIER, token.value, value_token.value, "cool_scope" // TODO: Real scopes
+					};
+					file->decls.emplace_back(decl);
+				}
+			}
+		}
+	}
+	auto nowTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+	std::cout << "\033[1;36m> \033[0;32mBackend time (s): " << ((double)(nowTime - time) / 1000000000) << "\033[0m" << std::endl;
+	return file;
 }
