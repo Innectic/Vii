@@ -40,15 +40,15 @@ public:
         return this->has_next(this->it, this->end);
     }
 
-    const inline bool has_next(std::string::iterator& it) {
+    const inline bool has_next(const std::string::iterator& it) {
         return this->has_next(it, this->end);
     }
 
-    const inline bool has_next(std::string::iterator& it, std::string::iterator& end) {
+    const inline bool has_next(const std::string::iterator& it, const std::string::iterator& end) {
         return it < end;
     }
 
-    const inline bool has_next(std::vector<Token>::iterator& it, std::vector<Token>::iterator& end) {
+    const inline bool has_next(const std::vector<Token>::iterator& it, const std::vector<Token>::iterator& end) {
         return it < end;
     }
 };
