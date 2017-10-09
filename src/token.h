@@ -87,7 +87,10 @@ static TokenType get_type_from_string(std::string checking) {
 
 struct Token {
     TokenType type;
-    std::string value; // TODO:  Make the type something useful
+    std::string value;
+
+    int line;
+    int column;
 };
 
 static std::vector<std::string> keywords = {
