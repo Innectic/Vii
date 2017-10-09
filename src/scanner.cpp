@@ -246,7 +246,13 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     auto argument = *argument_it;
                     // COPYPASTA: This should be a function, was copied from another section
                     while (argument.type != TokenType::RPAREN && argument_it != tokens.end()) {
-                        arguments.emplace_back(argument);
+                        // Build the AST representation of the argument from the token
+                        // Cleanup: Literally what even
+                        AST_Argument arg;
+                        arg.name = argument.value;
+                        arg.type = argument.type;
+
+                        arguments.emplace_back(arg);
                         argument_it++;
                         argument = *argument_it;
                     }
@@ -379,7 +385,13 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 
                 Token argument = *argument_it;
                 while (argument.type != TokenType::RPAREN && argument_it != tokens.end()) {
-                    arguments.emplace_back(argument);
+                    // Build the AST representation of the argument from the token
+                    // Cleanup: Literally what even
+                    AST_Argument arg;
+                    arg.name = argument.value;
+                    arg.type = argument.type;
+
+                    arguments.emplace_back(arg);
                     argument_it++;
                     argument = *argument_it;
                 }
