@@ -1,0 +1,10 @@
+
+# Random things that need to be done
+## This shouldn't be a file, I know.
+
+Convert all the random vectors into one vector using some sort of a base class AST(thing).
+Fix string parsing within function calls (print("A") doesn't work)
+Implement block comments.
+Make function scoping actually work...
+Store the main function on the file it's self, and not as a bool on the function
+Proper error reporting
