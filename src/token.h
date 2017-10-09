@@ -138,7 +138,7 @@ struct SourceFile {
 
     inline void replaceDecl(Decleration& replacing, Decleration& newDecl) {
         int pos = -1;
-        for (auto i = 0; i < this->decls.size(); ++i) {
+        for (unsigned int i = 0; i < this->decls.size(); ++i) {
             auto decl = this->decls[i];
 
             if (decl.name == replacing.name) {
