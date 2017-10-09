@@ -9,6 +9,7 @@
 #include "util.h"
 
 #include "token.h"
+#include "ast.h"
 #include "reporter.h"
 
 enum OptimizationLevel {
@@ -31,7 +32,7 @@ struct WorkSpace {
     std::string block_comment_end;
 
     std::vector<std::string> original_files;
-    std::vector<SourceFile> source_files;
+    std::vector<AST_SourceFile*> source_files;
 
     OptimizationLevel optimization;
 

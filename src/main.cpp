@@ -4,6 +4,7 @@
 #include "reporter.h"
 #include "workspace.h"
 #include "token.h"
+#include "ast.h"
 #include "scanner.h"
 #include "file_handler.h"
 #include "c_converter.h"
@@ -39,32 +40,7 @@ int main(int argc, char *argv[]) {
     workspace->load_configuration();
 
     std::vector<Token> tokens = scanner->tokenize("test.vii");
-    const SourceFile* file = scanner->parse(tokens);
-
-    for (auto decl : file->decls) {
-        std::cout << "NAME: " << decl.name << ", VALUE: " << decl.value << ", SCOPE: " << decl.scope << ", TYPE: " << token_map[decl.type] << std::endl;
-    }
-
-    for (auto func : file->function_calls) {
-        std::cout << "NAME: " << func.function_name << std::endl;
-        for (auto arg : func.arguments) {
-            std::cout << "TYPE: " << token_map[arg.type] << ", VALUE: " << arg.value << std::endl;
-        }
-    }
-    
-    for (auto func : file->functions) {
-        std::cout << "CUSTOM: " << func.function_name << std::endl;
-        for (auto arg : func.arguments) {
-            std::cout << "TYPE: " << token_map[arg.type] << ", VALUE: " << arg.value << std::endl;
-        }
-    }
-
-    std::cout << "================" << std::endl;
-      
-    /*
-    for (auto a : tokens) {
-        std::cout << token_map[a.type] << ", " << a.value << std::endl;
-    }*/
+    const AST_SourceFile* file = scanner->parse(tokens);
 
     if (reporter->errors.size() > 0)
         std::cout << "Encountered " << reporter->errors.size() << "errors during compilation.";

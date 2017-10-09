@@ -81,7 +81,9 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
     std::vector<Token> tokens;
     if (contents.size() <= 0) return tokens;
 
+    int line_num = 1;
     for (auto line : contents) {
+        int column = 1;
         this->beg = line.begin();
         this->it = this->beg;
         this->end = line.end();
@@ -91,7 +93,7 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
         while (it < end) {
             if (*it == '"') {
                 auto taken = this->read_string();
-                Token token = { TokenType::STRING, taken };
+                Token token = { TokenType::STRING, taken, line_num, column };
                 tokens.emplace_back(token);
                 continue;
             } else if (this->check_comment()) {
@@ -124,17 +126,18 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
                 }
 
                 if (current != "" && current != " ") {
-                    Token identToken = { TokenType::IDENTIFIER, current };
+                    Token identToken = { TokenType::IDENTIFIER, current, line_num, column };
                     tokens.emplace_back(identToken);
                     current = "";
                 }
 
-                Token token = { type, "" };
+                Token token = { type, "", line_num, column };
                 tokens.emplace_back(token);
             }
             it++;
-            continue;
+            column++;
         }
+        line_num++;
     }
     // Report the time it took
     auto nowTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
@@ -142,9 +145,9 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
     return tokens;
 }
 
-const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
+const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
     auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-    SourceFile* file = new SourceFile();
+    AST_SourceFile* file = new AST_SourceFile(this->fileName);
 
     // Start by making sure we even have any tokens to parse.
     if (tokens.size() == 0) return file;
@@ -169,7 +172,7 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
             // Before we can do so, lets make sure we even have things after this
             if (!this->has_next(it, tokens.end())) {
                 // We don't have anything next, so we need to display a friendly error.
-                this->workspace.reporter.report_error({ "Incomplete identifier", this->fileName, 0, 0 });
+                this->workspace.reporter.report_error({ "Incomplete identifier", this->fileName, token.line, token.column });
                 continue;
             }
 
@@ -188,7 +191,7 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 //
 
                 if (!this->has_next(it + 1, tokens.end())) {
-                    this->workspace.reporter.report_error({ "Incomplete variable decleration", this->fileName, 0, 0 });
+                    this->workspace.reporter.report_error({ "Incomplete variable decleration", this->fileName, token.line, token.column });
                     it += 3;
                     continue;
                 }
@@ -198,23 +201,23 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 if (next_token.type == TokenType::ASSIGN) {
                     // Since it's an assign, we need to do one more check - Make sure there's a value!
                     if (!this->has_next(it + 2, tokens.end())) {
-                        this->workspace.reporter.report_error({ "Missing value on variable decleration", this->fileName, 0, 0 });
+                        this->workspace.reporter.report_error({ "Missing value on variable decleration", this->fileName, token.line, token.column });
                         it += 3;
                         continue;
                     }
                     // Make sure that this name hasn't been used
                     if (!this->can_use_name(token.value)) {
-                        this->workspace.reporter.report_error({ "Variable name '" + token.value + "' is already in use", this->fileName, 0, 0 });
+                        this->workspace.reporter.report_error({ "Variable name '" + token.value + "' is already in use", this->fileName, token.line, token.column });
                         it += 3;
                         continue;
                     }
 
                     // Since we have a value, we can turn this into a real variable!
                     auto value_token = *(it + 3);
-                    Decleration decl = {
-                        0, 0, value_token.type, token.value, value_token.value, "cool_scope" // TODO: Real scopes
+                    AST_Declaration decl = {
+                        token.line, token.column, value_token.type, token.value, value_token.value, "cool_scope" // TODO: Real scopes
                     };
-                    file->decls.emplace_back(decl);
+                    file->contained.emplace_back(decl);
                     // Make sure the scanner knows it's been used too!
                     this->usedNames.emplace_back(token.value);
                 }
@@ -224,7 +227,7 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     // Make sure that we have something more to check.
                     if (!this->has_next(it + 2, tokens.end()) || !this->has_next(it + 3, tokens.end())) {
                         // We don't have at least two more, which we need.
-                        this->workspace.reporter.report_error({ "Incomplete function decleration", this->fileName, 0, 0 });
+                        this->workspace.reporter.report_error({ "Incomplete function decleration", this->fileName, token.line, token.column });
                         it += 4;
                         continue;
                     }
@@ -234,19 +237,25 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 
                     // Make sure we actually have what we need to make a function
                     if (first_next.type != TokenType::LPAREN) {
-                        this->workspace.reporter.report_error({ "Function decleration is missing argument block", this->fileName, 0, 0 });
+                        this->workspace.reporter.report_error({ "Function decleration is missing argument block", this->fileName, token.line, token.column });
                         it += 4;
                         continue;
                     }
 
                     // Since we have that, everything between that and ) is our arguments.
-                    std::vector<Token> arguments;
+                    std::vector<AST_Argument> arguments;
                     auto argument_it = it + 4;
 
                     auto argument = *argument_it;
                     // COPYPASTA: This should be a function, was copied from another section
                     while (argument.type != TokenType::RPAREN && argument_it != tokens.end()) {
-                        arguments.emplace_back(argument);
+                        // Build the AST representation of the argument from the token
+                        // Cleanup: Literally what even
+                        AST_Argument arg;
+                        arg.name = argument.value;
+                        arg.type = argument.type;
+
+                        arguments.emplace_back(arg);
                         argument_it++;
                         argument = *argument_it;
                     }
@@ -254,19 +263,18 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     it += arguments.size();
 
                     // Now that we have our arguments, lets apply it to a function.
-                    Function function = {  };
-                    function.column = 0;
-                    function.line = 0;
+                    AST_Function function;
+                    function.name = token.value;
+                    function.line = token.line;
+                    function.column = token.column;
                     function.arguments = arguments;
-                    function.function_name = token.value;
-                    function.parent_scope = ""; // TODO
-                    function.return_type = TokenType::INT; // TODO
-                    function.scope = ""; // TODO
+                    function.scope = "";
+                    function.return_type = TokenType::INVALID;
 
                     // Make sure we're not attempting to redeclare the main function
-                    if (function.function_name == "main") {  // TODO: This shouldn't be static
+                    if (function.name == "main") {  // TODO: This shouldn't be static
                         if (file->mainFunction != nullptr) {
-                            this->workspace.reporter.report_error({ "Attempt to redeclare main function", this->fileName, 0, 0 });
+                            this->workspace.reporter.report_error({ "Attempt to redeclare main function", this->fileName, token.line, token.column });
                             it += 4;
                             continue;
                         }
@@ -274,14 +282,14 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                         file->mainFunction = &function;
                     }
                     // Now that we have our function, give it to the file
-                    file->functions.emplace_back(function);
+                    file->contained.emplace_back(function);
                 }
                 else if (next_token.type == TokenType::IDENTIFIER) {
                     // Having an identifier here means we're setting a custom type to a variable.
                     // So, we need to have 3 more arguments following.
 
                     if (!this->has_next(it + 2, tokens.end())) {
-                        this->workspace.reporter.report_error({ "Expected '=', but found nothing", this->fileName, 0, 0 });
+                        this->workspace.reporter.report_error({ "Expected '=', but found nothing", this->fileName, token.line, token.column });
                         it += 4;
                         continue;
                     }
@@ -291,14 +299,14 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     auto new_type = get_type_from_string(type_token.value);
                     if (new_type == TokenType::INVALID) {
                         // The type isn't a thing
-                        this->workspace.reporter.report_error({ "Invalid type: '" + type_token.value + "'", this->fileName, 0, 0 });
+                        this->workspace.reporter.report_error({ "Invalid type: '" + type_token.value + "'", this->fileName, token.line, token.column });
                         it += 4;
                         continue;
                     }
 
                     // Since the type exists, lets see if we have a value.
                     if (!this->has_next(it + 3, tokens.end())) {
-                        this->workspace.reporter.report_error({ "Cannot initialize variable without a value", this->fileName, 0, 0 });
+                        this->workspace.reporter.report_error({ "Cannot initialize variable without a value", this->fileName, token.line, token.column });
                         it += 4;
                         continue;
                     }
@@ -313,15 +321,15 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 
                     // Make sure that the types match
                     if (new_type != value_token.type) {
-                        this->workspace.reporter.report_error({ "Cannot assign type '" + token_map[new_type] + "' from type '" + token_map[value_token.type] + "'", this->fileName, 0, 0 });
+                        this->workspace.reporter.report_error({ "Cannot assign type '" + token_map[new_type] + "' from type '" + token_map[value_token.type] + "'", this->fileName, token.line, token.column });
                         it += 4;
                         continue;
                     }
                     
-                    Decleration decl = {
-                        0, 0, value_token.type, token.value, value_token.value, "cool_scope" // TODO: Real scopes
+                    AST_Declaration decl = {
+                        token.line, token.column, value_token.type, token.value, value_token.value, "cool_scope" // TODO: Real scopes
                     };
-                    file->decls.emplace_back(decl);
+                    file->contained.emplace_back(decl);
                     // Make sure the scanner knows it's been used too!
                     this->usedNames.emplace_back(token.value);
                     it += 4;
@@ -333,21 +341,21 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 
                 // Before we can, lets make sure we have something to actually assign it to
                 if (!this->has_next(it + 1, tokens.end())) {
-                    this->workspace.reporter.report_error({ "Cannot reassign variable without value", this->fileName, 0, 0 });
+                    this->workspace.reporter.report_error({ "Cannot reassign variable without value", this->fileName, token.line, token.column });
                     it += 2;
                     continue;
                 }
                 // Since we have a value, lets see if the variable even exists
                 if (this->can_use_name(token.value)) {
-                    this->workspace.reporter.report_error({ "Cannot reassign variable '" + token.value + "', does not exist", this->fileName, 0, 0 });
+                    this->workspace.reporter.report_error({ "Cannot reassign variable '" + token.value + "', does not exist", this->fileName, token.line, token.column });
                     it += 2;
                     continue;
                 }
 
                 // Since we have both the value and a variable, set it.
-                auto originalDecl = file->getDecl(token.value);
+                auto originalDecl = file->get_decl(token.value);
                 if (originalDecl.line == -1) {
-                    this->workspace.reporter.report_error({ "Internal compiler error: Found name that doesn't exist: " + token.value, this->fileName, 0, 0 });
+                    this->workspace.reporter.report_error({ "Internal compiler error: Found name that doesn't exist: " + token.value, this->fileName, token.line, token.column });
                     break;
                 }
                 auto value_token = *(it + 2);
@@ -355,14 +363,14 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 // Make sure they're the same types
                 if (originalDecl.type != value_token.type) {
                     this->workspace.reporter.report_error({ "Cannot set variable '" + token.value + "', type " + token_map[originalDecl.type] + ", to type of " +
-                        token_map[value_token.type] + "", this->fileName, 0, 0 });
+                        token_map[value_token.type] + "", this->fileName, token.line, token.column });
                     it += 2;
                     continue;
                 }
                 // Types are the same, and the variable exists. Time to finally set it.
                 auto newDecl = originalDecl;
                 newDecl.value = value_token.value;
-                file->replaceDecl(originalDecl, newDecl);
+                file->replace_decl(originalDecl, newDecl);
             }
             else if (the_next_token.type == TokenType::LPAREN) {
                 // If we have a left paren, then we MUST be calling a function.
@@ -370,25 +378,35 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 
                 // But before we can do that, we need to make sure we even *have* args to do that with.
                 if (!this->has_next(it + 1, tokens.end())) {
-                    this->workspace.reporter.report_error({ "Expected (, found nothing", this->fileName, 0, 0 });
+                    this->workspace.reporter.report_error({ "Expected (, found nothing", this->fileName, token.line, token.column });
                     it += 2;
                     continue;
                 }
 
-                std::vector<Token> arguments;
+                std::vector<AST_Argument> arguments;
                 auto argument_it = it + 2;
 
                 Token argument = *argument_it;
                 while (argument.type != TokenType::RPAREN && argument_it != tokens.end()) {
-                    arguments.emplace_back(argument);
+                    // Build the AST representation of the argument from the token
+                    // Cleanup: Literally what even
+                    AST_Argument arg;
+                    arg.name = argument.value;
+                    arg.type = argument.type;
+
+                    arguments.emplace_back(arg);
                     argument_it++;
                     argument = *argument_it;
                 }
                 // Set the iterator
                 it += arguments.size();
                 // Now that we have our arguments, let build the AST function call.
-                FunctionCall function = { 0, 0, token.value, arguments };
-                file->function_calls.emplace_back(function);
+                AST_FunctionCall function;
+                function.name = token.value;
+                function.line = 0;
+                function.column = 0;
+                function.arguments = arguments;
+                file->contained.emplace_back(function);
             }
         }
     }

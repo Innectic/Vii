@@ -2,8 +2,6 @@
 # Random things that need to be done
 ## This shouldn't be a file, I know.
 
-Convert all the random vectors into one vector using some sort of a base class AST(thing).
 Implement block comments.
 Make function scoping actually work...
-Track the position of tokens
 Ensure lines actually end with a semicolon

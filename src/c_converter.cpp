@@ -26,17 +26,20 @@ void C_Converter::add_import(const std::string& lib, std::ofstream& stream) {
     this->emit(line, stream);
 }
 
-void C_Converter::emit_functions(const SourceFile& file, std::ofstream& stream) {
-    for (auto function : file.functions) {
-        std::string functionName = function.function_name; // TODO: things for main
+void C_Converter::emit_functions(const AST_SourceFile& file, std::ofstream& stream) {
+    for (auto potential : file.contained) {
+        // We only want to do thing with functions
+        if (typeid(potential) != typeid(AST_Function)) continue;
+        auto function = static_cast<AST_Function*>(&potential);
+        std::string functionName = function->name; // TODO: things for main
         std::cout << functionName << std::endl;
 
-        std::string returnType = this->type_to_c_type(function.return_type);
+        std::string returnType = this->type_to_c_type(function->return_type);
         std::string argumentString = "";
 
-        for (auto arg : function.arguments) {
+        for (auto arg : function->arguments) {
             std::string argType = this->type_to_c_type(arg.type);
-            argumentString += argType + " " + arg.value;
+            argumentString += argType + " " + arg.name;
         }
 
         this->emit(returnType + " " + functionName + "(" + argumentString +  ") {\n", stream);
@@ -45,9 +48,9 @@ void C_Converter::emit_functions(const SourceFile& file, std::ofstream& stream) 
     }
 }
 
-void C_Converter::convert(const SourceFile& file) {
+void C_Converter::convert(const AST_SourceFile& file) {
     std::ofstream fileStream;
-    std::string fileName = std::regex_replace(file.fileName, std::regex("\\.vii"), ".cpp");
+    std::string fileName = std::regex_replace(file.file_name, std::regex("\\.vii"), ".cpp");
     fileStream.open(fileName);
 
     // TODO: Only add imports when needed, and detect other imports that we need

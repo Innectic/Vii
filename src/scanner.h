@@ -7,6 +7,7 @@
 
 #include "util.h"
 #include "token.h"
+#include "ast.h"
 #include "workspace.h"
 #include "reporter.h"
 
@@ -32,7 +33,7 @@ public:
     const bool can_use_name(std::string name);
 
     const std::vector<Token> tokenize(const std::string& filename);
-    const SourceFile* parse(std::vector<Token>& tokens);
+    const AST_SourceFile* parse(std::vector<Token>& tokens);
 
     // TODO: #TooManyOverloads - This can probably just be templated, tbh
 

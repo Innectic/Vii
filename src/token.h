@@ -87,7 +87,10 @@ static TokenType get_type_from_string(std::string checking) {
 
 struct Token {
     TokenType type;
-    std::string value; // TODO:  Make the type something useful
+    std::string value;
+
+    int line;
+    int column;
 };
 
 static std::vector<std::string> keywords = {
@@ -96,59 +99,3 @@ static std::vector<std::string> keywords = {
     "true",
     "false"
 };
-
-struct Decleration {
-    int line;
-    int column;
-    TokenType type; // TODO: Having the type here is probably redundant.
-
-    std::string name;
-    std::string value; // TODO: Might want to turn this into some-sort of a custom type;
-    std::string scope;
-};
-
-struct FunctionCall {
-    int line;
-    int column;
-
-    std::string function_name;
-    std::vector<Token> arguments;
-};
-
-struct Function : public FunctionCall {
-    // TODO: This will only allow for primitives to be returned, custom objects won't work here.
-    TokenType return_type;
-
-    std::string parent_scope;
-    std::string scope;
-};
-
-struct SourceFile {
-    std::string fileName;
-    int lines;
-    std::vector<Function> functions;
-    std::vector<FunctionCall> function_calls;
-    std::vector<Decleration> decls;
-    Function *mainFunction;
-
-    inline const Decleration getDecl(std::string name) {
-        for (auto decl : this->decls) if (decl.name == name) return decl;
-        return {-1, -1, TokenType::COMMENT, nullptr, nullptr, nullptr};
-    }
-
-    inline void replaceDecl(Decleration& replacing, Decleration& newDecl) {
-        int pos = -1;
-        for (unsigned int i = 0; i < this->decls.size(); ++i) {
-            auto decl = this->decls[i];
-
-            if (decl.name == replacing.name) {
-                pos = i;
-                break;
-            }
-        }
-
-        if (pos > -1) this->decls[pos] = newDecl;
-    }
-};
-
-
