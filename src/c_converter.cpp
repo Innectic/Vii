@@ -28,7 +28,7 @@ void C_Converter::add_import(const std::string& lib, std::ofstream& stream) {
 
 void C_Converter::emit_functions(const SourceFile& file, std::ofstream& stream) {
     for (auto function : file.functions) {
-        std::string functionName = function.isMain ? "realMain" : function.function_name;
+        std::string functionName = function.function_name; // TODO: things for main
         std::cout << functionName << std::endl;
 
         std::string returnType = this->type_to_c_type(function.return_type);

@@ -121,7 +121,6 @@ struct Function : public FunctionCall {
 
     std::string parent_scope;
     std::string scope;
-    bool isMain;
 };
 
 struct SourceFile {
@@ -130,6 +129,7 @@ struct SourceFile {
     std::vector<Function> functions;
     std::vector<FunctionCall> function_calls;
     std::vector<Decleration> decls;
+    Function *mainFunction;
 
     inline const Decleration getDecl(std::string name) {
         for (auto decl : this->decls) if (decl.name == name) return decl;

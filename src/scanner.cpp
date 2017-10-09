@@ -262,11 +262,20 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     function.line = 0;
                     function.arguments = arguments;
                     function.function_name = token.value;
-                    function.isMain = true; // TODO
                     function.parent_scope = ""; // TODO
                     function.return_type = TokenType::INT; // TODO
                     function.scope = ""; // TODO
 
+                    // Make sure we're not attempting to redeclare the main function
+                    if (function.function_name == "main") {  // TODO: This shouldn't be static
+                        if (file->mainFunction != nullptr) {
+                            std::cout << "Attempt to redeclare main function." << std::endl;
+                            it += 4;
+                            continue;
+                        }
+                        // Set the main function to this
+                        file->mainFunction = &function;
+                    }
                     // Now that we have our function, give it to the file
                     file->functions.emplace_back(function);
                 }
