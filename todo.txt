@@ -6,4 +6,5 @@ Convert all the random vectors into one vector using some sort of a base class A
 Fix string parsing within function calls (print("A") doesn't work)
 Implement block comments.
 Make function scoping actually work...
-Proper error reporting
+Fix CMake builds
+Track the position of tokens

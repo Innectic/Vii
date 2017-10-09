@@ -9,12 +9,19 @@
 #include "util.h"
 
 #include "token.h"
+#include "reporter.h"
 
 enum OptimizationLevel {
     OP_NONE, OP_LOW, OP_MEDIUM, OP_MAX, OP_SIZE, OP_SPEED
 };
 
 struct WorkSpace {
+    Reporter reporter;
+
+    inline WorkSpace(Reporter& reporter) : reporter(reporter) {
+
+    }
+
     std::string directory;
 
     std::string comment_prefix;

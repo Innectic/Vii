@@ -70,6 +70,8 @@ const bool Scanner::can_use_name(std::string name) {
 }
 
 const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
+    this->fileName = fileName;
+
     auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
     std::vector<std::string> contents = Util::readFileToVector(fileName);
     std::vector<Token> tokens;
@@ -163,8 +165,7 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
             // Before we can do so, lets make sure we even have things after this
             if (!this->has_next(it, tokens.end())) {
                 // We don't have anything next, so we need to display a friendly error.
-                // TODO: Real error reporting that actually helps the user solve the problem
-                std::cout << "No useful information about the ident." << std::endl;
+                this->workspace.reporter.report_error({ "Incomplete identifier", this->fileName, 0, 0 });
                 continue;
             }
 
@@ -182,11 +183,8 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 // to that, if the type is valid.
                 //
 
-                // TODO: Support for type setting
-
                 if (!this->has_next(it + 1, tokens.end())) {
-                    // TODO: See the above TODO about error reporting.
-                    std::cout << "Variable decleration isn't finished." << std::endl;
+                    this->workspace.reporter.report_error({ "Incomplete variable decleration", this->fileName, 0, 0 });
                     it += 3;
                     continue;
                 }
@@ -196,15 +194,13 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 if (next_token.type == TokenType::ASSIGN) {
                     // Since it's an assign, we need to do one more check - Make sure there's a value!
                     if (!this->has_next(it + 2, tokens.end())) {
-                        // TODO: See the above TODO about error reporting
-                        std::cout << "Variable decleration has no value" << std::endl;
+                        this->workspace.reporter.report_error({ "Missing value on variable decleration", this->fileName, 0, 0 });
                         it += 3;
                         continue;
                     }
                     // Make sure that this name hasn't been used
                     if (!this->can_use_name(token.value)) {
-                        // TODO: See above TODO about error reporting
-                        std::cout << "Cannot use name '" << token.value << "'." << std::endl;
+                        this->workspace.reporter.report_error({ "Variable name '" + token.value + "' is already in use", this->fileName, 0, 0 });
                         it += 3;
                         continue;
                     }
@@ -224,9 +220,7 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     // Make sure that we have something more to check.
                     if (!this->has_next(it + 2, tokens.end()) || !this->has_next(it + 3, tokens.end())) {
                         // We don't have at least two more, which we need.
-                        
-                        // TODO: See above TODO about error reporting
-                        std::cout << "Function format issue" << std::endl;
+                        this->workspace.reporter.report_error({ "Incomplete function decleration", this->fileName, 0, 0 });
                         it += 4;
                         continue;
                     }
@@ -236,8 +230,7 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 
                     // Make sure we actually have what we need to make a function
                     if (first_next.type != TokenType::LPAREN) {
-                        // TODO: See above TODO about error reporting
-                        std::cout << "Function format issue" << std::endl;
+                        this->workspace.reporter.report_error({ "Function decleration is missing argument block", this->fileName, 0, 0 });
                         it += 4;
                         continue;
                     }
@@ -269,7 +262,7 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     // Make sure we're not attempting to redeclare the main function
                     if (function.function_name == "main") {  // TODO: This shouldn't be static
                         if (file->mainFunction != nullptr) {
-                            std::cout << "Attempt to redeclare main function." << std::endl;
+                            this->workspace.reporter.report_error({ "Attempt to redeclare main function", this->fileName, 0, 0 });
                             it += 4;
                             continue;
                         }
@@ -284,8 +277,7 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     // So, we need to have 3 more arguments following.
 
                     if (!this->has_next(it + 2, tokens.end())) {
-                        // TODO: See above TODO about error reporting
-                        std::cout << "Expected an '='" << std::endl;
+                        this->workspace.reporter.report_error({ "Expected '=', but found nothing", this->fileName, 0, 0 });
                         it += 4;
                         continue;
                     }
@@ -295,15 +287,14 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     auto new_type = get_type_from_string(type_token.value);
                     if (new_type == TokenType::INVALID) {
                         // The type isn't a thing
-                        std::cout << "Invalid type: '" << type_token.value << "'" << std::endl;
+                        this->workspace.reporter.report_error({ "Invalid type: '" + type_token.value + "'", this->fileName, 0, 0 });
                         it += 4;
                         continue;
                     }
 
                     // Since the type exists, lets see if we have a value.
                     if (!this->has_next(it + 3, tokens.end())) {
-                        // TODO: See above TODO about error reporting
-                        std::cout << "Cannot initialize variable without value." << std::endl;
+                        this->workspace.reporter.report_error({ "Cannot initialize variable without a value", this->fileName, 0, 0 });
                         it += 4;
                         continue;
                     }
@@ -315,12 +306,10 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     // This should become a nice generic function.
                     //
                     auto value_token = *(it + 4);
-                    
 
                     // Make sure that the types match
                     if (new_type != value_token.type) {
-                        // TODO: See above TODO about error reporting
-                        std::cout << "Cannot assign with two different types." << std::endl;
+                        this->workspace.reporter.report_error({ "Cannot assign type '" + token_map[new_type] + "' from type '" + token_map[value_token.type] + "'", this->fileName, 0, 0 });
                         it += 4;
                         continue;
                     }
@@ -340,15 +329,13 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 
                 // Before we can, lets make sure we have something to actually assign it to
                 if (!this->has_next(it + 1, tokens.end())) {
-                    // TODO: See above TODO about error reporting
-                    std::cout << "Cannot set value without a value!" << std::endl;
+                    this->workspace.reporter.report_error({ "Cannot reassign variable without value", this->fileName, 0, 0 });
                     it += 2;
                     continue;
                 }
                 // Since we have a value, lets see if the variable even exists
                 if (this->can_use_name(token.value)) {
-                    // Variable doesn't exist
-                    std::cout << "Variable '" << token.value << "' does not exist." << std::endl;
+                    this->workspace.reporter.report_error({ "Cannot reassign variable '" + token.value + "', does not exist", this->fileName, 0, 0 });
                     it += 2;
                     continue;
                 }
@@ -356,14 +343,15 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 // Since we have both the value and a variable, set it.
                 auto originalDecl = file->getDecl(token.value);
                 if (originalDecl.line == -1) {
-                    std::cout << "Internal compiler error: Found name that doesn't exist: " << token.value << std::endl;
+                    this->workspace.reporter.report_error({ "Internal compiler error: Found name that doesn't exist: " + token.value, this->fileName, 0, 0 });
                     break;
                 }
                 auto value_token = *(it + 2);
 
                 // Make sure they're the same types
                 if (originalDecl.type != value_token.type) {
-                    std::cout << "Cannot set variable '" << token.value << "', type " << token_map[originalDecl.type] << ", to type of " << token_map[value_token.type] << "." << std::endl;
+                    this->workspace.reporter.report_error({ "Cannot set variable '" + token.value + "', type " + token_map[originalDecl.type] + ", to type of " +
+                        token_map[value_token.type] + "", this->fileName, 0, 0 });
                     it += 2;
                     continue;
                 }
@@ -378,8 +366,7 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 
                 // But before we can do that, we need to make sure we even *have* args to do that with.
                 if (!this->has_next(it + 1, tokens.end())) {
-                    // TODO: See above TODO about error reporting.
-                    std::cout << "Function call doesn't have args / end" << std::endl;
+                    this->workspace.reporter.report_error({ "Expected (, found nothing", this->fileName, 0, 0 });
                     it += 2;
                     continue;
                 }
@@ -395,7 +382,6 @@ const SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 }
                 // Set the iterator
                 it += arguments.size();
-                
                 // Now that we have our arguments, let build the AST function call.
                 FunctionCall function = { 0, 0, token.value, arguments };
                 file->function_calls.emplace_back(function);

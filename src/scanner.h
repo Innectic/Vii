@@ -8,12 +8,15 @@
 #include "util.h"
 #include "token.h"
 #include "workspace.h"
+#include "reporter.h"
 
 class Scanner {
 private:
     std::string::iterator beg;
     std::string::iterator it;
     std::string::iterator end;
+
+    std::string fileName;
 
     WorkSpace& workspace;
 
