@@ -1,16 +1,4 @@
 
-// This is general purpose testing code.
-//
-// In most cases, nothing should be replaced here, just added to.
-// Keep in mind, pretty much all of this syntax is temp!
-// I stole it from Haskell & Go, so I might want to come up with
-// something myself at a later date. Don't get used to this.
-//
-
-test := "b";
-
-main :: () {
-    print(test);
-    test = "c";
-    print(test);
-}
+print("b");
+test := "a";
+print(test);

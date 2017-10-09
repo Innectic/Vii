@@ -21,7 +21,11 @@ const std::string Scanner::read_string() {
         }
         else if (*it == '\\' && this->has_next() && *(it + 1) == '"') escaped = true;
         else if (*it == '"') {
-            if (!escaped && taking) taking = false;
+            if (!escaped && taking) {
+                taking = false;
+                it++;
+                break;
+            }
             else taking = true;
         }
         else if (taking) found += *it;
