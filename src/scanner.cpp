@@ -266,21 +266,51 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 
                     auto argument = *argument_it;
                     // COPYPASTA: This should be a function, was copied from another section
-                    while (argument.type != TokenType::RPAREN && argument_it != tokens.end()) {
+                    while (argument.type != TokenType::RPAREN && argument_it < tokens.end() - 1) {
                         // Build the AST representation of the argument from the token
-                        // Cleanup: Literally what even
-                        AST_Argument arg;
-                        arg.name = argument.value;
-                        arg.type = argument.type;
-
-                        arguments.emplace_back(arg);
-                        argument_it++;
+                        
+                        if (argument.type == TokenType::IDENTIFIER && this->has_next(argument_it, tokens.end())) {
+                            auto colon = *(argument_it + 1);
+                            if (colon.type == TokenType::COLON && this->has_next(argument_it + 1, tokens.end())) {
+                                auto type = *(argument_it + 2);
+                                auto real_type = get_type_from_string(type.value);
+                                // Make sure it's a valid type
+                                if (type.type != TokenType::IDENTIFIER || real_type == TokenType::INVALID) {
+                                    ViiError err = {
+                                        "Invalid type: " + type.value,
+                                        file->file_name,
+                                        type.line,
+                                        type.column
+                                    };
+                                    this->workspace.reporter.report_error(err);
+                                    argument_it += 2;
+                                    it = argument_it;
+                                    continue;
+                                }
+                                // It is, allow the function to have this argument as this type.
+                                auto arg = new AST_Argument(argument.value, real_type);
+                                arguments.emplace_back(*arg);
+                                argument_it += 3;
+                                argument = *argument_it;
+                                it = argument_it;
+                                continue;
+                            }
+                            std::cout << "A" << std::endl;
+                            argument_it += 3;
+                            argument = *argument_it;
+                            it = argument_it;
+                            continue;
+                        }
+                        std::cout << "B" << std::endl;
+                        argument_it += 3;
                         argument = *argument_it;
+                        it = argument_it;
+                        continue;
                     }
                     // Set the iterator
                     it += arguments.size();
 
-                    // Now that we have our arguments, lets apply it to a function.
+                    // Now that we have our arguments, lets apply them to a function.
                     auto function = new AST_Function(token.value, token.line, token.column, arguments, "really_cool_scope", TokenType::INVALID);
 
                     // Make sure we're not attempting to redeclare the main function
@@ -397,12 +427,9 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 Token argument = *argument_it;
                 while (argument.type != TokenType::RPAREN && argument_it != tokens.end()) {
                     // Build the AST representation of the argument from the token
-                    // Cleanup: Literally what even
-                    AST_Argument arg;
-                    arg.name = argument.value;
-                    arg.type = argument.type;
+                    AST_Argument* arg = new AST_Argument(argument.value, argument.type);
 
-                    arguments.emplace_back(arg);
+                    arguments.emplace_back(*arg);
                     argument_it++;
                     argument = *argument_it;
                 }

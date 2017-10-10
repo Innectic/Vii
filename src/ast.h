@@ -15,7 +15,7 @@ const inline static bool is_type(AST_Type* t) {
 }
 
 struct AST_Declaration : public AST_Type {
-    inline AST_Declaration(int line, int column, TokenType type, std::string name, std::string value, std::string scope) :
+    inline AST_Declaration(const int& line, const int& column, const TokenType& type, const std::string& name, const std::string& value, const std::string& scope) :
         line(line), column(column), type(type), name(name), value(value), scope(scope) {
 
     }
@@ -54,7 +54,7 @@ struct AST_FunctionCall : public AST_Type {
 protected:
     inline AST_FunctionCall() {}
 public:
-    inline AST_FunctionCall(std::string name, int line, int column, std::vector<AST_Argument> arguments) :
+    inline AST_FunctionCall(const std::string& name, const int& line, const int& column, const std::vector<AST_Argument>& arguments) :
         name(name), line(line), column(column), arguments(arguments) {
 
     }
@@ -72,7 +72,7 @@ public:
 };
 
 struct AST_Function : public AST_FunctionCall {
-    inline AST_Function(std::string name, int line, int column, std::vector<AST_Argument> argument, std::string scope, TokenType return_type) :
+    inline AST_Function(const std::string& name, const int& line, const int& column, const std::vector<AST_Argument>& arguments, std::string scope, const TokenType& return_type) :
         scope(scope), return_type(return_type) {
         this->name = name;
         this->line = line;
@@ -86,11 +86,12 @@ struct AST_Function : public AST_FunctionCall {
 
     std::string scope;
     TokenType return_type;
+    std::vector<AST_Type*> contained;
 };
 
 struct AST_SourceFile : public AST_Type {
     inline AST_SourceFile() {}
-    inline AST_SourceFile(std::string file_name) : file_name(file_name) {
+    inline AST_SourceFile(const std::string& file_name) : file_name(file_name) {
         this->total_comments = 0;
         this->total_code = 0;
         this->total_blank = 0;
