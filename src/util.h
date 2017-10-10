@@ -5,6 +5,7 @@
 #include <vector>
 #include <fstream>
 #include <algorithm>
+#include <chrono>
 
 class Util {
 public:
@@ -61,5 +62,9 @@ public:
         auto new_string = original.substr(0, original.find_last_not_of(pattern) + 1);
         new_string = new_string.substr(new_string.find_first_not_of(pattern));
         return new_string;
+    }
+
+    const static inline __int64 get_time() {
+        return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
     }
 };

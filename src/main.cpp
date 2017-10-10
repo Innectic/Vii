@@ -8,7 +8,7 @@
 #include "scanner.h"
 #include "file_handler.h"
 #include "c_converter.h"
-
+#include "util.h"
 
 template<class First>
 const inline bool is_type(AST_Type* t) {
@@ -45,8 +45,15 @@ int main(int argc, char *argv[]) {
 
     workspace->load_configuration();
 
+    auto start_time = Util::get_time();
     std::vector<Token> tokens = scanner->tokenize("test.vii");
+    auto end_time = Util::get_time();
+    std::cout << "\033[1;36m> \033[0;32mFrontend time (s): " << ((double)(end_time - start_time) / 1000000000) << "\033[0m" << std::endl;
+    
+    start_time = Util::get_time();
     const AST_SourceFile* file = scanner->parse(tokens);
+    end_time = Util::get_time();
+    std::cout << "\033[1;36m> \033[0;32mBackend time  (s): " << ((double)(end_time- start_time) / 1000000000) << "\033[0m" << std::endl;
 
     for (auto entry : file->contained) {
         if (is_type<AST_FunctionCall*>(entry)) {

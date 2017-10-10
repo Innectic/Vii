@@ -3,7 +3,6 @@
 ## This shouldn't be a file, I know.
 
 Better type system IE: Ints should be assignable to floats
-Better time tracking
 Implement block comments.
 Make function scoping actually work...
 Ensure lines actually end with a semicolon

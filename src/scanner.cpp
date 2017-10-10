@@ -77,7 +77,6 @@ const bool Scanner::can_use_name(std::string name) {
 const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
     this->fileName = fileName;
 
-    auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
     std::vector<std::string> contents = Util::readFileToVector(fileName);
     std::vector<Token> tokens;
     if (contents.size() <= 0) return tokens;
@@ -147,14 +146,10 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
         }
         line_num++;
     }
-    // Report the time it took
-    auto nowTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-    std::cout << "\033[1;36m> \033[0;32mFrontend time (s): " <<  ((double) (nowTime - time) / 1000000000) << "\033[0m" << std::endl;
     return tokens;
 }
 
 const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
-    auto time = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
     AST_SourceFile* file = new AST_SourceFile(this->fileName);
 
     // Start by making sure we even have any tokens to parse.
@@ -402,9 +397,5 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
             }
         }
     }
-
-    // Report the time it took
-    auto nowTime = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-    std::cout << "\033[1;36m> \033[0;32mBackend time  (s): " << ((double)(nowTime - time) / 1000000000) << "\033[0m" << std::endl;
     return file;
 }
