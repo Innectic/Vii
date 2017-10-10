@@ -2,8 +2,4 @@
 # Random things that need to be done
 ## This shouldn't be a file, I know.
 
-Better type system IE: Ints should be assignable to floats
-
-Ensure lines actually end with a semicolon
-Implement block comments.
 Make function scoping actually work...

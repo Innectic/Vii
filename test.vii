@@ -1,10 +1,17 @@
 
-a := "a";
-b := 'b';
+/*
+*
+* this is a comment
+*
+*/
+test := "a"
 
-c := 1;
-d := 1.2;
-
-d = 1;
-
-c = 2;
+/*
+I'm a comment too!
+*/
+print(test)
+/*
+*
+ I wish I had the missing part of my side D:
+*/
+print("B")

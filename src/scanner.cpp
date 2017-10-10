@@ -13,27 +13,27 @@ const std::string Scanner::read_string(const char& delim) {
     bool escaped = false;
     bool taking = false;
 
-    std::string found = "";
+std::string found = "";
 
-    while (it < this->end) {
-        if (escaped) {
-            found += *it;
-            escaped = false;
-        }
-        else if (*it == '\\' && this->has_next() && *(it + 1) == delim) escaped = true;
-        else if (*it == delim) {
-            if (!escaped && taking) {
-                taking = false;
-                it++;
-                break;
-            }
-            else taking = true;
-        }
-        else if (taking) found += *it;
-        it++;
+while (it < this->end) {
+    if (escaped) {
+        found += *it;
+        escaped = false;
     }
+    else if (*it == '\\' && this->has_next() && *(it + 1) == delim) escaped = true;
+    else if (*it == delim) {
+        if (!escaped && taking) {
+            taking = false;
+            it++;
+            break;
+        }
+        else taking = true;
+    }
+    else if (taking) found += *it;
+    it++;
+}
 
-    return found;
+return found;
 }
 
 const Token Scanner::read_number() {
@@ -81,6 +81,7 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
     std::vector<Token> tokens;
     if (contents.size() <= 0) return tokens;
 
+    bool skip_next = false;
     int line_num = 1;
     for (auto line : contents) {
         int column = 1;
@@ -91,7 +92,23 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
         std::string current = "";
 
         while (it < end) {
-            if (*it == '"') {
+            if (skip_next) {
+                if (*it == '*' && this->has_next() && *(it + 1) == '/') {
+                    skip_next = false;
+                    it += 2;
+                    continue;
+                }
+                else {
+                    it++;
+                    continue;
+                }
+            }
+            if (*it == '/' && this->has_next() && *(it + 1) == '*' && !skip_next) {
+                skip_next = true;
+                it++;
+                continue;
+            }
+            else if (*it == '"') {
                 auto taken = this->read_string('"');
                 Token token = { TokenType::STRING, taken, line_num, column };
                 tokens.emplace_back(token);

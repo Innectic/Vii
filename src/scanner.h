@@ -45,10 +45,10 @@ public:
     }
 
     const inline bool has_next(const std::string::iterator& it, const std::string::iterator& end) {
-        return it < end;
+        return it < end - 1;
     }
 
     const inline bool has_next(const std::vector<Token>::iterator& it, const std::vector<Token>::iterator& end) {
-        return it < end;
+        return it < end - 1;
     }
 };
