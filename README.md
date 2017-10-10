@@ -16,3 +16,16 @@ Some of the goals are:
 Write good code if you want to contribute. Don't manage your own memory, if you can avoid it. If you can't avoid it, please just do it properly
 
 If you want to know how things should be written, just look at how some of the code in the repo has been written.
+
+# Compiling
+
+To compile on linux, you need gcc 7.0 or higher.
+
+```
+git clone https://github.com/innectic/vii
+cd vii
+mkdir build
+cmake ../src && make
+```
+
+Bam! Now you built it
