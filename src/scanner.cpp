@@ -9,9 +9,10 @@ Scanner::~Scanner() {
 
 }
 
-const std::string Scanner::read_string() {
+const std::string Scanner::read_string(const char& delim) {
     bool escaped = false;
     bool taking = false;
+
     std::string found = "";
 
     while (it < this->end) {
@@ -19,8 +20,8 @@ const std::string Scanner::read_string() {
             found += *it;
             escaped = false;
         }
-        else if (*it == '\\' && this->has_next() && *(it + 1) == '"') escaped = true;
-        else if (*it == '"') {
+        else if (*it == '\\' && this->has_next() && *(it + 1) == delim) escaped = true;
+        else if (*it == delim) {
             if (!escaped && taking) {
                 taking = false;
                 it++;
@@ -92,7 +93,7 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
 
         while (it < end) {
             if (*it == '"') {
-                auto taken = this->read_string();
+                auto taken = this->read_string('"');
                 Token token = { TokenType::STRING, taken, line_num, column };
                 tokens.emplace_back(token);
                 continue;
@@ -214,9 +215,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 
                     // Since we have a value, we can turn this into a real variable!
                     auto value_token = *(it + 3);
-                    AST_Declaration decl = {
-                        token.line, token.column, value_token.type, token.value, value_token.value, "cool_scope" // TODO: Real scopes
-                    };
+                    auto decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, "cool_scope");
                     file->contained.emplace_back(decl);
                     // Make sure the scanner knows it's been used too!
                     this->usedNames.emplace_back(token.value);
@@ -263,23 +262,17 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     it += arguments.size();
 
                     // Now that we have our arguments, lets apply it to a function.
-                    AST_Function function;
-                    function.name = token.value;
-                    function.line = token.line;
-                    function.column = token.column;
-                    function.arguments = arguments;
-                    function.scope = "";
-                    function.return_type = TokenType::INVALID;
+                    auto function = new AST_Function(token.value, token.line, token.column, arguments, "really_cool_scope", TokenType::INVALID);
 
                     // Make sure we're not attempting to redeclare the main function
-                    if (function.name == "main") {  // TODO: This shouldn't be static
+                    if (function->name == "main") {  // TODO: This shouldn't be static
                         if (file->mainFunction != nullptr) {
                             this->workspace.reporter.report_error({ "Attempt to redeclare main function", this->fileName, token.line, token.column });
                             it += 4;
                             continue;
                         }
                         // Set the main function to this
-                        file->mainFunction = &function;
+                        file->mainFunction = function;
                     }
                     // Now that we have our function, give it to the file
                     file->contained.emplace_back(function);
@@ -326,9 +319,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                         continue;
                     }
                     
-                    AST_Declaration decl = {
-                        token.line, token.column, value_token.type, token.value, value_token.value, "cool_scope" // TODO: Real scopes
-                    };
+                    auto decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, "cool_scope");
                     file->contained.emplace_back(decl);
                     // Make sure the scanner knows it's been used too!
                     this->usedNames.emplace_back(token.value);
@@ -353,24 +344,22 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 }
 
                 // Since we have both the value and a variable, set it.
-                auto originalDecl = file->get_decl(token.value);
-                if (originalDecl.line == -1) {
+                auto original_decl = file->get_decl(token.value);
+                if (original_decl->line == -1) {
                     this->workspace.reporter.report_error({ "Internal compiler error: Found name that doesn't exist: " + token.value, this->fileName, token.line, token.column });
                     break;
                 }
                 auto value_token = *(it + 2);
 
                 // Make sure they're the same types
-                if (originalDecl.type != value_token.type) {
-                    this->workspace.reporter.report_error({ "Cannot set variable '" + token.value + "', type " + token_map[originalDecl.type] + ", to type of " +
+                if (original_decl->type != value_token.type) {
+                    this->workspace.reporter.report_error({ "Cannot set variable '" + token.value + "', type " + token_map[original_decl->type] + ", to type of " +
                         token_map[value_token.type] + "", this->fileName, token.line, token.column });
                     it += 2;
                     continue;
                 }
                 // Types are the same, and the variable exists. Time to finally set it.
-                auto newDecl = originalDecl;
-                newDecl.value = value_token.value;
-                file->replace_decl(originalDecl, newDecl);
+                original_decl->value = value_token.value;
             }
             else if (the_next_token.type == TokenType::LPAREN) {
                 // If we have a left paren, then we MUST be calling a function.
@@ -401,11 +390,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 // Set the iterator
                 it += arguments.size();
                 // Now that we have our arguments, let build the AST function call.
-                AST_FunctionCall function;
-                function.name = token.value;
-                function.line = 0;
-                function.column = 0;
-                function.arguments = arguments;
+                auto function = new AST_FunctionCall(token.value, 0, 0, arguments);
                 file->contained.emplace_back(function);
             }
         }

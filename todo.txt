@@ -2,6 +2,10 @@
 # Random things that need to be done
 ## This shouldn't be a file, I know.
 
+Implement char type
+
+Better type system IE: Ints should be assignable to floats
+Better time tracking
 Implement block comments.
 Make function scoping actually work...
 Ensure lines actually end with a semicolon

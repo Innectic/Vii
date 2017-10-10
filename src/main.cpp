@@ -9,6 +9,12 @@
 #include "file_handler.h"
 #include "c_converter.h"
 
+
+template<class First>
+const inline bool is_type(AST_Type* t) {
+    return dynamic_cast<First>(t) != nullptr;
+}
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         std::cout << "   ERROR: Must supply at least one file to compile" << std::endl;
@@ -42,10 +48,29 @@ int main(int argc, char *argv[]) {
     std::vector<Token> tokens = scanner->tokenize("test.vii");
     const AST_SourceFile* file = scanner->parse(tokens);
 
-    if (reporter->errors.size() > 0)
-        std::cout << "Encountered " << reporter->errors.size() << "errors during compilation.";
+    for (auto entry : file->contained) {
+        if (is_type<AST_FunctionCall*>(entry)) {
+            auto f = static_cast<AST_FunctionCall*>(entry);
+            std::cout << "This is a function: " << f->name << ", and these are my arguments: ";
+            for (auto arg : f->arguments) {
+                std::cout << arg.name << ", " << token_map[arg.type] << std::endl;
+            }
+        }
+        else if (is_type<AST_Declaration*>(entry)) {
+            auto decl = static_cast<AST_Declaration*>(entry);
+            std::cout << "This is a decl: " << decl->name << ", and this is my type: " << token_map[decl->type] << std::endl;
+        }
+    }
+
+    if (reporter->errors.size() > 0) {
+        std::cout << "Encountered " << reporter->errors.size() << "errors. Will not build.";
+    }
+    else {
+        //converter->convert(*file);
+    }
 
     delete file;
 
     return 0;
 }
+

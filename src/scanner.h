@@ -26,7 +26,7 @@ public:
     Scanner(WorkSpace& workspace);
     ~Scanner();
 
-    const std::string read_string();
+    const std::string read_string(const char& delim);
     const Token read_number();
     const bool check_comment();
 

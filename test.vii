@@ -1,6 +1,2 @@
 
-print("b");
-test := "a";
-print(test);
-
-a = "b";
+print("A");

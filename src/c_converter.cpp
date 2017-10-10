@@ -30,7 +30,7 @@ void C_Converter::emit_functions(const AST_SourceFile& file, std::ofstream& stre
     for (auto potential : file.contained) {
         // We only want to do thing with functions
         if (typeid(potential) != typeid(AST_Function)) continue;
-        auto function = static_cast<AST_Function*>(&potential);
+        auto function = static_cast<AST_Function*>(potential);
         std::string functionName = function->name; // TODO: things for main
         std::cout << functionName << std::endl;
 
