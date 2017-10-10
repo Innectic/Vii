@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
         }
         else if (is_type<AST_Declaration*>(entry)) {
             auto decl = static_cast<AST_Declaration*>(entry);
-            std::cout << "This is a decl: " << decl->name << ", and this is my type: " << token_map[decl->type] << std::endl;
+            std::cout << "This is a decl: " << decl->name << ", and this is my type: " << token_map[decl->type] << ", and if you're interested in my value: " << decl->value << std::endl;
         }
     }
 

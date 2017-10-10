@@ -97,7 +97,14 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
                 Token token = { TokenType::STRING, taken, line_num, column };
                 tokens.emplace_back(token);
                 continue;
-            } else if (this->check_comment()) {
+            }
+            else if (*it == '\'') {
+                auto taken = this->read_string('\'');
+                Token token = { TokenType::CHAR, taken, line_num, column };
+                tokens.emplace_back(token);
+                continue;
+            }
+            else if (this->check_comment()) {
                 it += 2;
                 continue;
             }

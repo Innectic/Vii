@@ -1,2 +1,7 @@
 
-print("A");
+test := 'a';
+thing: char = 'b';
+
+print(test);
+print(thing);
+print('c');
