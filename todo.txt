@@ -2,4 +2,9 @@
 # Random things that need to be done
 ## This shouldn't be a file, I know.
 
-Make function scoping actually work...
+### 10/10/17 - Something compiled omg
+
+Create standard lib
+solve all the TODOs
+solve all the CHECKs
+Make it actually run g++ or something to make things compile

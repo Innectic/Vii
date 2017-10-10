@@ -62,16 +62,13 @@ int main(int argc, char *argv[]) {
         }
         else if (is_type<AST_Declaration*>(entry)) {
             auto decl = static_cast<AST_Declaration*>(entry);
-            std::cout << "This is a decl: " << decl->name << ", and this is my type: " << token_map[decl->type] << ", and if you're interested in my value: " << decl->value << std::endl;
+            std::cout << "This is a decl: " << decl->name << ", and this is my type: " << token_map[decl->type] << ", and if you're interested in my value: " <<
+                decl->value << ", and I live in: " << decl->scope << std::endl;
         }
     }
 
-    if (reporter->errors.size() > 0) {
-        std::cout << "Encountered " << reporter->errors.size() << "errors. Will not build.";
-    }
-    else {
-        //converter->convert(*file);
-    }
+    if (reporter->errors.size() > 0) std::cout << "Encountered " << reporter->errors.size() << "errors. Will not build.";
+    else converter->convert(*file);
 
     delete file;
 

@@ -37,7 +37,7 @@ struct AST_Declaration : public AST_Type {
 // CLEANUP: This can probably just be replaced with token...
 struct AST_Argument : public AST_Type {
     inline AST_Argument() {}
-    inline AST_Argument(std::string name, TokenType type) :
+    inline AST_Argument(std::string name, TokenType type) : // TODO: Fix name
         name(name), type(type) {
 
     }
@@ -48,6 +48,20 @@ struct AST_Argument : public AST_Type {
 
     std::string name;
     TokenType type;
+};
+
+struct AST_Builtin : public AST_Type {
+    inline AST_Builtin(const BuiltinType& type, const std::vector<AST_Argument>& arguments) :
+        type(type), arguments(arguments) {
+
+    }
+
+    std::string my_name() {
+        return "AST_Builtin";
+    }
+
+    BuiltinType type;
+    std::vector<AST_Argument> arguments;
 };
 
 struct AST_FunctionCall : public AST_Type {

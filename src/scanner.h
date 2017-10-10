@@ -20,6 +20,8 @@ private:
 
     WorkSpace& workspace;
 
+    std::map<std::string, AST_Function*> scope_map;
+
 public:
     std::vector<std::string> usedNames;
     Scanner(WorkSpace& workspace);

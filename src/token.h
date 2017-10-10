@@ -35,6 +35,10 @@ enum class TokenType {
     ASSIGN,
 };
 
+enum class BuiltinType {
+    PRINT
+};
+
 // TODO: Operator precedence (AKA: Making order of operations actually apply.)
 static std::map<TokenType, std::string> token_map = {
     { TokenType::INVALID, "INVALID" },
@@ -72,6 +76,14 @@ static std::map<std::string, TokenType> type_map = {
     { "float", TokenType::FLOAT },
     { "char", TokenType::CHAR }
 };
+
+static std::map<BuiltinType, std::string> builtin_map = {
+    { BuiltinType::PRINT, "std::cout << \"<CUSTOM>\" << std::endl;"}
+};
+
+static bool is_builtin(std::string name) {
+    return name == "print"; // HACK: this is really stupid
+}
 
 static TokenType get_token_type(std::string checking) {
     // Check each pair and see if we have a keyword that matches.

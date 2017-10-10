@@ -1,3 +1,4 @@
 
-main :: (thing: string) {
+realMain :: () {
+    print("Hello, world!")
 }

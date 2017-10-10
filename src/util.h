@@ -7,6 +7,15 @@
 #include <algorithm>
 #include <chrono>
 
+
+#ifdef _WIN32
+#define int64 __int64
+#endif
+#ifdef __linux__
+#include <inttypes.h>
+#define int64 int64_t
+#endif
+
 class Util {
 public:
     const static inline std::string eatSpaces(std::string original) {
@@ -64,7 +73,13 @@ public:
         return new_string;
     }
 
-    const static inline __int64 get_time() {
+    const static inline int64 get_time() {
         return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    }
+
+    const static inline std::string replace(const std::string& original, const std::string& replace, const std::string& with) {
+        std::string replaced = original;
+        replaced = std::regex_replace(replaced, std::regex(replace), with);
+        return replaced;
     }
 };

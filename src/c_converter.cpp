@@ -29,7 +29,7 @@ void C_Converter::add_import(const std::string& lib, std::ofstream& stream) {
 void C_Converter::emit_functions(const AST_SourceFile& file, std::ofstream& stream) {
     for (auto potential : file.contained) {
         // We only want to do thing with functions
-        if (typeid(potential) != typeid(AST_Function)) continue;
+        if (!is_type<AST_Function*>(potential)) continue;
         auto function = static_cast<AST_Function*>(potential);
         std::string functionName = function->name; // TODO: things for main
         std::cout << functionName << std::endl;
@@ -43,7 +43,32 @@ void C_Converter::emit_functions(const AST_SourceFile& file, std::ofstream& stre
         }
 
         this->emit(returnType + " " + functionName + "(" + argumentString +  ") {\n", stream);
-        this->emit("std::cout << \"Hello\" << std::endl;\n", stream);
+        
+        for (auto contained : function->contained) {
+            // TODO: Builtin functions
+            if (is_type<AST_Declaration*>(contained)) {
+                auto decl = static_cast<AST_Declaration*>(contained);
+
+                std::string type = this->type_to_c_type(decl->type);
+                // TODO: this only supports strings right now...
+                this->emit(type + " " + decl->name + " = \"" + decl->value + "\";\n", stream);
+            }
+            else if (is_type<AST_Builtin*>(contained)) {
+                // TODO: Do something with a standard lib here, so we can actually
+                // check the types being passed in.
+                auto builtin = static_cast<AST_Builtin*>(contained);
+                std::string ready_line = builtin_map[builtin->type];
+
+                std::string arguments;
+                for (auto arg : builtin->arguments) {
+                    arguments += arg.name + " "; // HACK: this shouldn't put a space at the end if it's the last element
+                }
+
+                ready_line = Util::replace(ready_line, "<CUSTOM>", arguments);
+                this->emit(ready_line + "\n", stream);
+            }
+        }
+
         this->emit("}\n", stream);
     }
 }
