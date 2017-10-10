@@ -243,7 +243,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     std::string name = this->fileName + "_" + current_scope;
                     auto decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
                     if (this->scope_map[name]) this->scope_map[name]->contained.emplace_back(decl);
-                    else file->contained.emplace_back(decl); // CHECK: Do we really want to be doing this?
+                    else file->contained.emplace_back(decl);
                     // Make sure the scanner knows it's been used too!
                     this->usedNames.emplace_back(token.value);
                 }
@@ -453,7 +453,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 else function = new AST_FunctionCall(token.value, 0, 0, arguments);
                 std::string name = this->fileName + "_" + current_scope;
                 if (this->scope_map[name]) this->scope_map[name]->contained.emplace_back(function);
-                else file->contained.emplace_back(function); // CHECK: Do we really want to be doing this?
+                else file->contained.emplace_back(function);
             }
         }
     }

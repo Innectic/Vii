@@ -110,7 +110,7 @@ struct AST_SourceFile : public AST_Type {
         this->total_code = 0;
         this->total_blank = 0;
 
-        this->mainFunction = nullptr; // Check: Do we really want this to be null?
+        this->mainFunction = nullptr;
     }
 
     std::string my_name() {

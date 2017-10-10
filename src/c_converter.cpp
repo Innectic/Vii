@@ -31,8 +31,9 @@ void C_Converter::emit_functions(const AST_SourceFile& file, std::ofstream& stre
         // We only want to do thing with functions
         if (!is_type<AST_Function*>(potential)) continue;
         auto function = static_cast<AST_Function*>(potential);
+        // Check if this is the main function
         std::string functionName = function->name; // TODO: things for main
-        std::cout << functionName << std::endl;
+        if (file.mainFunction && file.mainFunction == function) functionName = "realMain";
 
         std::string returnType = this->type_to_c_type(function->return_type);
         std::string argumentString = "";
