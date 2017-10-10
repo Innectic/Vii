@@ -9,6 +9,11 @@ struct AST_Type {
     virtual std::string my_name() = 0;
 };
 
+template<class First>
+const inline static bool is_type(AST_Type* t) {
+    return dynamic_cast<First>(t) != nullptr;
+}
+
 struct AST_Declaration : public AST_Type {
     inline AST_Declaration(int line, int column, TokenType type, std::string name, std::string value, std::string scope) :
         line(line), column(column), type(type), name(name), value(value), scope(scope) {
@@ -108,7 +113,7 @@ struct AST_SourceFile : public AST_Type {
     inline AST_Declaration* get_decl(const std::string& name) {
         for (auto potential : this->contained) {
             // We only want declarations
-            if (typeid(potential) != typeid(AST_Declaration)) continue;
+            if (!is_type<AST_Declaration*>(potential)) continue;
             // Turn the type into a declaration we can actually check
             auto decl = static_cast<AST_Declaration*>(potential);
             // Return the declaration if it's what we're looking for
@@ -122,7 +127,7 @@ struct AST_SourceFile : public AST_Type {
         for (unsigned int i = 0; i < this->contained.size(); ++i) {
             auto potential = this->contained[i];
             // Make sure it's actually a declaration
-            if (typeid(potential) != typeid(AST_Declaration)) continue;
+            if (!is_type<AST_Declaration*>(potential)) continue;
             auto decl = static_cast<AST_Declaration*>(potential);
             // Check if it's what we're looking for
             if (decl->name == replacing.name) {

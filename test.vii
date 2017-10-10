@@ -1,7 +1,10 @@
 
-test := 'a';
-thing: char = 'b';
+a := "a";
+b := 'b';
 
-print(test);
-print(thing);
-print('c');
+c := 1;
+d := 1.2;
+
+d = 1;
+
+c = 2;

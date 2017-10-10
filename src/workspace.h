@@ -11,6 +11,7 @@
 #include "token.h"
 #include "ast.h"
 #include "reporter.h"
+#include "typer.h"
 
 enum OptimizationLevel {
     OP_NONE, OP_LOW, OP_MEDIUM, OP_MAX, OP_SIZE, OP_SPEED
@@ -18,8 +19,10 @@ enum OptimizationLevel {
 
 struct WorkSpace {
     Reporter reporter;
+    Typer typer;
 
-    inline WorkSpace(Reporter& reporter) : reporter(reporter) {
+    inline WorkSpace(const Reporter& reporter, const Typer& typer) :
+        reporter(reporter), typer(typer) {
 
     }
 

@@ -20,8 +20,8 @@ private:
 
     WorkSpace& workspace;
 
-    std::vector<std::string> usedNames;
 public:
+    std::vector<std::string> usedNames;
     Scanner(WorkSpace& workspace);
     ~Scanner();
 

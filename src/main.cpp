@@ -6,14 +6,10 @@
 #include "token.h"
 #include "ast.h"
 #include "scanner.h"
+#include "typer.h"
 #include "file_handler.h"
 #include "c_converter.h"
 #include "util.h"
-
-template<class First>
-const inline bool is_type(AST_Type* t) {
-    return dynamic_cast<First>(t) != nullptr;
-}
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -22,8 +18,9 @@ int main(int argc, char *argv[]) {
     }
 
     auto reporter = std::make_unique<Reporter>();
+    auto typer = std::make_unique<Typer>();
 
-    auto workspace = std::make_unique<WorkSpace>(*reporter.get());
+    auto workspace = std::make_unique<WorkSpace>(*reporter.get(), *typer.get());
     auto fileHandler = std::make_unique<FileHandler>();
     auto converter = std::make_unique<C_Converter>();
     auto scanner = std::make_unique<Scanner>(*workspace.get());

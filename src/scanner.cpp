@@ -315,7 +315,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     auto value_token = *(it + 4);
 
                     // Make sure that the types match
-                    if (new_type != value_token.type) {
+                    if (this->workspace.typer.can_assign_this(new_type, value_token.type)) {
                         this->workspace.reporter.report_error({ "Cannot assign type '" + token_map[new_type] + "' from type '" + token_map[value_token.type] + "'", this->fileName, token.line, token.column });
                         it += 4;
                         continue;
@@ -347,14 +347,14 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 
                 // Since we have both the value and a variable, set it.
                 auto original_decl = file->get_decl(token.value);
-                if (original_decl->line == -1) {
+                if (original_decl == nullptr) {
                     this->workspace.reporter.report_error({ "Internal compiler error: Found name that doesn't exist: " + token.value, this->fileName, token.line, token.column });
                     break;
                 }
                 auto value_token = *(it + 2);
 
                 // Make sure they're the same types
-                if (original_decl->type != value_token.type) {
+                if (!this->workspace.typer.can_assign_this(original_decl->type, value_token.type)) {
                     this->workspace.reporter.report_error({ "Cannot set variable '" + token.value + "', type " + token_map[original_decl->type] + ", to type of " +
                         token_map[value_token.type] + "", this->fileName, token.line, token.column });
                     it += 2;
