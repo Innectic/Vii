@@ -1,4 +1,7 @@
 
+test := "A"
+
 main :: () {
+    thing := "b"
     print("Hello, world!")
 }
