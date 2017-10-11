@@ -15,4 +15,5 @@ class Reporter {
 public:
     std::vector<ViiError> errors;
     const void report_error(const ViiError& error);
+    const void report_workspace(const int& lines, const int& comments) const;
 };

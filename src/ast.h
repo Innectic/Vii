@@ -106,10 +106,6 @@ struct AST_Function : public AST_FunctionCall {
 struct AST_SourceFile : public AST_Type {
     inline AST_SourceFile() {}
     inline AST_SourceFile(const std::string& file_name) : file_name(file_name) {
-        this->total_comments = 0;
-        this->total_code = 0;
-        this->total_blank = 0;
-
         this->mainFunction = nullptr;
     }
 
@@ -118,9 +114,6 @@ struct AST_SourceFile : public AST_Type {
     }
 
     std::string file_name;
-    int total_comments;
-    int total_code;
-    int total_blank;
 
     std::vector<AST_Type*> contained; // TODO: What should this actually be called?
     AST_Function* mainFunction;

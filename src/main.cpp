@@ -67,6 +67,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    reporter->report_workspace(workspace->total_code, workspace->total_comments);
+
     if (reporter->errors.size() > 0) std::cout << "Encountered " << reporter->errors.size() << "errors. Will not build.";
     else converter->begin("test.cpp", *file);
 

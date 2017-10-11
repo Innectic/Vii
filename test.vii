@@ -1,7 +1,2 @@
-
-test := "A"
-
-main :: () {
-    thing := "b"
-    print("Hello, world!")
-}
+a := 1
+// test
