@@ -4,8 +4,6 @@
 
 ### 10/10/17 - Something compiled omg
 
-Abstract export backend
-Create x64 backend
 Create LLVM backend
 
 Create standard lib (This should somehow be written in the lang)

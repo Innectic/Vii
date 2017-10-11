@@ -8,8 +8,8 @@
 #include "scanner.h"
 #include "typer.h"
 #include "file_handler.h"
-#include "c_converter.h"
 #include "util.h"
+#include "export_x64.h"
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
 
     auto workspace = std::make_unique<WorkSpace>(*reporter.get(), *typer.get());
     auto fileHandler = std::make_unique<FileHandler>();
-    auto converter = std::make_unique<C_Converter>();
+    auto converter = std::make_unique<Export_x64>();
     auto scanner = std::make_unique<Scanner>(*workspace.get());
 
     workspace->set_defaults();
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (reporter->errors.size() > 0) std::cout << "Encountered " << reporter->errors.size() << "errors. Will not build.";
-    else converter->convert(*file);
+    else converter->begin("test.cpp", *file);
 
     delete file;
 
