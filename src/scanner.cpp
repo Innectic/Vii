@@ -52,22 +52,33 @@ const Token Scanner::read_string(const char& delim) {
 }
 
 const Token Scanner::read_number() {
+    // TODO: CLEANUP
+    // TODO: CLEANUP
+    // TODO: CLEANUP
+    // TODO: CLEANUP
+
     std::string found = "";
     bool encountered_dot = false;
+    bool errored = false;
 
     Token token = { TokenType::INVALID, "0" };
 
     while (it < this->end) {
         if (*it == '.') {
-            if (encountered_dot) break;
-            token.type = TokenType::FLOAT;
+            if (encountered_dot) {
+                errored = true;
+                break;
+            }
             encountered_dot = true;
         }
         else if (!Util::is_number(*it)) break;
         found += *it;
         it++;
     }
-    token.value = found;
+    if (!errored) {
+        token.value = found;
+        token.type = encountered_dot ? TokenType::FLOAT : TokenType::INT;
+    }
     return token;
 }
 

@@ -1,4 +1,8 @@
 
 main :: () {
+    test := 12
+    thing := "aaa"
+    stuff := 1.2
     print("Hi")
+    print(thing)
 }
