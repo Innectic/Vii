@@ -78,7 +78,7 @@ static std::map<std::string, TokenType> type_map = {
 };
 
 static std::map<BuiltinType, std::string> builtin_map = {
-    { BuiltinType::PRINT, "std::cout << \"<CUSTOM>\" << std::endl;"}
+    { BuiltinType::PRINT, "std::cout << <CUSTOM> << std::endl;"}
 };
 
 static bool is_builtin(std::string name) {

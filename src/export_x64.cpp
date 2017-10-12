@@ -83,7 +83,13 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
 
                 std::string arguments;
                 for (auto arg : builtin->arguments) {
-                    arguments += arg.name + " "; // HACK: this shouldn't put a space at the end if it's the last element
+                    std::string pre = "";;
+                    std::string post = "";
+                    if (arg.type == TokenType::STRING) {
+                        pre += "\"";
+                        post += "\" "; // HACK: this shouldn't put a space at the end if it's the last element
+                    }
+                    arguments += pre + arg.name + post;
                 }
 
                 ready_line = Util::replace(ready_line, "<CUSTOM>", arguments);
