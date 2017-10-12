@@ -40,3 +40,4 @@ Release/
 
 # CMake stuff
 build/
+test.cpp
