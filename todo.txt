@@ -5,7 +5,6 @@
 ### 10/10/17 - Something compiled omg
 
 Create LLVM backend
-Fix LOC being off by 1
 
 Create standard lib (This should somehow be written in the lang)
 solve all the TODOs
@@ -17,5 +16,3 @@ Implement array type
 Implement spread (...string) for types
 Imports (Should work on standard lib things too!)
 Implement structs
-Don't allow redecl of builin types
-Don't allow redecl of keywords

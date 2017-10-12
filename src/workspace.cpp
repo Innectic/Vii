@@ -33,9 +33,6 @@ void WorkSpace::set_defaults() {
 
     this->comment_prefix = "//";
     this->optimization = OptimizationLevel::OP_NONE;
-
-    this->total_code = 0;
-    this->total_comments = 0;
 }
 
 void WorkSpace::load_configuration() {

@@ -13,27 +13,27 @@ const std::string Scanner::read_string(const char& delim) {
     bool escaped = false;
     bool taking = false;
 
-    std::string found = "";
+std::string found = "";
 
-    while (it < this->end) {
-        if (escaped) {
-            found += *it;
-            escaped = false;
-        }
-        else if (*it == '\\' && this->has_next() && *(it + 1) == delim) escaped = true;
-        else if (*it == delim) {
-            if (!escaped && taking) {
-                taking = false;
-                it++;
-                break;
-            }
-            else taking = true;
-        }
-        else if (taking) found += *it;
-        it++;
+while (it < this->end) {
+    if (escaped) {
+        found += *it;
+        escaped = false;
     }
+    else if (*it == '\\' && this->has_next() && *(it + 1) == delim) escaped = true;
+    else if (*it == delim) {
+        if (!escaped && taking) {
+            taking = false;
+            it++;
+            break;
+        }
+        else taking = true;
+    }
+    else if (taking) found += *it;
+    it++;
+}
 
-    return found;
+return found;
 }
 
 const Token Scanner::read_number() {
@@ -54,13 +54,15 @@ const Token Scanner::read_number() {
 
 const bool Scanner::check_comment() {
     // Clone the iterator
+    auto i = this->it;
+
     bool all_have_matched = true;
 
     // Make sure the iterator starts with the whole comment prefix
     for (auto c : this->workspace.comment_prefix) {
-        if (!has_next(it)) return false;
-        all_have_matched = *it == c;
-        it++;
+        if (!has_next(i)) return false;
+        all_have_matched = *i == c;
+        i++;
     }
 
     return all_have_matched;
@@ -80,6 +82,7 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
     if (contents.size() <= 0) return tokens;
 
     bool skip_next = false;
+    int line_num = 1;
     for (auto line : contents) {
         int column = 1;
         this->beg = line.begin();
@@ -107,19 +110,18 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
             }
             else if (*it == '"') {
                 auto taken = this->read_string('"');
-                Token token = { TokenType::STRING, taken, this->workspace.total_code, column };
+                Token token = { TokenType::STRING, taken, line_num, column };
                 tokens.emplace_back(token);
                 continue;
             }
             else if (*it == '\'') {
                 auto taken = this->read_string('\'');
-                Token token = { TokenType::CHAR, taken, this->workspace.total_code, column };
+                Token token = { TokenType::CHAR, taken, line_num, column };
                 tokens.emplace_back(token);
                 continue;
             }
             else if (this->check_comment()) {
                 it += 2;
-                this->workspace.total_comments++;
                 continue;
             }
             else if (Util::is_number(*it)) {
@@ -148,18 +150,18 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
                 }
 
                 if (current != "" && current != " ") {
-                    Token identToken = { TokenType::IDENTIFIER, current, this->workspace.total_code, column };
+                    Token identToken = { TokenType::IDENTIFIER, current, line_num, column };
                     tokens.emplace_back(identToken);
                     current = "";
                 }
 
-                Token token = { type, "", this->workspace.total_code, column };
+                Token token = { type, "", line_num, column };
                 tokens.emplace_back(token);
             }
             it++;
             column++;
         }
-        this->workspace.total_code++;
+        line_num++;
     }
     return tokens;
 }

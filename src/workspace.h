@@ -21,9 +21,6 @@ struct WorkSpace {
     Reporter reporter;
     Typer typer;
 
-    int total_comments;
-    int total_code;
-
     inline WorkSpace(const Reporter& reporter, const Typer& typer) :
         reporter(reporter), typer(typer) {
 
