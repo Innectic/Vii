@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
 
     if (workspace->had_error) std::cout << "Encountered errors. Will not build.";
     else {
-        converter->begin("test.cpp", *file);
+        converter->go("test.cpp", *file);
     }
     delete file;
 

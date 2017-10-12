@@ -4,12 +4,10 @@
 
 ### 10/10/17 - Something compiled omg
 
-Make sure that numbers never contain multiple `.`
+solve all the TODOs
 
 Create LLVM backend
 Create standard lib (This should somehow be written in the lang)
-solve all the TODOs
-solve all the CHECKs
 Make it actually run g++ or something to make things compile
 Implement array type
 Implement spread (...string) for types

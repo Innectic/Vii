@@ -3,6 +3,10 @@
 
 const std::string FILE_TEMPLATE = "int main(int argc, char* argv[]) { real_main(); } \n";
 
+std::vector<std::string> imported;
+std::vector<std::string> header;
+std::vector<std::string> body;
+
 const std::string convert_type(const TokenType& type) {
     switch (type) {
     case TokenType::INT:
@@ -19,22 +23,18 @@ const std::string convert_type(const TokenType& type) {
 }
 
 const void add_import(const std::string& lib, std::ofstream& stream) {
+    for (auto exists : imported) if (exists == lib) return;
+    imported.emplace_back(lib);
+    
     std::string line = "#include " + lib + "\n";
-    stream << line;
+    header.emplace_back(line);
 }
 
 const std::string Export_x64::name() const {
     return "x64";
 }
 
-const void Export_x64::begin(const std::string& destination_file, const AST_SourceFile& source_file) {
-    std::ofstream stream;
-    stream.open(destination_file);
-
-    // TODO: check if we actually need these imports
-    add_import("<string>", stream);
-    add_import("<iostream>", stream);
-
+const void Export_x64::begin(const AST_SourceFile& source_file) {
     for (auto potential : source_file.contained) {
         // We only want to do thing with functions
         if (!is_type<AST_Function*>(potential)) continue;
@@ -51,21 +51,23 @@ const void Export_x64::begin(const std::string& destination_file, const AST_Sour
             argumentString += argType + " " + arg.name;
         }
 
-        stream << returnType + " " + functionName + "(" + argumentString + ") {\n";
+        body.emplace_back(returnType + " " + functionName + "(" + argumentString + ") {\n");
 
         for (auto contained : function->contained) {
             // TODO: Builtin functions
             if (is_type<AST_Declaration*>(contained)) {
                 auto decl = static_cast<AST_Declaration*>(contained);
+                if (decl->type == TokenType::STRING) add_import("<string>", stream);
 
                 std::string type = convert_type(decl->type);
                 // TODO: this only supports strings right now...
-                stream << type + " " + decl->name + " = \"" + decl->value + "\";\n";
+                body.emplace_back(type + " " + decl->name + " = \"" + decl->value + "\";\n");
             }
             else if (is_type<AST_Builtin*>(contained)) {
                 // TODO: Do something with a standard lib here, so we can actually
                 // check the types being passed in.
                 auto builtin = static_cast<AST_Builtin*>(contained);
+                if (builtin->type == BuiltinType::PRINT) add_import("<iostream>", stream);
                 std::string ready_line = builtin_map[builtin->type];
 
                 std::string arguments;
@@ -74,21 +76,22 @@ const void Export_x64::begin(const std::string& destination_file, const AST_Sour
                 }
 
                 ready_line = Util::replace(ready_line, "<CUSTOM>", arguments);
-                stream << ready_line + "\n";
+                body.emplace_back(ready_line + "\n");
             }
         }
 
-        stream << "}\n";
+        body.emplace_back("}\n");
     }
 
-    stream << FILE_TEMPLATE;
-    stream.close();
+    body.emplace_back(FILE_TEMPLATE);
 }
 
-const void Export_x64::go() {
+const void Export_x64::go(const std::string& destination_file, const AST_SourceFile& source_file) {
+    std::ofstream stream;
+    stream.open(destination_file);
 
-}
+    this->begin(source_file);
 
-const void Export_x64::convert_functions() {
-
+    for (auto line : header) stream << line;
+    for (auto line : body) stream << line;
 }

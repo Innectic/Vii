@@ -9,7 +9,6 @@ private:
 public:
     virtual const std::string name() const = 0;
 
-    virtual const void begin(const std::string& destination_file, const AST_SourceFile& source_file) = 0;
-    virtual const void go() = 0;
-    virtual const void convert_functions() = 0;
+    const virtual void begin(const AST_SourceFile& source_file) = 0;
+    const virtual void go(const std::string& destination_file, const AST_SourceFile& source_file) = 0;
 };
