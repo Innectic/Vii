@@ -1,4 +1,2 @@
 
-main :: () {
-    print("Hi")
-}
+test := 1..2

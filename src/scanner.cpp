@@ -55,14 +55,18 @@ const Token Scanner::read_number() {
     std::string found = "";
     bool encountered_dot = false;
 
+    Token token = { TokenType::INVALID, "0" };
+
     while (it < this->end) {
-        if (*it == '.') encountered_dot = true;
+        if (*it == '.') {
+            if (encountered_dot) break;
+            token.type = TokenType::FLOAT;
+            encountered_dot = true;
+        }
         else if (!Util::is_number(*it)) break;
         found += *it;
         it++;
     }
-    Token token = {};
-    token.type = encountered_dot ? TokenType::FLOAT : TokenType::INT;
     token.value = found;
     return token;
 }
@@ -138,6 +142,10 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
             }
             else if (Util::is_number(*it)) {
                 auto token = this->read_number();
+                if (token.type == TokenType::INVALID) {
+                    this->workspace.report_error({ "Number cannot contain multiple '.'", this->fileName, 0, column });
+                    continue;
+                }
                 tokens.emplace_back(token);
                 continue;
             }
