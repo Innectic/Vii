@@ -27,7 +27,7 @@ public:
     Scanner(WorkSpace& workspace);
     ~Scanner();
 
-    const std::string read_string(const char& delim);
+    const Token read_string(const char& delim);
     const Token read_number();
     const bool check_comment();
 
@@ -52,5 +52,20 @@ public:
 
     const inline bool has_next(const std::vector<Token>::iterator& it, const std::vector<Token>::iterator& end) {
         return it < end - 1;
+    }
+
+    const inline bool next(int amount) {
+        // Revisit: Speed things
+        auto clone = it;
+        auto had_all = true;
+
+        for (auto i = 0; i < amount; ++i) {
+            if (clone != this->end) clone++;
+            else {
+                had_all = false;
+                break;
+            }
+        }
+        return had_all;
     }
 };

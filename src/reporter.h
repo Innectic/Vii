@@ -13,6 +13,5 @@ struct ViiError {
 
 class Reporter {
 public:
-    std::vector<ViiError> errors;
     const void report_error(const ViiError& error);
 };

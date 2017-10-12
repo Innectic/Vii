@@ -7,8 +7,6 @@ const std::string RED_BOLD = "\033[1;31m";
 const std::string RESET = "\033[0m";
 
 const void Reporter::report_error(const ViiError& error) {
-    errors.emplace_back(error);
-
     std::cout << RED_BOLD << "Encountered an error: '" << error.error << "', in file " << error.file << " at line: " << error.line << " at col: " << error.column
         << RESET << std::endl;
 }

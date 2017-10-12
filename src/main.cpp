@@ -1,8 +1,9 @@
 
 #include <memory>
 
-#include "reporter.h"
 #include "workspace.h"
+#include "reporter.h"
+
 #include "token.h"
 #include "ast.h"
 #include "scanner.h"
@@ -17,9 +18,8 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    auto reporter = std::make_unique<Reporter>();
     auto typer = std::make_unique<Typer>();
-
+    auto reporter = std::make_unique<Reporter>();
     auto workspace = std::make_unique<WorkSpace>(*reporter.get(), *typer.get());
     auto fileHandler = std::make_unique<FileHandler>();
     auto converter = std::make_unique<Export_x64>();
@@ -67,11 +67,11 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    if (reporter->errors.size() > 0) std::cout << "Encountered " << reporter->errors.size() << "errors. Will not build.";
-    else converter->begin("test.cpp", *file);
-
+    if (workspace->had_error) std::cout << "Encountered errors. Will not build.";
+    else {
+        converter->begin("test.cpp", *file);
+    }
     delete file;
 
     return 0;
 }
-

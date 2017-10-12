@@ -4,14 +4,13 @@
 
 ### 10/10/17 - Something compiled omg
 
-Create LLVM backend
+Make sure that numbers never contain multiple `.`
 
+Create LLVM backend
 Create standard lib (This should somehow be written in the lang)
 solve all the TODOs
 solve all the CHECKs
 Make it actually run g++ or something to make things compile
-Actually make sure strings / chars are terminated.
-Make sure that numbers never contain multiple `.`
 Implement array type
 Implement spread (...string) for types
 Imports (Should work on standard lib things too!)

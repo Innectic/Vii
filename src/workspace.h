@@ -41,4 +41,11 @@ struct WorkSpace {
 
     void load_configuration();
     void set_defaults();
+
+    bool had_error = false;
+
+    const inline void report_error(const ViiError& error) {
+        this->reporter.report_error(error);
+        this->had_error = true;
+    }
 };
