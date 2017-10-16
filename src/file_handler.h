@@ -22,7 +22,7 @@ private:
             // We only want to take the `.vii` files.
             if (name.extension() == ".vii") {
                 std::string wholeName = entry.path().parent_path().string();
-                wholeName.append(entry.path().root_directory().string()).append(name.string());
+                wholeName.append("/").append(entry.path().root_directory().string()).append(name.string());
                 discoveredFiles.emplace_back(wholeName);
             }
         }

@@ -1,0 +1,4 @@
+
+print :: (message: string) {
+    native_print(message)
+}

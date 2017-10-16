@@ -51,12 +51,11 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
         stream << returnType + " " + functionName + "(" + argumentString + ") {\n";
 
         for (auto contained : function->contained) {
-            // TODO: Builtin functions
+            std::cout << contained->my_name() << std::endl;
             if (is_type<AST_Declaration*>(contained)) {
                 auto decl = static_cast<AST_Declaration*>(contained);
 
                 std::string type = convert_type(decl->type);
-                // TODO: this only supports strings right now...
                 stream << type + " " + decl->name + " = ";
 
                 switch (decl->type) {
@@ -79,7 +78,7 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                 // TODO: Do something with a standard lib here, so we can actually
                 // check the types being passed in.
                 auto builtin = static_cast<AST_Builtin*>(contained);
-                std::string ready_line = builtin_map[builtin->type];
+                std::string ready_line = native_map[builtin->type];
 
                 std::string arguments;
                 for (auto arg : builtin->arguments) {
@@ -95,12 +94,33 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                 ready_line = Util::replace(ready_line, "<CUSTOM>", arguments);
                 stream << ready_line + "\n";
             }
+            else if (is_type<AST_FunctionCall*>(contained)) { // TODO: Generalize this with the above one
+                auto call = static_cast<AST_FunctionCall*>(contained);
+                if (call->native) {
+                    if (!this->allow_native) continue;
+                    std::string ready_line = get_native(call->name);
+
+                    std::string arguments;
+                    for (auto arg : call->arguments) {
+                        std::string pre = "";;
+                        std::string post = "";
+                        if (arg.type == TokenType::STRING) {
+                            pre += "\"";
+                            post += "\" "; // HACK: this shouldn't put a space at the end if it's the last element
+                        }
+                        arguments += pre + arg.name + post;
+                    }
+
+                    ready_line = Util::replace(ready_line, "<CUSTOM>", arguments);
+                    stream << ready_line + "\n";
+                }
+            }
         }
 
         stream << "}\n";
     }
 
-    stream << FILE_TEMPLATE;
+    if (!allow_native) stream << FILE_TEMPLATE;
 }
 
 const void Export_x64::go(const std::string& destination_file, const AST_SourceFile& source_file) {

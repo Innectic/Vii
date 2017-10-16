@@ -21,7 +21,8 @@ private:
     WorkSpace& workspace;
 
     std::map<std::string, AST_Function*> scope_map;
-
+    
+    bool allow_native;
 public:
     std::vector<std::string> usedNames;
     Scanner(WorkSpace& workspace);
@@ -33,7 +34,7 @@ public:
 
     const bool can_use_name(std::string name);
 
-    const std::vector<Token> tokenize(const std::string& filename);
+    const std::vector<Token> tokenize(const std::string& filename, const bool allow_native);
     const AST_SourceFile* parse(std::vector<Token>& tokens);
 
     // TODO: #TooManyOverloads - This can probably just be templated, tbh

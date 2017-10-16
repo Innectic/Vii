@@ -82,4 +82,8 @@ public:
         replaced = std::regex_replace(replaced, std::regex(replace), with);
         return replaced;
     }
+
+    const static bool starts_with(const std::string& check, const std::string& checking) {
+        return checking.substr(0, check.size()) == check;
+    }
 };

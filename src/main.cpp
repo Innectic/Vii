@@ -22,7 +22,6 @@ int main(int argc, char *argv[]) {
     auto reporter = std::make_unique<Reporter>();
     auto workspace = std::make_unique<WorkSpace>(*reporter.get(), *typer.get());
     auto fileHandler = std::make_unique<FileHandler>();
-    auto converter = std::make_unique<Export_x64>();
     auto scanner = std::make_unique<Scanner>(*workspace.get());
 
     workspace->set_defaults();
@@ -38,12 +37,31 @@ int main(int argc, char *argv[]) {
             workspace->directory = fileHandler->getCurrentDirectory();
             workspace->original_files = fileHandler->getFilesInDirectory(true, workspace->directory);
         }
+        else if (current == "-stdc") {
+            // This means we're compiling the standard lib.
+            // So we don't want to do anything with the user's code.
+            auto converter = std::make_unique<Export_x64>(true);
+            auto files = fileHandler->getFilesInDirectory(true, "lib");
+
+            // Compile each file
+            for (auto file : files) {
+                std::cout << file << std::endl;
+                std::vector<Token> tokens = scanner->tokenize(file, true);
+                auto f = scanner->parse(tokens);
+                auto name = Util::replace(file, "lib/", "");
+                name = Util::replace(name, ".vii", ".cpp");
+                converter->go(name, *f);
+            }
+
+            return 0;
+        }
     }
 
+    auto converter = std::make_unique<Export_x64>(false);
     workspace->load_configuration();
 
     auto start_time = Util::get_time();
-    std::vector<Token> tokens = scanner->tokenize("test.vii");
+    std::vector<Token> tokens = scanner->tokenize("test.vii", false);
     auto end_time = Util::get_time();
     std::cout << "\033[1;36m> \033[0;32mFrontend time (s): " << ((double)(end_time - start_time) / 1000000000) << "\033[0m" << std::endl;
     

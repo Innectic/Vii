@@ -35,7 +35,7 @@ enum class TokenType {
     ASSIGN,
 };
 
-enum class BuiltinType {
+enum class NativeType {
     PRINT
 };
 
@@ -77,12 +77,22 @@ static std::map<std::string, TokenType> type_map = {
     { "char", TokenType::CHAR }
 };
 
-static std::map<BuiltinType, std::string> builtin_map = {
-    { BuiltinType::PRINT, "std::cout << <CUSTOM> << std::endl;"}
+static std::map<NativeType, std::string> native_map = {
+    { NativeType::PRINT, "std::cout << <CUSTOM> << std::endl;"}
+};
+
+static std::map<std::string, NativeType> builtin_map = {
+    { "print", NativeType::PRINT }
 };
 
 static bool is_builtin(std::string name) {
-    return name == "print"; // HACK: this is really stupid
+    for (auto entry : builtin_map) if (entry.first == name) return true;
+    return false;
+}
+
+static std::string get_native(std::string name) {
+    std::string using_name = Util::replace(name, "native_", "");
+    return native_map[builtin_map[using_name]];
 }
 
 static TokenType get_token_type(std::string checking) {

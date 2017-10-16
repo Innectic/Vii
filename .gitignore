@@ -41,3 +41,5 @@ Release/
 # CMake stuff
 build/
 test.cpp
+io.cpp
+test

@@ -50,27 +50,13 @@ struct AST_Argument : public AST_Type {
     TokenType type;
 };
 
-struct AST_Builtin : public AST_Type {
-    inline AST_Builtin(const BuiltinType& type, const std::vector<AST_Argument>& arguments) :
-        type(type), arguments(arguments) {
-
-    }
-
-    std::string my_name() {
-        return "AST_Builtin";
-    }
-
-    BuiltinType type;
-    std::vector<AST_Argument> arguments;
-};
-
 struct AST_FunctionCall : public AST_Type {
 protected:
     inline AST_FunctionCall() {}
 public:
     inline AST_FunctionCall(const std::string& name, const int& line, const int& column, const std::vector<AST_Argument>& arguments) :
         name(name), line(line), column(column), arguments(arguments) {
-
+        this->native = false;
     }
 
     std::string my_name() {
@@ -83,6 +69,24 @@ public:
     int column;
 
     std::vector<AST_Argument> arguments;
+
+    bool native;
+};
+
+struct AST_Builtin : public AST_FunctionCall {
+    inline AST_Builtin(const NativeType& type, const std::vector<AST_Argument>& arguments) {
+        this->arguments = arguments;
+        this->native = false;
+        this->type = type;
+    }
+
+
+    std::string my_name() {
+        return "AST_Builtin";
+    }
+
+    NativeType type;
+    std::vector<AST_Argument> arguments;
 };
 
 struct AST_Function : public AST_FunctionCall {
@@ -92,6 +96,7 @@ struct AST_Function : public AST_FunctionCall {
         this->line = line;
         this->column = column;
         this->arguments = arguments;
+        this->native = false;
     }
 
     std::string my_name() {

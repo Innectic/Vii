@@ -104,8 +104,9 @@ const bool Scanner::can_use_name(std::string name) {
     return !Util::vectorContains(this->usedNames, name) && !Util::vectorContains(keywords, name);
 }
 
-const std::vector<Token> Scanner::tokenize(const std::string& fileName) {
+const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bool allow_native) {
     this->fileName = fileName;
+    this->allow_native = allow_native;
 
     std::vector<std::string> contents = Util::readFileToVector(fileName);
     std::vector<Token> tokens;
@@ -480,10 +481,22 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 // Set the iterator
                 this->next(arguments.size());
                 // Check if this is a builtin function
-                AST_Type* function = nullptr;
-                if (is_builtin(token.value)) function = new AST_Builtin(BuiltinType::PRINT, arguments);
+                AST_FunctionCall* function = nullptr;
+                if (is_builtin(token.value)) function = new AST_Builtin(builtin_map[token.value], arguments);
                 else function = new AST_FunctionCall(token.value, 0, 0, arguments);
                 std::string name = this->fileName + "_" + current_scope;
+
+                // Make sure that this isn't being attempted with native_
+                if (Util::starts_with("native_", token.value)) {
+                    if (!this->allow_native) {
+                        // This isn't allowed. native_ is reserved for compiler directives
+                        // that refer back to an action within C++.
+                        this->workspace.report_error({ "Cannot declare function with native_ prefix", this->fileName, token.line, token.column });
+                        continue;
+                    }
+                    // Otherwise, just mark this as native.
+                    function->native = true;
+                }
                 if (this->scope_map[name]) this->scope_map[name]->contained.emplace_back(function);
                 else file->contained.emplace_back(function);
             }
