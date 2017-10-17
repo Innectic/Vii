@@ -31,6 +31,7 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
     std::cout << std::endl;
     add_import("<string>", stream);
     add_import("<iostream>", stream);
+    if (!allow_native) add_import("\"io.cpp\"", stream);
 
     for (auto potential : source_file.contained) {
         // We only want to do thing with functions
@@ -78,7 +79,7 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                 // TODO: Do something with a standard lib here, so we can actually
                 // check the types being passed in.
                 auto builtin = static_cast<AST_Builtin*>(contained);
-                std::string ready_line = native_map[builtin->type];
+                std::string ready_line = allow_native ? native_map[builtin->type] : internal_map[builtin->type];
 
                 std::string arguments;
                 for (auto arg : builtin->arguments) {
@@ -90,6 +91,7 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                     }
                     arguments += pre + arg.name + post;
                 }
+
 
                 ready_line = Util::replace(ready_line, "<CUSTOM>", arguments);
                 stream << ready_line + "\n";

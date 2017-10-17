@@ -77,6 +77,10 @@ static std::map<std::string, TokenType> type_map = {
     { "char", TokenType::CHAR }
 };
 
+static std::map<NativeType, std::string> internal_map = {
+    { NativeType::PRINT, "print(<CUSTOM>);" }
+};
+
 static std::map<NativeType, std::string> native_map = {
     { NativeType::PRINT, "std::cout << <CUSTOM> << std::endl;"}
 };
