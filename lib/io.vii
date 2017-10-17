@@ -2,3 +2,15 @@
 print :: (message: string) {
     native_print(message)
 }
+
+print :: (message: char) {
+    native_print(message);
+}
+
+print :: (message: int) {
+    native_print(message);
+}
+
+print :: (message: float) {
+    native_print(message);
+}

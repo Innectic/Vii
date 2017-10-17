@@ -212,7 +212,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
         
         if (token.type == TokenType::RBRACE) {
             current_scope = this->fileName;
-            it++;
+            // this->next(1);
             continue;
         }
         else if (token.type == TokenType::IDENTIFIER) {
@@ -365,6 +365,32 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                         }
                         // Set the main function to this
                         file->mainFunction = function;
+                    }
+                    // Make sure we're not redecling
+                    bool skip_next = false;
+                    for (auto contained : file->contained) {
+                        if (!is_type<AST_Function*>(contained)) continue;
+                        auto func = static_cast<AST_Function*>(contained);
+                        // Check the arguments
+                        if (func->name == function->name && function->arguments.size() == func->arguments.size()) {
+                            bool same_args = false;
+                            for (auto arg : function->arguments) {
+                                for (auto other_arg : func->arguments) {
+                                    if (other_arg.type != arg.type) continue;
+                                    same_args = true;
+                                    break;
+                                }
+                            }
+                            if (same_args) {
+                                this->workspace.report_error({ "Attempt to declare function with same name and args as existing function.", this->fileName, token.line, token.column });
+                                skip_next = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (skip_next) {
+                        this->next(4);
+                        continue;
                     }
                     // Now that we have our function, give it to the file
                     file->contained.emplace_back(function);

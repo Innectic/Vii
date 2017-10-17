@@ -50,7 +50,9 @@ int main(int argc, char *argv[]) {
                 auto f = scanner->parse(tokens);
                 auto name = Util::replace(file, "lib/", "");
                 name = Util::replace(name, ".vii", ".cpp");
-                converter->go(name, *f);
+                if (workspace->had_error) std::cout << "Encountered errors. Will not build.";
+                else converter->go(name, *f);
+
             }
 
             return 0;
@@ -77,6 +79,7 @@ int main(int argc, char *argv[]) {
             for (auto arg : f->arguments) {
                 std::cout << arg.name << ", " << token_map[arg.type] << std::endl;
             }
+            std::cout << std::endl;
         }
         else if (is_type<AST_Declaration*>(entry)) {
             auto decl = static_cast<AST_Declaration*>(entry);
@@ -85,10 +88,10 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    std::cout << workspace->had_error;
+
     if (workspace->had_error) std::cout << "Encountered errors. Will not build.";
-    else {
-        converter->go("test.cpp", *file);
-    }
+    else converter->go("test.cpp", *file);
     delete file;
 
     return 0;
