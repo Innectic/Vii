@@ -11,6 +11,7 @@
 #include "file_handler.h"
 #include "util.h"
 #include "export_x64.h"
+#include "registry.h"
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -23,6 +24,13 @@ int main(int argc, char *argv[]) {
     auto workspace = std::make_unique<WorkSpace>(*reporter.get(), *typer.get());
     auto fileHandler = std::make_unique<FileHandler>();
     auto scanner = std::make_unique<Scanner>(*workspace.get());
+    auto registry = std::make_unique<Registry>();
+
+    registry->add<bool>("test", std::make_unique<ViiBool>(true));
+    std::cout << registry->is_registered("test") << std::endl;
+    std::cout << (registry->get<ViiBool>("test")->name()) << std::endl;
+
+    return 0;
 
     workspace->set_defaults();
 
