@@ -28,7 +28,6 @@ const std::string Export_x64::name() const {
 }
 
 const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& stream) {
-    std::cout << std::endl;
     add_import("<string>", stream);
     add_import("<iostream>", stream);
     if (!allow_native) add_import("\"io.cpp\"", stream);

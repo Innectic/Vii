@@ -1,7 +1,5 @@
 
 main :: () {
-    print("Hello, world!")
-    print('c')
-    print(1)
-    print(1.2)
+  testing: string = "compiler pls"
+  print(testing)
 }

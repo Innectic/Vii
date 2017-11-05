@@ -88,8 +88,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    std::cout << workspace->had_error;
-
     if (workspace->had_error) std::cout << "Encountered errors. Will not build.";
     else converter->go("test.cpp", *file);
     delete file;
