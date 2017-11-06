@@ -108,6 +108,17 @@ struct AST_Function : public AST_FunctionCall {
     std::vector<AST_Type*> contained;
 };
 
+struct AST_Keyword : public AST_Type {
+    inline AST_Keyword(const KeywordType& keyword, const int& line, const int &column) :
+        keyword(keyword), line(line), column(column) {
+
+    }
+
+    KeywordType keyword;
+    int line;
+    int column;
+};
+
 struct AST_SourceFile : public AST_Type {
     inline AST_SourceFile() {}
     inline AST_SourceFile(const std::string& file_name) : file_name(file_name) {
