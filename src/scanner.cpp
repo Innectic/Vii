@@ -52,21 +52,16 @@ const Token Scanner::read_string(const char& delim) {
 }
 
 const Token Scanner::read_number() {
-    // TODO: CLEANUP
-    // TODO: CLEANUP
-    // TODO: CLEANUP
-    // TODO: CLEANUP
-
     std::string found = "";
     bool encountered_dot = false;
-    bool errored = false;
+    bool invalid = false;
 
     Token token = { TokenType::INVALID, "0" };
 
     while (it < this->end) {
         if (*it == '.') {
             if (encountered_dot) {
-                errored = true;
+                invalid = true;
                 break;
             }
             encountered_dot = true;
@@ -75,7 +70,7 @@ const Token Scanner::read_number() {
         found += *it;
         it++;
     }
-    if (!errored) {
+    if (!invalid) {
         token.value = found;
         token.type = encountered_dot ? TokenType::FLOAT : TokenType::INT;
     }
@@ -89,7 +84,7 @@ const bool Scanner::check_comment() {
     bool all_have_matched = true;
 
     // Make sure the iterator starts with the whole comment prefix
-    for (auto c : this->workspace.comment_prefix) {
+    for (auto& c : this->workspace.comment_prefix) {
         if (!has_next(i)) return false;
         all_have_matched = *i == c;
         i++;
@@ -101,7 +96,7 @@ const bool Scanner::check_comment() {
 const bool Scanner::can_use_name(std::string name) {
     // TODO: This needs more checking for the contents of the name too.
     // We don't want names like: `t-h-e_t-h-i-n-g`. 
-    return !Util::vectorContains(this->usedNames, name) && !Util::vectorContains(keywords, name);
+    return !Util::vectorContains(this->usedNames, name) && get_keyword_type(name) == KeywordType::INVALID;
 }
 
 const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bool allow_native) {
@@ -114,7 +109,7 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
 
     bool skip_next = false;
     int line_num = 1;
-    for (auto line : contents) {
+    for (auto& line : contents) {
         int column = 1;
         this->beg = line.begin();
         this->it = this->beg;
@@ -206,7 +201,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
     std::string current_scope = "";
 
     // We have things to check, so lets just start going through.
-    for (auto it = tokens.begin(); it < tokens.end() - 1; ++it) {
+    for (auto& it = tokens.begin(); it < tokens.end() - 1; ++it) {
         auto token = *it;
         // Check the type of the token
         
@@ -368,14 +363,14 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     }
                     // Make sure we're not redecling
                     bool skip_next = false;
-                    for (auto contained : file->contained) {
+                    for (auto& contained : file->contained) {
                         if (!is_type<AST_Function*>(contained)) continue;
                         auto func = static_cast<AST_Function*>(contained);
                         // Check the arguments
                         if (func->name == function->name && function->arguments.size() == func->arguments.size()) {
                             bool same_args = false;
-                            for (auto arg : function->arguments) {
-                                for (auto other_arg : func->arguments) {
+                            for (auto& arg : function->arguments) {
+                                for (auto& other_arg : func->arguments) {
                                     if (other_arg.type != arg.type) continue;
                                     same_args = true;
                                     break;

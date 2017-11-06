@@ -17,7 +17,7 @@ const std::vector<std::string> split_string(const std::string& splitting, const 
     // TODO: Why can't this be in the main loop?
     // It seems to make the entire function hang and never exit, for some reason.
     std::vector<std::string> clean;
-    for (auto dirty : matches) {
+    for (auto& dirty : matches) {
         if (dirty == " " || dirty == "") continue;
         clean.emplace_back(dirty);
     }
@@ -41,7 +41,7 @@ void WorkSpace::load_configuration() {
     std::vector<std::string> contents = Util::readFileToVector(this->directory + "/workspace.vii");
     if (contents.size() <= 0) return;
 
-    for (auto line : contents) {
+    for (auto& line : contents) {
         // Remove all spaces from the string. We don't REALLY need them.
         std::string::iterator end_pos = std::remove(line.begin(), line.end(), ' ');
         line.erase(end_pos, line.end());
@@ -52,7 +52,6 @@ void WorkSpace::load_configuration() {
             continue;
         }
 
-        // TODO: lhs should be lowercased
         std::string lhs = matches[0];
         std::string rhs = matches[1];
         

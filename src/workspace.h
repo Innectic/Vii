@@ -27,7 +27,6 @@ struct WorkSpace {
     }
 
     std::string directory;
-
     std::string comment_prefix;
     
     std::string block_comment_start;

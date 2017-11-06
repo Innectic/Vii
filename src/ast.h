@@ -37,8 +37,8 @@ struct AST_Declaration : public AST_Type {
 // CLEANUP: This can probably just be replaced with token...
 struct AST_Argument : public AST_Type {
     inline AST_Argument() {}
-    inline AST_Argument(std::string name, TokenType type) : // TODO: Fix name
-        name(name), type(type) {
+    inline AST_Argument(std::string value, TokenType type) :
+        value(value), type(type) {
 
     }
 
@@ -46,7 +46,7 @@ struct AST_Argument : public AST_Type {
         return "AST_Arg";
     }
 
-    std::string name;
+    std::string value;
     TokenType type;
 };
 
@@ -127,11 +127,11 @@ struct AST_SourceFile : public AST_Type {
     int total_code;
     int total_blank;
 
-    std::vector<AST_Type*> contained; // TODO: What should this actually be called?
+    std::vector<AST_Type*> contained;
     AST_Function* mainFunction;
 
     inline AST_Declaration* get_decl(const std::string& name) {
-        for (auto potential : this->contained) {
+        for (auto& potential : this->contained) {
             // We only want declarations
             if (!is_type<AST_Declaration*>(potential)) continue;
             // Turn the type into a declaration we can actually check
@@ -144,7 +144,7 @@ struct AST_SourceFile : public AST_Type {
 
     inline void replace_decl(AST_Declaration& replacing, AST_Declaration* new_decl) {
         int pos = -1;
-        for (unsigned int i = 0; i < this->contained.size(); ++i) {
+        for (auto i = 0u; i < this->contained.size(); ++i) {
             auto potential = this->contained[i];
             // Make sure it's actually a declaration
             if (!is_type<AST_Declaration*>(potential)) continue;

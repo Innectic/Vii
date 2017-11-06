@@ -40,13 +40,13 @@ public:
 
     const static inline std::string join(const std::vector<std::string> joining) {
         std::string result;
-        for (auto join : joining) result += join;
+        for (auto& join : joining) result += join;
         return result;
     }
 
     const static inline bool is_number(std::string check) {
         bool allMatch = true;
-        for (auto c : check) allMatch = is_number(c);
+        for (auto& c : check) allMatch = is_number(c);
         return allMatch;
     }
 
@@ -56,7 +56,7 @@ public:
 
     // TODO: This is pretty bad, since it only works on the one type.
     const static inline bool vectorContains(std::vector<std::string> vec, std::string check) {
-        for (auto in : vec) if (in == check) return true;
+        for (auto& in : vec) if (in == check) return true;
         return false;
     }
 

@@ -90,7 +90,7 @@ static std::map<std::string, NativeType> builtin_map = {
 };
 
 static bool is_builtin(std::string name) {
-    for (auto entry : builtin_map) if (entry.first == name) return true;
+    for (auto& entry : builtin_map) if (entry.first == name) return true;
     return false;
 }
 
@@ -101,13 +101,13 @@ static std::string get_native(std::string name) {
 
 static TokenType get_token_type(std::string checking) {
     // Check each pair and see if we have a keyword that matches.
-    for (auto entry : token_map) if (entry.second == checking) return entry.first;
+    for (auto& entry : token_map) if (entry.second == checking) return entry.first;
     // If not, it's just an identifier.
     return TokenType::IDENTIFIER;
 }
 
 static TokenType get_type_from_string(std::string checking) {
-    for (auto entry : type_map) if (entry.first == Util::string_to_lower(checking)) return entry.second;
+    for (auto& entry : type_map) if (entry.first == Util::string_to_lower(checking)) return entry.second;
     return TokenType::INVALID;
 }
 
@@ -119,9 +119,22 @@ struct Token {
     int column;
 };
 
-static std::vector<std::string> keywords = {
-    "if",
-    "else",
-    "true",
-    "false"
+enum class KeywordType {
+    INVALID,
+    IF,
+    ELSE,
+    TRUE,
+    FALSE
 };
+
+static std::map<std::string, KeywordType> keywords = {
+    { "if", KeywordType::IF },
+    { "else", KeywordType::ELSE },
+    { "true", KeywordType::TRUE },
+    { "false", KeywordType::FALSE },
+};
+
+static KeywordType get_keyword_type(std::string keyword) {
+    for (auto& entry : keywords) if (entry.first == keyword) return entry.second;
+    return KeywordType::INVALID;
+}
