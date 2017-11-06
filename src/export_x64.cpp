@@ -32,26 +32,25 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
     add_import("<iostream>", stream);
     if (!allow_native) add_import("\"io.cpp\"", stream);
 
-    for (auto potential : source_file.contained) {
+    for (auto& potential : source_file.contained) {
         // We only want to do thing with functions
         if (!is_type<AST_Function*>(potential)) continue;
         auto function = static_cast<AST_Function*>(potential);
         // Check if this is the main function
-        std::string functionName = function->name; // TODO: things for main
-        if (source_file.mainFunction && source_file.mainFunction == function) functionName = "real_main";
+        std::string function_name = function->name;
+        if (source_file.mainFunction && source_file.mainFunction == function) function_name = "real_main";
 
-        std::string returnType = convert_type(function->return_type);
-        std::string argumentString = "";
+        std::string return_type = convert_type(function->return_type);
+        std::string argument_string = "";
 
-        for (auto arg : function->arguments) {
-            std::string argType = convert_type(arg.type);
-            argumentString += argType + " " + arg.name;
+        for (auto& arg : function->arguments) {
+            std::string arg_type = convert_type(arg.type);
+            argument_string += arg_type + " " + arg.value;
         }
 
-        stream << returnType + " " + functionName + "(" + argumentString + ") {\n";
+        stream << return_type + " " + function_name + "(" + argument_string + ") {\n";
 
-        for (auto contained : function->contained) {
-            std::cout << contained->my_name() << std::endl;
+        for (auto& contained : function->contained) {
             if (is_type<AST_Declaration*>(contained)) {
                 auto decl = static_cast<AST_Declaration*>(contained);
 
@@ -81,21 +80,17 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                 std::string ready_line = allow_native ? native_map[builtin->type] : internal_map[builtin->type];
 
                 std::string arguments;
-                for (auto arg : builtin->arguments) {
+                for (auto& arg : builtin->arguments) {
                     std::string pre = "";;
                     std::string post = "";
                     if (arg.type == TokenType::STRING) {
                         pre += "\"";
-                        post += "\""; // HACK: this shouldn't put a space at the end if it's the last element
-                    }
-                    else if (arg.type == TokenType::CHAR) {
+                        post += "\"";
+                    } else if (arg.type == TokenType::CHAR) {
                         pre += "'";
                         post += "'";
-                    }
-                    else if (arg.type == TokenType::FLOAT) {
-                        post += "F";
-                    }
-                    arguments += pre + arg.name + post;
+                    } else if (arg.type == TokenType::FLOAT) post += "F";
+                    arguments += pre + arg.value + post;
                 }
 
                 ready_line = Util::replace(ready_line, "<CUSTOM>", arguments);
@@ -108,7 +103,7 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                     std::string ready_line = get_native(call->name);
 
                     std::string arguments;
-                    for (auto arg : call->arguments) {
+                    for (auto& arg : call->arguments) {
                         std::string pre = "";;
                         std::string post = "";
                         if (arg.type == TokenType::STRING) {
@@ -122,7 +117,7 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                         else if (arg.type == TokenType::FLOAT) {
                             post += "F";
                         }
-                        arguments += pre + arg.name + post;
+                        arguments += pre + arg.value + post;
                     }
 
                     ready_line = Util::replace(ready_line, "<CUSTOM>", arguments);

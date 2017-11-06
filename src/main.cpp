@@ -43,18 +43,27 @@ int main(int argc, char *argv[]) {
             auto converter = std::make_unique<Export_x64>(true);
             auto files = fileHandler->getFilesInDirectory(true, "lib");
 
+            std::map<std::string, std::vector<Token>> tokens;
+            std::vector<AST_SourceFile*> parsed;
+
+            auto start_time = Util::get_time();
             // Compile each file
-            for (auto file : files) {
-                std::cout << file << std::endl;
-                std::vector<Token> tokens = scanner->tokenize(file, true);
-                auto f = scanner->parse(tokens);
-                auto name = Util::replace(file, "lib/", "");
+            for (auto& file : files) tokens[file] = scanner->tokenize(file, true);
+            auto end_time = Util::get_time();
+            std::cout << "\033[1;36m> \033[0;32mFrontend time (s): " << ((double)(end_time - start_time) / 1000000000) << "\033[0m" << std::endl;
+            
+            start_time = Util::get_time();
+            for (auto& entry : tokens) {
+                const AST_SourceFile* f = scanner->parse(entry.second);
+            
+                auto name = Util::replace(entry.first, "lib/", "");
                 name = Util::replace(name, ".vii", ".cpp");
-                if (workspace->had_error) std::cout << "Encountered errors. Will not build.";
+                if (workspace->had_error) std::cout << "Encountered errors. Will not build." << std::endl;
                 else converter->go(name, *f);
-
             }
-
+            end_time = Util::get_time();
+            std::cout << "\033[1;36m> \033[0;32mBackend time  (s): " << ((double)(end_time - start_time) / 1000000000) << "\033[0m" << std::endl;
+            
             return 0;
         }
     }
@@ -65,28 +74,12 @@ int main(int argc, char *argv[]) {
     auto start_time = Util::get_time();
     std::vector<Token> tokens = scanner->tokenize("test.vii", false);
     auto end_time = Util::get_time();
-    std::cout << "\033[1;36m> \033[0;32mFrontend time (s): " << ((double)(end_time - start_time) / 1000000000) << "\033[0m" << std::endl;
+    std::cout << "\033[1;36m> \033[0;32mFrontend time (s): " << ((double) (end_time - start_time) / 1000000000) << "\033[0m" << std::endl;
     
     start_time = Util::get_time();
     const AST_SourceFile* file = scanner->parse(tokens);
     end_time = Util::get_time();
-    std::cout << "\033[1;36m> \033[0;32mBackend time  (s): " << ((double)(end_time- start_time) / 1000000000) << "\033[0m" << std::endl;
-
-    for (auto entry : file->contained) {
-        if (is_type<AST_FunctionCall*>(entry)) {
-            auto f = static_cast<AST_FunctionCall*>(entry);
-            std::cout << "This is a function: " << f->name << ", and these are my arguments: ";
-            for (auto arg : f->arguments) {
-                std::cout << arg.name << ", " << token_map[arg.type] << std::endl;
-            }
-            std::cout << std::endl;
-        }
-        else if (is_type<AST_Declaration*>(entry)) {
-            auto decl = static_cast<AST_Declaration*>(entry);
-            std::cout << "This is a decl: " << decl->name << ", and this is my type: " << token_map[decl->type] << ", and if you're interested in my value: " <<
-                decl->value << ", and I live in: " << decl->scope << std::endl;
-        }
-    }
+    std::cout << "\033[1;36m> \033[0;32mBackend time  (s): " << ((double) (end_time - start_time) / 1000000000) << "\033[0m" << std::endl;
 
     if (workspace->had_error) std::cout << "Encountered errors. Will not build.";
     else converter->go("test.cpp", *file);
