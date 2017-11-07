@@ -68,7 +68,7 @@ const Token Scanner::read_number() {
         }
         else if (!Util::is_number(*it)) break;
         found += *it;
-        it++;
+        ++it;
     }
     if (!invalid) {
         token.value = found;
@@ -87,7 +87,7 @@ const bool Scanner::check_comment() {
     for (auto& c : this->workspace.comment_prefix) {
         if (!has_next(i)) return false;
         all_have_matched = *i == c;
-        i++;
+        ++i;
     }
 
     return all_have_matched;
@@ -125,13 +125,13 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
                     continue;
                 }
                 else {
-                    it++;
+                    ++it;
                     continue;
                 }
             }
             if (*it == '/' && this->has_next() && *(it + 1) == '*' && !skip_next) {
                 skip_next = true;
-                it++;
+                ++it;
                 continue;
             }
             else if (*it == '"' || *it == '\'') {
@@ -157,22 +157,21 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
                 continue;
             }
             else {
-                std::string a;
-                a += *it;
+                std::string contents = *it;
 
-                if (a == " " || a == "") {
+                if (contents == " " || contents == "") {
                     it++;
                     continue;
                 }
 
                 // Get the type of the character we're currently looking at
-                auto type = get_token_type(a);
+                auto type = get_token_type(contents);
 
                 // If it's an ident, that means it's not something we have.
                 // So, add that to our currently found (for later use) string.
-                if (type == TokenType::IDENTIFIER && (a != " " && a != "")) {
-                    current += *it;
-                    it++;
+                if (type == TokenType::IDENTIFIER && (contents != " " && contents != "")) {
+                    current += contents;
+                    ++it;
                     continue;
                 }
 
@@ -185,10 +184,10 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
                 Token token = { type, "", line_num, column };
                 tokens.emplace_back(token);
             }
-            it++;
-            column++;
+            ++it;
+            ++column;
         }
-        line_num++;
+        ++line_num;
     }
     return tokens;
 }
@@ -207,7 +206,6 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
         
         if (token.type == TokenType::RBRACE) {
             current_scope = this->fileName;
-            // it += 1;
             continue;
         }
         else if (token.type == TokenType::IDENTIFIER) {
@@ -225,7 +223,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
             // Before we can do so, lets make sure we even have things after this
             if (!this->has_next(it, tokens.end())) {
                 // We don't have anything next, so we need to display a friendly error.
-                this->workspace.report_error({ "Incomplete identifier", this->fileName, token.line, token.column });
+                this->workspace.report_error({ "Incomplete identifier '" + token.value + "'", this->fileName, token.line, token.column });
                 continue;
             }
 
@@ -244,7 +242,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 //
 
                 if (!this->has_next(it + 1, tokens.end())) {
-                    this->workspace.report_error({ "Incomplete variable decleration", this->fileName, token.line, token.column });
+                    this->workspace.report_error({ "Incomplete variable decleration for '" + token.value + "'", this->fileName, token.line, token.column });
                     it += 3;
                     continue;
                 }
@@ -254,7 +252,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 if (next_token.type == TokenType::ASSIGN) {
                     // Since it's an assign, we need to do one more check - Make sure there's a value!
                     if (!this->has_next(it + 2, tokens.end())) {
-                        this->workspace.report_error({ "Missing value on variable decleration", this->fileName, token.line, token.column });
+                        this->workspace.report_error({ "Missing value on variable decleration for '" + token.value  + "'", this->fileName, token.line, token.column });
                         it += 3;
                         continue;
                     }
@@ -313,13 +311,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                                 auto real_type = get_type_from_string(type.value);
                                 // Make sure it's a valid type
                                 if (type.type != TokenType::IDENTIFIER || real_type == TokenType::INVALID) {
-                                    ViiError err = {
-                                        "Invalid type: " + type.value,
-                                        file->file_name,
-                                        type.line,
-                                        type.column
-                                    };
-                                    this->workspace.report_error(err);
+                                    this->workspace.report_error({ "'" + type.value + "' is an invalid type", file->file_name, type.line, type.column });
                                     argument_it += 2;
                                     it = argument_it;
                                     continue;
@@ -462,11 +454,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 }
 
                 // Since we have both the value and a variable, set it.
-                auto original_decl = file->get_decl(token.value);
-                if (original_decl == nullptr) {
-                    this->workspace.report_error({ "Internal compiler error: Found name that doesn't exist: " + token.value, this->fileName, token.line, token.column });
-                    break;
-                }
+                assert(original_decl)
                 auto value_token = *(it + 2);
 
                 // Make sure they're the same types

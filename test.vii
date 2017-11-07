@@ -1,24 +1,8 @@
 
 main :: () {
-  testing: string = "compiler pls"
+  testing: string = "test 1"
+  another := "test 2"
 
-  if testing == "compiler pls" {
-    print("COMPILER PLS")
-  }
-
-  if true {
-    print("True!")
-  }
-
-  if false {
-    print("This should never happen")
-  }
-
-  test := 1
-  things := 1.2
-
-  if true print("This should print")
-  if test == 1 print("Test is 1")
-  if things == 1.2 print("Things is 1.2")
-  if testing == "compiler pls" print("Blah")
+  print(another)
+  print(testing)
 }
