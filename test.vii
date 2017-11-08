@@ -1,5 +1,6 @@
 
 main :: () {
   testing: string = "compiler pls"
+  print(1.2)
   print(testing)
 }

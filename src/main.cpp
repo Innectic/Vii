@@ -71,26 +71,39 @@ int main(int argc, char *argv[]) {
     auto converter = std::make_unique<Export_x64>(false);
     workspace->load_configuration();
 
+    auto total_time = Util::get_time();
+
     auto start_time = Util::get_time();
     std::vector<Token> tokens = scanner->tokenize("test.vii", false);
-    auto end_time = Util::get_time();
-    std::cout << "\033[1;36m> \033[0;32mFrontend time (s): " << ((double) (end_time - start_time) / 1000000000) << "\033[0m" << std::endl;
+    auto end_time = Util::get_time() - start_time;
     
     start_time = Util::get_time();
     const AST_SourceFile* file = scanner->parse(tokens);
-    end_time = Util::get_time();
-    std::cout << "\033[1;36m> \033[0;32mBackend time  (s): " << ((double) (end_time - start_time) / 1000000000) << "\033[0m" << std::endl;
+    auto end_parse = Util::get_time() - start_time;
 
     if (workspace->had_error) std::cout << "Encountered errors. Will not build.";
-    else converter->go("test.cpp", *file);
-    delete file;
+    else {
+        start_time = Util::get_time();
+        converter->go("test.cpp", *file);
+        auto conversion_time = Util::get_time() - start_time;
 
-    #ifdef _WIN32
-    auto test = "compile_windows.bat " + workspace->directory + " test.cpp";
-    system(test.c_str());
-    #endif
-    #ifdef __linux__
-    #endif
+        start_time = Util::get_time();
+
+        #ifdef _WIN32
+        auto command = "compile_windows.bat " + workspace->directory + " test.cpp";
+        system(command.c_str());
+        #endif
+        #ifdef __linux__
+        #endif
+        auto end_compile = Util::get_time() - start_time;
+
+        auto total_end = Util::get_time();
+        std::cout << "\033[1;36m> \033[0;32mFrontend time (s)     : " << ((double) end_time / 1000000000) << "\033[0m" << std::endl;
+        std::cout << "\033[1;36m> \033[0;32mTotal backend time (s): " << ((double)(total_end - total_time) / 1000000000) << "\033[0m" << std::endl;
+        std::cout << "  \033[1;36m> \033[0;32mInternal time (s): " << ((double) conversion_time / 1000000000) << "\033[0m" << std::endl;
+        std::cout << "  \033[1;36m> \033[0;32mC++ time  (s)    : " << ((double) end_compile / 1000000000) << "\033[0m" << std::endl;
+    }
+    delete file;
 
     return 0;
 }
