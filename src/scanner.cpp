@@ -201,7 +201,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
     std::string current_scope = "";
 
     // We have things to check, so lets just start going through.
-    for (auto& it = tokens.begin(); it < tokens.end() - 1; ++it) {
+    for (auto it = tokens.begin(); it < tokens.end() - 1; ++it) {
         auto token = *it;
         // Check the type of the token
         
