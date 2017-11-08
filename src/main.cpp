@@ -85,5 +85,12 @@ int main(int argc, char *argv[]) {
     else converter->go("test.cpp", *file);
     delete file;
 
+    #ifdef _WIN32
+    auto test = "compile_windows.bat " + workspace->directory + " test.cpp";
+    system(test.c_str());
+    #endif
+    #ifdef __linux__
+    #endif
+
     return 0;
 }
