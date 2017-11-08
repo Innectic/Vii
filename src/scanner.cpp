@@ -124,17 +124,14 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
                     it += 2;
                     continue;
                 }
-                else {
-                    it++;
-                    continue;
-                }
+                it++;
+                continue;
             }
             if (*it == '/' && this->has_next() && *(it + 1) == '*' && !skip_next) {
                 skip_next = true;
                 it++;
                 continue;
-            }
-            else if (*it == '"' || *it == '\'') {
+            } else if (*it == '"' || *it == '\'') {
                 auto token = this->read_string(*it);
                 if (token.type == TokenType::INVALID) {
                     this->workspace.report_error({ "String / char was never terminated.", this->fileName, 0, column });
@@ -142,12 +139,10 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
                 }
                 tokens.emplace_back(token);
                 continue;
-            }
-            else if (this->check_comment()) {
+            } else if (this->check_comment()) {
                 it += 2;
                 continue;
-            }
-            else if (Util::is_number(*it)) {
+            } else if (Util::is_number(*it)) {
                 auto token = this->read_number();
                 if (token.type == TokenType::INVALID) {
                     this->workspace.report_error({ "Number cannot contain multiple '.'", this->fileName, 0, column });
@@ -156,35 +151,34 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
                 tokens.emplace_back(token);
                 continue;
             }
-            else {
-                std::string a;
-                a += *it;
+            std::string a;
+            a += *it;
 
-                if (a == " " || a == "") {
-                    it++;
-                    continue;
-                }
-
-                // Get the type of the character we're currently looking at
-                auto type = get_token_type(a);
-
-                // If it's an ident, that means it's not something we have.
-                // So, add that to our currently found (for later use) string.
-                if (type == TokenType::IDENTIFIER && (a != " " && a != "")) {
-                    current += *it;
-                    it++;
-                    continue;
-                }
-
-                if (current != "" && current != " ") {
-                    Token identToken = { TokenType::IDENTIFIER, current, line_num, column };
-                    tokens.emplace_back(identToken);
-                    current = "";
-                }
-
-                Token token = { type, "", line_num, column };
-                tokens.emplace_back(token);
+            if (a == " " || a == "") {
+                it++;
+                continue;
             }
+
+            // Get the type of the character we're currently looking at
+            auto type = get_token_type(a);
+
+            // If it's an ident, that means it's not something we have.
+            // So, add that to our currently found (for later use) string.
+            if (type == TokenType::IDENTIFIER && (a != " " && a != "")) {
+                current += *it;
+                it++;
+                continue;
+            }
+
+            if (current != "" && current != " ") {
+                Token identToken = { TokenType::IDENTIFIER, current, line_num, column };
+                tokens.emplace_back(identToken);
+                current = "";
+            }
+
+            Token token = { type, "", line_num, column };
+            tokens.emplace_back(token);
+            
             it++;
             column++;
         }
@@ -209,8 +203,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
             current_scope = this->fileName;
             // it += 1;
             continue;
-        }
-        else if (token.type == TokenType::IDENTIFIER) {
+        } else if (token.type == TokenType::IDENTIFIER) {
             // If we have an identifier type, this can be four different things.
             //   - Function call
             //   - Function decleration
@@ -273,8 +266,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     else file->contained.emplace_back(decl);
                     // Make sure the scanner knows it's been used too!
                     this->usedNames.emplace_back(token.value);
-                }
-                else if (the_next_token.type == TokenType::COLON && next_token.type == TokenType::COLON) {
+                } else if (the_next_token.type == TokenType::COLON && next_token.type == TokenType::COLON) {
                     // Having another colon here means we might be making a function.
 
                     // Make sure that we have something more to check.
@@ -390,8 +382,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     // Now that we have our function, give it to the file
                     file->contained.emplace_back(function);
                     this->scope_map[name] = function;
-                }
-                else if (next_token.type == TokenType::IDENTIFIER) {
+                } else if (next_token.type == TokenType::IDENTIFIER) {
                     // Having an identifier here means we're setting a custom type to a variable.
                     // So, we need to have 3 more arguments following.
 
@@ -478,8 +469,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 }
                 // Types are the same, and the variable exists. Time to finally set it.
                 original_decl->value = value_token.value;
-            }
-            else if (the_next_token.type == TokenType::LPAREN) {
+            } else if (the_next_token.type == TokenType::LPAREN) {
                 // If we have a left paren, then we MUST be calling a function.
                 // So, lets take everything until ) as arguments.
 
