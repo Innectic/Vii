@@ -99,9 +99,9 @@ int main(int argc, char *argv[]) {
 
         auto total_end = Util::get_time();
         std::cout << "\033[1;36m> \033[0;32mFrontend time (s)     : " << ((double) end_time / 1000000000) << "\033[0m" << std::endl;
-        std::cout << "\033[1;36m> \033[0;32mTotal backend time (s): " << ((double)(total_end - total_time) / 1000000000) << "\033[0m" << std::endl;
-        std::cout << "  \033[1;36m> \033[0;32mInternal time (s): " << ((double) conversion_time / 1000000000) << "\033[0m" << std::endl;
-        std::cout << "  \033[1;36m> \033[0;32mC++ time  (s)    : " << ((double) end_compile / 1000000000) << "\033[0m" << std::endl;
+        std::cout << "\033[1;36m> \033[0;32mTotal backend time (s): " << ((double) (total_end - total_time) / 1000000000) << "\033[0m" << std::endl;
+        std::cout << "  \033[1;36m> \033[0;32mInternal time (s)   : " << ((double) conversion_time / 1000000000) << "\033[0m" << std::endl;
+        std::cout << "  \033[1;36m> \033[0;32mC++ time  (s)       : " << ((double) end_compile / 1000000000) << "\033[0m" << std::endl;
     }
     delete file;
 

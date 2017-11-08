@@ -6,4 +6,4 @@ echo Compiling %2
 E:
 cd %1
 
-cl %1\%2 /nologo /std:c++latest
+cl %1\%2 /nologo /std:c++latest /EHsc /Gr
