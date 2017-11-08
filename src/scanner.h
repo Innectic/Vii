@@ -3,7 +3,6 @@
 #include <string>
 #include <map>
 #include <iostream>
-#include <cassert>
 
 #include "util.h"
 #include "token.h"
