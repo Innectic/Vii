@@ -89,26 +89,34 @@ static std::map<std::string, NativeType> builtin_map = {
     { "print", NativeType::PRINT }
 };
 
-static bool is_builtin(std::string name) {
+const static bool is_operator(const TokenType& type) {
+    return type == TokenType::OP_ADD || type == TokenType::OP_SUB; // TODO: Put the things I forgot here /shrug
+}
+
+const static bool is_builtin(const std::string& name) {
     for (auto& entry : builtin_map) if (entry.first == name) return true;
     return false;
 }
 
-static std::string get_native(std::string name) {
+static std::string get_native(const std::string& name) {
     std::string using_name = Util::replace(name, "native_", "");
     return native_map[builtin_map[using_name]];
 }
 
-static TokenType get_token_type(std::string checking) {
+static TokenType get_token_type(const std::string& checking) {
     // Check each pair and see if we have a keyword that matches.
     for (auto& entry : token_map) if (entry.second == checking) return entry.first;
     // If not, it's just an identifier.
     return TokenType::IDENTIFIER;
 }
 
-static TokenType get_type_from_string(std::string checking) {
+static TokenType get_type_from_string(const std::string& checking) {
     for (auto& entry : type_map) if (entry.first == Util::string_to_lower(checking)) return entry.second;
     return TokenType::INVALID;
+}
+
+const static bool is_numeric(const TokenType& type) {
+    return type == TokenType::INT || type == TokenType::FLOAT;
 }
 
 struct Token {

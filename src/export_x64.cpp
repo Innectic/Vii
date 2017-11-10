@@ -62,10 +62,18 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                     stream << "\"" + decl->value + "\"";
                     break;
                 case TokenType::INT:
-                    stream << std::stoi(decl->value);
+                    if (decl->math) {
+                        // TODO: This probably doesn't even work for multiple things...
+                        for (auto op : decl->math->operations) stream << op.first_value << token_map[op.operation] << op.second_value;
+                    }
+                    else stream << std::stoi(decl->value);
                     break;
                 case TokenType::FLOAT:
-                    stream << std::stof(decl->value);
+                    if (decl->math) {
+                        // TODO: This probably doesn't even work for multiple things...
+                        for (auto op : decl->math->operations) stream << op.first_value << token_map[op.operation] << op.second_value;
+                    }
+                    else stream << std::stof(decl->value);
                     break;
                 case TokenType::CHAR:
                     stream << "'" + decl->value + "'";
@@ -75,8 +83,7 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                     break;
                 }
                 stream << ";\n";
-            }
-            else if (is_type<AST_Builtin*>(contained)) {
+            } else if (is_type<AST_Builtin*>(contained)) {
                 // TODO: Do something with a standard lib here, so we can actually
                 // check the types being passed in.
                 auto builtin = static_cast<AST_Builtin*>(contained);
@@ -98,8 +105,7 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
 
                 ready_line = Util::replace(ready_line, "<CUSTOM>", arguments);
                 stream << ready_line + "\n";
-            }
-            else if (is_type<AST_FunctionCall*>(contained)) { // TODO: Generalize this with the above one
+            } else if (is_type<AST_FunctionCall*>(contained)) { // TODO: Generalize this with the above one
                 auto call = static_cast<AST_FunctionCall*>(contained);
                 if (call->native) {
                     if (!this->allow_native) continue;

@@ -9,14 +9,50 @@ struct AST_Type {
     virtual std::string my_name() = 0;
 };
 
-template<class First>
+template<class T>
 const inline static bool is_type(AST_Type* t) {
-    return dynamic_cast<First>(t) != nullptr;
+    return dynamic_cast<T>(t) != nullptr;
 }
+
+struct AST_Operation : public AST_Type {
+    inline AST_Operation() {}
+    inline AST_Operation(const std::string& first_value, const TokenType& first_type, const std::string& second_value, const TokenType& second_type, const TokenType& operation) :
+        first_value(first_value), first_type(first_type), second_value(second_value), second_type(second_type), operation(operation) {
+    }
+
+    std::string my_name() {
+        return "AST_Operation";
+    }
+
+    std::string first_value;
+    TokenType first_type;
+    std::string second_value;
+    TokenType second_type;
+    TokenType operation;
+};
+
+// TODO: Get rid of this. It's gross.
+struct AST_Math : public AST_Type {
+    inline AST_Math() {}
+    inline AST_Math(int line, int column, std::vector<AST_Operation> operations) : line(line), column(column), operations(operations) {}
+
+    int line;
+    int column;
+    std::vector<AST_Operation> operations;
+
+    std::string my_name() {
+        return "AST_Math";
+    }
+};
 
 struct AST_Declaration : public AST_Type {
     inline AST_Declaration(const int& line, const int& column, const TokenType& type, const std::string& name, const std::string& value, const std::string& scope) :
         line(line), column(column), type(type), name(name), value(value), scope(scope) {
+
+    }
+
+    inline AST_Declaration(const int& line, const int& column, const TokenType& type, const std::string& name, AST_Math* math, const std::string& scope) :
+        line(line), column(column), type(type), name(name), math(math), scope(scope) {
 
     }
 
@@ -30,7 +66,10 @@ struct AST_Declaration : public AST_Type {
     TokenType type;
 
     std::string name;
+
     std::string value;
+    AST_Math* math;
+
     std::string scope;
 };
 

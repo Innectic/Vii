@@ -1,5 +1,11 @@
 
 main :: () {
-  this_will_work := 'a'
-  print(this_will_work)
+    test := 2 + 2
+    print(test)
+
+    testing: int = 3 + 1
+    print(testing)
+
+    things := 1.2 + 5.3
+    print(things)
 }

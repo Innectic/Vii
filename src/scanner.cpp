@@ -98,6 +98,47 @@ const bool Scanner::check_comment() {
     return all_have_matched;
 }
 
+AST_Math* Scanner::do_math(std::vector<Token>* tokens, std::vector<Token>::iterator it, const Token& token) {
+    if (!this->has_next(it, tokens->end()) || !this->has_next(it + 1, tokens->end())) return nullptr;
+    std::vector<AST_Operation> operations;
+
+    while (it < tokens->end()) {
+        if (!this->has_next(it + 1, tokens->end()) || !this->has_next(it + 2, tokens->end())) break;
+        auto current_token = *it;
+        auto operator_token_real = *(it + 1);
+        auto next_adding = *(it + 2);
+
+        if (!is_operator(operator_token_real.type)) {
+            this->workspace.report_error({ "Invalid operator type: " + token_map[operator_token_real.type], this->fileName, token.line, token.column });
+            it += 2;
+            continue;
+        }
+
+        if (!is_numeric(current_token.type)) {
+            this->workspace.report_error({ "Cannot add this type: " + token_map[current_token.type], this->fileName, token.line, token.column });
+            it += 2;
+            continue;
+        }
+
+        if (!is_numeric(next_adding.type)) {
+            this->workspace.report_error({ "Cannot add this type: " + token_map[next_adding.type], this->fileName, token.line, token.column });
+            it += 2;
+            continue;
+        }
+
+        AST_Operation operation = { current_token.value, current_token.type, next_adding.value, next_adding.type, operator_token_real.type };
+        operations.emplace_back(operation);
+        it += 2;
+        break; // TODO: This only allows 1 + 1, nothing more complex can be done.. Not sure how that will even work yet...
+    }
+
+    if (operations.size() == 0) {
+        this->workspace.report_error({ "INTERNAL COMPILER ERROR: Didn't get any operations / operators from expression?!", this->fileName, token.line, token.column });
+        return nullptr;
+    }
+    return new AST_Math(0, 0, operations);
+}
+
 const bool Scanner::can_use_name(std::string name) {
     // TODO: This needs more checking for the contents of the name too.
     // We don't want names like: `t-h-e_t-h-i-n-g`. 
@@ -197,6 +238,11 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
 }
 
 const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
+    // TODO: Fix the stupid hack of a scoping system.
+    // currently, it's based off of the name of the file and the "position"
+    // of the file that it's in (something like a function).
+    // This should probably just become some sort of an enum(?)
+
     AST_SourceFile* file = new AST_SourceFile(this->fileName);
 
     // Start by making sure we even have any tokens to parse.
@@ -210,7 +256,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
         
         if (token.type == TokenType::RBRACE) {
             current_scope = this->fileName;
-            // it += 1;
+            it += 1;
             continue;
         } else if (token.type == TokenType::IDENTIFIER) {
             // If we have an identifier type, this can be four different things.
@@ -267,10 +313,27 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                         continue;
                     }
 
+                    auto has_math = false;
+                    AST_Math* math = nullptr;
+                    if (is_operator((it + 4)->type)) {
+                        // TODO: This won't allow things like idents to be used for evaluating things.
+                        // We'll do math to set the value of this.
+                        auto evaluated = this->do_math(&tokens, it + 3, token);
+                        if (evaluated) {
+                            has_math = true;
+                            math = evaluated;
+                        }
+                    }
+
                     // Since we have a value, we can turn this into a real variable!
                     auto value_token = *(it + 3);
-                    std::string name = this->fileName + "_" + current_scope;
-                    auto decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
+                    // TODO: Ew
+                    AST_Declaration* decl = nullptr;
+                    auto name = this->fileName + "_" + current_scope;
+                    if (has_math) decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, math, name);
+                    else decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
+                    assert(decl);
+                    file->contained.emplace_back(decl);
                     if (this->scope_map[name]) this->scope_map[name]->contained.emplace_back(decl);
                     else file->contained.emplace_back(decl);
                     // Make sure the scanner knows it's been used too!
@@ -365,6 +428,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     // Make sure we're not redecling
                     bool skip_next = false;
                     for (auto& contained : file->contained) {
+                        // TODO: Allow REAL function overloading.
                         if (!is_type<AST_Function*>(contained)) continue;
                         auto func = static_cast<AST_Function*>(contained);
                         // Check the arguments
@@ -394,6 +458,18 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 } else if (next_token.type == TokenType::IDENTIFIER) {
                     // Having an identifier here means we're setting a custom type to a variable.
                     // So, we need to have 3 more arguments following.
+
+                    auto has_math = false;
+                    AST_Math* math = nullptr;
+                    if (is_operator((it + 5)->type)) {
+                        // TODO: This won't allow things like idents to be used for evaluating things.
+                        // We'll do math to set the value of this.
+                        auto evaluated = this->do_math(&tokens, it + 4, token);
+                        if (evaluated) {
+                            has_math = true;
+                            math = evaluated;
+                        }
+                    }
 
                     if (!this->has_next(it + 1, tokens.end())) {
                         this->workspace.report_error({ "Expected '=', but found nothing", this->fileName, token.line, token.column });
@@ -434,8 +510,11 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                         continue;
                     }
 
-                    const auto name = this->fileName + "_" + current_scope;
-                    auto decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
+                    AST_Declaration* decl = nullptr;
+                    auto name = this->fileName + "_" + current_scope;
+                    if (has_math) decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, math, name);
+                    else decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
+                    assert(decl);
                     file->contained.emplace_back(decl);
                     if (this->scope_map[name]) this->scope_map[name]->contained.emplace_back(decl);
                     else file->contained.emplace_back(decl);
@@ -447,6 +526,18 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
             else if (the_next_token.type == TokenType::ASSIGN) {
                 // If we have a '=', then we're setting the value of a variable
                 // that's already been declared.
+
+                auto has_math = false;
+                AST_Math* math = nullptr;
+                if (is_operator((it + 3)->type)) {
+                    // TODO: This won't allow things like idents to be used for evaluating things.
+                    // We'll do math to set the value of this.
+                    auto evaluated = this->do_math(&tokens, it + 2, token);
+                    if (evaluated) {
+                        has_math = true;
+                        math = evaluated;
+                    }
+                }
 
                 // Before we can, lets make sure we have something to actually assign it to
                 if (!this->has_next(it + 1, tokens.end())) {
@@ -463,7 +554,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 
                 // Since we have both the value and a variable, set it.
                 auto original_decl = file->get_decl(token.value);
-                if (original_decl == nullptr) {
+                if (!original_decl) {
                     this->workspace.report_error({ "Internal compiler error: Found name that doesn't exist: " + token.value, this->fileName, token.line, token.column });
                     break;
                 }
@@ -477,7 +568,8 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     continue;
                 }
                 // Types are the same, and the variable exists. Time to finally set it.
-                original_decl->value = value_token.value;
+                if (has_math) original_decl->math = math;
+                else original_decl->value = value_token.value;
             } else if (the_next_token.type == TokenType::LPAREN) {
                 // If we have a left paren, then we MUST be calling a function.
                 // So, lets take everything until ) as arguments.
@@ -507,7 +599,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 AST_FunctionCall* function = nullptr;
                 if (is_builtin(token.value)) function = new AST_Builtin(builtin_map[token.value], arguments);
                 else function = new AST_FunctionCall(token.value, 0, 0, arguments);
-                std::string name = this->fileName + "_" + current_scope;
+                auto name = this->fileName + "_" + current_scope;
 
                 // Make sure that this isn't being attempted with native_
                 if (Util::starts_with("native_", token.value)) {

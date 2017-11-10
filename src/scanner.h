@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include <iostream>
+#include <cassert>
 
 #include "util.h"
 #include "token.h"
@@ -23,6 +24,8 @@ private:
     std::map<std::string, AST_Function*> scope_map;
     
     bool allow_native;
+
+    AST_Math* do_math(std::vector<Token>* tokens, std::vector<Token>::iterator it, const Token& token);
 public:
     std::vector<std::string> usedNames;
     Scanner(WorkSpace& workspace);
