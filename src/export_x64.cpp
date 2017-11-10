@@ -67,6 +67,9 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                 case TokenType::FLOAT:
                     stream << std::stof(decl->value);
                     break;
+                case TokenType::CHAR:
+                    stream << "'" + decl->value + "'";
+                    break;
                 default:
                     std::cout << "HOW DID AN INVALID TYPE GET TO THIS STAGE HOLY COW SOMETHING IS BROKEN! '" << token_map[decl->type] << "'" << std::endl;
                     break;

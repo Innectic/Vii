@@ -14,7 +14,7 @@ const Token Scanner::read_string(const char& delim) {
     bool taking = false;
 
     bool was_terminated = true;
-
+    
     std::string found = "";
 
     Token token = { TokenType::INVALID, "" };
@@ -46,6 +46,11 @@ const Token Scanner::read_string(const char& delim) {
     if (was_terminated) {
         token.type = delim == '\'' ? TokenType::CHAR : TokenType::STRING;
         token.value = found;
+    }
+
+    if (token.type == TokenType::CHAR && token.value.size() != 1) {
+        token.type = TokenType::INVALID;
+        token.value = "";
     }
 
     return token;
@@ -134,6 +139,10 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
             } else if (*it == '"' || *it == '\'') {
                 auto token = this->read_string(*it);
                 if (token.type == TokenType::INVALID) {
+                    if (token.value == "") {
+                        this->workspace.report_error({ "Char must contain only one character.", this->fileName, 0, column });
+                        continue;
+                    }
                     this->workspace.report_error({ "String / char was never terminated.", this->fileName, 0, column });
                     continue;
                 }
