@@ -4,14 +4,19 @@
 
 ### 10/10/17 - Something compiled omg
 
+
+
+MASSIVE COMPILER BUG: When variables are redeclared, there not recreated AND reassigned, just reassigned.
+                      This causes variables to only have the value of their "final form" within the Vii code.
+
+
+
 if statements (else, else if)
 true / false implementations
 meta information on objects to allow for inheritance, tostring, runtime information, etc
 proper checking for variable existance when calling functions Ex: print just assumes that the things passed are the correct type
 solve all the TODOs
 Create LLVM backend
-Create standard lib (This should somehow be written in the lang)
-Make it actually run g++ or something to make things compile
 Implement array type
 Implement spread (...string) for types
 Imports (Should work on standard lib things too!)
