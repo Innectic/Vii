@@ -7,7 +7,7 @@ const bool Resolver::register_function(AST_Resolved_Function* type) {
     auto resolved = this->attempt_function_resolution(type->arguments, type->name);
     if (resolved) return false;
         
-    std::vector<AST_Resolved_Function*> types;
+    auto types = registered[type->name];
     types.emplace_back(type);
     registered[type->name] = types;
     return true;
@@ -26,6 +26,9 @@ AST_Resolved_Function* Resolver::attempt_function_resolution(const std::vector<A
                 if (res_argument.type == given_argument.type) {
                     did_resolve = true;
                     continue;
+                } else if (given_argument.type == TokenType::IDENTIFIER) {
+                    // If it's an ident, then lets checkout the type of the ident.
+                    // TODO
                 }
                 if (did_resolve) break;
             }

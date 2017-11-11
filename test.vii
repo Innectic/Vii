@@ -1,5 +1,5 @@
 
-testing :: (a: string) {
+testing :: (a: char) {
     print(a)
 }
 
@@ -8,8 +8,6 @@ testing :: (a: int) {
 }
 
 main :: () {
-    test: string = "STRSTRSTRST"
-    testing(test)
     testing(1)
-    testing(1.2)
+    testing('a')
 }
