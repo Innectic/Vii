@@ -10,4 +10,6 @@ testing :: (a: int) {
 main :: () {
     testing(1)
     testing('a')
+    testing("a")
+    testing(1.2)
 }

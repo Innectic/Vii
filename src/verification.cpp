@@ -2,6 +2,7 @@
 #include "verification.h"
 
 const bool Verification::validate(const std::vector<AST_Type*>& contained) {
+    auto had_issues = false;
     for (auto component : contained) {
         if (is_type<AST_Function*>(component)) {
             auto function = static_cast<AST_Function*>(component);
@@ -10,7 +11,10 @@ const bool Verification::validate(const std::vector<AST_Type*>& contained) {
             auto resolved_function_type = new AST_Resolved_Function(function->name, function->line, function->column, function->arguments, function->scope);
             auto registered = this->workspace.resolver.register_function(resolved_function_type);
             if (!registered) {
-                this->workspace.report_error({ "=~=~=~=~=~=~ THIS IS A SPOOKY ERROR =~=~=~=~=~=~", "[file]", function->line, function->column });
+                std::string argument_string;
+                for (auto arg : function->arguments) argument_string += token_map[arg.type] + " ";
+                this->workspace.report_error({ "Overloaded function " + function->name + " with arguments " + argument_string + "already exists.", "[file]", function->line, function->column });
+                had_issues = true;
                 continue;
             }
         } else if (is_type<AST_FunctionCall*>(component) && !is_type<AST_Builtin*>(component)) {
@@ -25,9 +29,10 @@ const bool Verification::validate(const std::vector<AST_Type*>& contained) {
                 std::string argument_string;
                 for (auto arg : function_call->arguments) argument_string += token_map[arg.type] + " ";
                 this->workspace.report_error({ "Function with " + argument_string + "by name " + function_call->name + " doesn't exist.", "[file]", function_call->line, function_call->column });
+                had_issues = true;
                 continue;
             }
         }
     }
-    return true;
+    return had_issues;
 }

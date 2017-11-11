@@ -133,14 +133,14 @@ AST_Math* Scanner::do_math(std::vector<Token>* tokens, std::vector<Token>::itera
 const bool Scanner::can_use_name(std::string name) {
     // TODO: This needs more checking for the contents of the name too.
     // We don't want names like: `t-h-e_t-h-i-n-g`. 
-    return !Util::vectorContains(this->usedNames, name) && get_keyword_type(name) == KeywordType::INVALID;
+    return !Util::vector_contains(this->usedNames, name) && get_keyword_type(name) == KeywordType::INVALID;
 }
 
 const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bool allow_native) {
     this->fileName = fileName;
     this->allow_native = allow_native;
 
-    std::vector<std::string> contents = Util::readFileToVector(fileName);
+    std::vector<std::string> contents = Util::read_file_to_vector(fileName);
     std::vector<Token> tokens;
     if (contents.size() <= 0) return tokens;
 

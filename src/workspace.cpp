@@ -38,7 +38,7 @@ void WorkSpace::set_defaults() {
 void WorkSpace::load_configuration() {
     std::string fileName = this->directory + "/workspace.vii";  // TODO: Maybe this file should be set by a compiler directive. #config ?
 
-    std::vector<std::string> contents = Util::readFileToVector(this->directory + "/workspace.vii");
+    std::vector<std::string> contents = Util::read_file_to_vector(this->directory + "/workspace.vii");
     if (contents.size() <= 0) return;
 
     for (auto& line : contents) {
