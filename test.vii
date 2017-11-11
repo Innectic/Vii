@@ -1,16 +1,8 @@
 
 main :: () {
-  // two plus two
-  test := 6 / 2
-  // is 4
-  things := 6 + 2
-  stuff := 6 - 2
-  testing := 6 * 2
-
-  // minus 1 thats
-  print(test)
-  print(things)
-  print(stuff)
-  // three quick math
-  print(testing)
+    // 1 + 1
+    // 't
+    // "a
+    // 'aaaa'
+    print("testing")
 }

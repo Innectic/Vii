@@ -84,7 +84,9 @@ const Token Scanner::read_number() {
 
 const bool Scanner::check_comment() {
     if (!has_next(this->it)) return false;
-    return *this->it + "" + *(this->it + 1) == "//";
+    auto current = *it;
+    auto next = *(it + 1);
+    return current == '/' && next == '/';
 }
 
 AST_Math* Scanner::do_math(std::vector<Token>* tokens, std::vector<Token>::iterator it, const Token& token) {
@@ -162,7 +164,10 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
                 it++;
                 continue;
             }
-            if (*it == '/' && this->has_next() && *(it + 1) == '*' && !skip_next) {
+            if (this->check_comment()) {
+                std::cout << "This is a comment" << std::endl;
+                break;
+            } else if (*it == '/' && this->has_next() && *(it + 1) == '*' && !skip_next) {
                 skip_next = true;
                 it++;
                 continue;
@@ -177,9 +182,6 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
                     continue;
                 }
                 tokens.emplace_back(token);
-                continue;
-            } else if (this->check_comment()) {
-                it += 2;
                 continue;
             } else if (Util::is_number(*it)) {
                 auto token = this->read_number();
