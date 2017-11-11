@@ -10,7 +10,6 @@ enum class TokenType {
     COMMA,
     SEMICOLON,
 
-    // Normal things
     OP_ADD,
     OP_SUB,
     OP_MUL,
@@ -33,6 +32,7 @@ enum class TokenType {
     GEQ,
     COLON,
     ASSIGN,
+    BOOL
 };
 
 enum class NativeType {
@@ -67,14 +67,16 @@ static std::map<TokenType, std::string> token_map = {
     { TokenType::COLON, ":" },
     { TokenType::ASSIGN, "=" },
     { TokenType::COMMA, "," },
-    { TokenType::SEMICOLON, ";" }
+    { TokenType::SEMICOLON, ";" },
+    { TokenType::BOOL, "BOOL" },
 };
 
 static std::map<std::string, TokenType> type_map = {
     { "string", TokenType::STRING },
     { "int", TokenType::INT },
     { "float", TokenType::FLOAT },
-    { "char", TokenType::CHAR }
+    { "char", TokenType::CHAR },
+    { "bool", TokenType::BOOL },
 };
 
 static std::map<NativeType, std::string> internal_map = {
@@ -104,6 +106,7 @@ static std::string get_native(const std::string& name) {
 }
 
 static TokenType get_token_type(const std::string& checking) {
+    if (checking == "true" || checking == "false") return TokenType::BOOL;
     // Check each pair and see if we have a keyword that matches.
     for (auto& entry : token_map) if (entry.second == checking) return entry.first;
     // If not, it's just an identifier.
@@ -111,7 +114,8 @@ static TokenType get_token_type(const std::string& checking) {
 }
 
 static TokenType get_type_from_string(const std::string& checking) {
-    for (auto& entry : type_map) if (entry.first == Util::string_to_lower(checking)) return entry.second;
+    if (checking == "true" || checking == "false") return TokenType::BOOL;
+    for (auto& entry : type_map) if (entry.first == checking) return entry.second;
     return TokenType::INVALID;
 }
 

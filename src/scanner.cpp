@@ -223,6 +223,11 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
             it++;
             column++;
         }
+        if (current != "") {
+            auto type = get_token_type(current);
+            Token remaining_token = { type, current, line_num, column };
+            tokens.emplace_back(remaining_token);
+        }
         line_num++;
     }
     return tokens;

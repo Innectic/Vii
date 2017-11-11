@@ -1,7 +1,12 @@
 
 main :: () {
-    test := 1 + 2
+    test: bool = true
     print(test)
-    test = 5 + 39
-    print(test)
+
+    print(false)
+    print(true)
+    testing := false
+    things := true
+    print(testing)
+    print(things)
 }

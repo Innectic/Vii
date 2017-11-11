@@ -13,6 +13,8 @@ const std::string convert_type(const TokenType& type) {
         return "char";
     case TokenType::FLOAT:
         return "float";
+    case TokenType::BOOL:
+        return "bool";
     default:
         return "void";
     }
@@ -75,6 +77,9 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                     break;
                 case TokenType::CHAR:
                     stream << "'" + decl->value + "'";
+                    break;
+                case TokenType::BOOL:
+                    stream << decl->value;
                     break;
                 default:
                     std::cout << "HOW DID AN INVALID TYPE GET TO THIS STAGE HOLY COW SOMETHING IS BROKEN! '" << token_map[decl->type] << "'" << std::endl;
