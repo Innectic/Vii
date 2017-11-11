@@ -54,7 +54,7 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
             if (is_type<AST_Declaration*>(contained)) {
                 auto decl = static_cast<AST_Declaration*>(contained);
 
-                std::string type = convert_type(decl->type);
+                std::string type = decl->redecl ? "" : convert_type(decl->type);
                 stream << type + " " + decl->name + " = ";
 
                 switch (decl->type) {
@@ -63,14 +63,12 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                     break;
                 case TokenType::INT:
                     if (decl->math) {
-                        // TODO: This probably doesn't even work for multiple things...
                         for (auto op : decl->math->operations) stream << op.first_value << token_map[op.operation] << op.second_value;
                     }
                     else stream << std::stoi(decl->value);
                     break;
                 case TokenType::FLOAT:
                     if (decl->math) {
-                        // TODO: This probably doesn't even work for multiple things...
                         for (auto op : decl->math->operations) stream << op.first_value << token_map[op.operation] << op.second_value;
                     }
                     else stream << std::stof(decl->value);

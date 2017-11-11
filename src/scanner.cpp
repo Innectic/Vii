@@ -558,9 +558,14 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     it += 2;
                     continue;
                 }
+                auto decl = new AST_Declaration(token.line, token.column, original_decl->type, original_decl->name, nullptr, original_decl->scope, true);
                 // Types are the same, and the variable exists. Time to finally set it.
-                if (has_math) original_decl->math = math;
-                else original_decl->value = value_token.value;
+                if (has_math) decl->math = math;
+                else decl->value = value_token.value;
+
+                auto name = decl->scope;
+                if (this->scope_map[name]) this->scope_map[name]->contained.emplace_back(decl);
+                else file->contained.emplace_back(decl);
             } else if (the_next_token.type == TokenType::LPAREN) {
                 // If we have a left paren, then we MUST be calling a function.
                 // So, lets take everything until ) as arguments.

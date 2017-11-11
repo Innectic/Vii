@@ -47,15 +47,25 @@ struct AST_Math : public AST_Type {
 
 struct AST_Declaration : public AST_Type {
     inline AST_Declaration(const int& line, const int& column, const TokenType& type, const std::string& name, const std::string& value, const std::string& scope) :
-        line(line), column(column), type(type), name(name), value(value), scope(scope) {
+        line(line), column(column), type(type), name(name), value(value), scope(scope), redecl(false) {
 
     }
 
     inline AST_Declaration(const int& line, const int& column, const TokenType& type, const std::string& name, AST_Math* math, const std::string& scope) :
-        line(line), column(column), type(type), name(name), math(math), scope(scope) {
+        line(line), column(column), type(type), name(name), math(math), scope(scope), redecl(false) {
 
     }
 
+    inline AST_Declaration(const int& line, const int& column, const TokenType& type, const std::string& name, const std::string& value, const std::string& scope, bool redecl) :
+        line(line), column(column), type(type), name(name), value(value), scope(scope), redecl(redecl) {
+
+    }
+
+    inline AST_Declaration(const int& line, const int& column, const TokenType& type, const std::string& name, AST_Math* math, const std::string& scope, bool redecl) :
+        line(line), column(column), type(type), name(name), math(math), scope(scope), redecl(redecl) {
+
+    }
+    
     std::string my_name() {
         return "AST_Decl";
     }
@@ -71,6 +81,7 @@ struct AST_Declaration : public AST_Type {
     AST_Math* math;
 
     std::string scope;
+    bool redecl;
 };
 
 // CLEANUP: This can probably just be replaced with token...

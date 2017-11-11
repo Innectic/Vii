@@ -1,8 +1,7 @@
 
 main :: () {
-    // 1 + 1
-    // 't
-    // "a
-    // 'aaaa'
-    print("testing")
+    test := 1 + 2
+    print(test)
+    test = 5 + 39
+    print(test)
 }

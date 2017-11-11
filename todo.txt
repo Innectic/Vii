@@ -5,12 +5,6 @@
 ### 10/10/17 - Something compiled omg
 ### 11/9/17  - Implementation of basic math
 
-
-MASSIVE COMPILER BUG: When variables are redeclared, there not recreated AND reassigned, just reassigned.
-                      This causes variables to only have the value of their "final form" within the Vii code.
-
-
-
 if statements (else, else if)
 true / false implementations
 meta information on objects to allow for inheritance, tostring, runtime information, etc
@@ -21,3 +15,4 @@ Implement array type
 Implement spread (...string) for types
 Imports (Should work on standard lib things too!)
 Implement structs
+importing
