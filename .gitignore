@@ -43,3 +43,9 @@ build/
 test.cpp
 io.cpp
 test
+
+# Temp files from Emacs
+*~
+\#*\#
+.\#*
+
