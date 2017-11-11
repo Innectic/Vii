@@ -1,0 +1,18 @@
+
+#include "verification.h"
+
+const bool Verification::validate(const std::vector<AST_Type*>& contained) {
+    for (auto component : contained) {
+        if (is_type<AST_Function*>(component)) {
+            auto function = static_cast<AST_Function*>(component);
+            // Make sure something like this doesn't already exist
+            auto resolved = false; //this->workspace.resolver.register_function(function->arguments, function->name);
+            if (!resolved) {
+                this->workspace.report_error({ "", "[file]", function->line, function->column });
+                return false;
+            }
+        } else if (is_type<AST_FunctionCall*>(component)) {
+        }
+    }
+    return true;
+}

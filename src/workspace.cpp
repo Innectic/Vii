@@ -32,7 +32,7 @@ void WorkSpace::set_defaults() {
     this->block_comment_end = "*/";
 
     this->comment_prefix = "//";
-    this->optimization = OptimizationLevel::OP_NONE;
+    this->optimization = OptimizationLevel::NONE;
 }
 
 void WorkSpace::load_configuration() {
@@ -56,12 +56,12 @@ void WorkSpace::load_configuration() {
         std::string rhs = matches[1];
         
         if (lhs == "optimization") {
-            if (rhs == "none") this->optimization = OptimizationLevel::OP_NONE;
-            else if (rhs == "low") this->optimization = OptimizationLevel::OP_LOW;
-            else if (rhs == "medium") this->optimization = OptimizationLevel::OP_MEDIUM;
-            else if (rhs == "max") this->optimization = OptimizationLevel::OP_MAX;
-            else if (rhs == "size") this->optimization = OptimizationLevel::OP_SIZE;
-            else if (rhs == "speed") this->optimization = OptimizationLevel::OP_SPEED;
+            if (rhs == "none") this->optimization = OptimizationLevel::NONE;
+            else if (rhs == "low") this->optimization = OptimizationLevel::LOW;
+            else if (rhs == "medium") this->optimization = OptimizationLevel::MEDIUM;
+            else if (rhs == "max") this->optimization = OptimizationLevel::MAX;
+            else if (rhs == "size") this->optimization = OptimizationLevel::SIZE;
+            else if (rhs == "speed") this->optimization = OptimizationLevel::SPEED;
             else std::cout << "Invalid value for optimization level: " << rhs << std::endl;
         }
     }

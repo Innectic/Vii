@@ -1,4 +1,16 @@
 
+test :: (a: string) {
+    print(a)
+}
+
+test :: (b: string) {
+    print(b)
+}
+
+test :: (c: string) {
+    print(c)
+}
+
 main :: () {
     test: bool = true
     print(test)

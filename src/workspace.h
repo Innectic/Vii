@@ -6,23 +6,30 @@
 #include <algorithm>
 #include <iostream>
 #include <map>
-#include "util.h"
 
+#include "util.h"
 #include "token.h"
 #include "ast.h"
 #include "reporter.h"
 #include "typer.h"
+#include "resolver.h"
 
-enum OptimizationLevel {
-    OP_NONE, OP_LOW, OP_MEDIUM, OP_MAX, OP_SIZE, OP_SPEED
+enum class OptimizationLevel {
+    NONE,
+    LOW,
+    MEDIUM,
+    MAX,
+    SIZE,
+    SPEED
 };
 
 struct WorkSpace {
     Reporter reporter;
     Typer typer;
+    Resolver resolver;
 
-    inline WorkSpace(const Reporter& reporter, const Typer& typer) :
-        reporter(reporter), typer(typer) {
+    inline WorkSpace(const Reporter& reporter, const Typer& typer, const Resolver& registry) :
+        reporter(reporter), typer(typer), resolver(resolver) {
 
     }
 

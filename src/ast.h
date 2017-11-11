@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "token.h"
+#include "typer.h"
 
 struct AST_Type {
     virtual std::string my_name() = 0;
@@ -218,5 +219,36 @@ struct AST_SourceFile : public AST_Type {
         }
         // Replace the decl with our new one, if we found the old one
         if (pos > -1) this->contained[pos] = new_decl;
+    }
+};
+
+struct AST_Resolved_Type {
+    std::string name;
+    int line;
+    int column;
+
+    const virtual std::string my_name() = 0;
+};
+
+struct AST_Resolved_Function : public AST_Resolved_Type {
+    AST_Resolved_Function(std::string name, int line, int column, std::vector<AST_Argument> arguments) :
+        arguments(arguments) {
+        this->name = name;
+        this->line = line;
+        this->column = column;
+    }
+
+    std::vector<AST_Argument> arguments;
+
+    inline const bool callable(const Typer& typer, const std::vector<TokenType>& args) {
+        // TODO: This will break with default & optional arguments
+        if (arguments.size() != args.size()) return false;
+        for (auto& arg : this->arguments) for (auto& other_arg : args)
+            if (!typer.can_assign_this(arg.type, other_arg)) return false;
+        return true;
+    }
+
+    inline const std::string my_name() {
+        return "resolved function";
     }
 };

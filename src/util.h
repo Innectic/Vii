@@ -86,4 +86,10 @@ public:
     const static bool starts_with(const std::string& check, const std::string& checking) {
         return checking.substr(0, check.size()) == check;
     }
+
+    template<class T, class T2>
+    const static bool contains_key(const std::map<T, T2> checking, T key) {
+        auto it = checking.find(key);
+        return it != checking.end();
+    }
 };
