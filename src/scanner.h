@@ -58,6 +58,14 @@ public:
         return it < end - 1;
     }
 
+    const inline void set_scope(std::string scope, AST_Function* type) {
+        if (!this->scope_map[scope]) this->scope_map[scope] = type;
+    }
+
+    const inline void add_scoped(std::string scope, AST_Type* type) {
+        if (this->scope_map[scope]) this->scope_map[scope]->contained.emplace_back(type);
+    }
+
     const inline bool next(int amount) {
         // Revisit: Speed things
         auto clone = it;

@@ -1,24 +1,15 @@
 
-test :: (a: string) {
+testing :: (a: string) {
     print(a)
 }
 
-test :: (b: string) {
-    print(b)
-}
-
-test :: (c: string) {
-    print(c)
+testing :: (a: int) {
+    print(a)
 }
 
 main :: () {
-    test: bool = true
-    print(test)
-
-    print(false)
-    print(true)
-    testing := false
-    things := true
-    print(testing)
-    print(things)
+    test: string = "STRSTRSTRST"
+    testing(test)
+    testing(1)
+    testing(1.2)
 }

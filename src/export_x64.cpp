@@ -120,20 +120,32 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                         std::string post = "";
                         if (arg.type == TokenType::STRING) {
                             pre += "\"";
-                            post += "\""; // HACK: this shouldn't put a space at the end if it's the last element
-                        }
-                        else if (arg.type == TokenType::CHAR) {
+                            post += "\"";
+                        } else if (arg.type == TokenType::CHAR) {
                             pre += "'";
                             post += "'";
-                        }
-                        else if (arg.type == TokenType::FLOAT) {
-                            post += "F";
-                        }
+                        } else if (arg.type == TokenType::FLOAT) post += "F";
                         arguments += pre + arg.value + post;
                     }
 
                     ready_line = Util::replace(ready_line, "<CUSTOM>", arguments);
                     stream << ready_line + "\n";
+                } else {
+                    // COPYPASTA from the above branch...
+                    std::string arguments;
+                    for (auto& arg : call->arguments) {
+                        std::string pre = "";;
+                        std::string post = "";
+                        if (arg.type == TokenType::STRING) {
+                            pre += "\"";
+                            post += "\"";
+                        } else if (arg.type == TokenType::CHAR) {
+                            pre += "'";
+                            post += "'";
+                        } else if (arg.type == TokenType::FLOAT) post += "F";
+                        arguments += pre + arg.value + post;
+                    }
+                    stream << call->name << "(" << arguments << ");\n";
                 }
             }
         }

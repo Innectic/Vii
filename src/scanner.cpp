@@ -127,7 +127,7 @@ AST_Math* Scanner::do_math(std::vector<Token>* tokens, std::vector<Token>::itera
         this->workspace.report_error({ "INTERNAL COMPILER ERROR: Didn't get any operations / operators from expression?!", this->fileName, token.line, token.column });
         return nullptr;
     }
-    return new AST_Math(0, 0, operations);
+    return new AST_Math(0, 0, operations, "");
 }
 
 const bool Scanner::can_use_name(std::string name) {
@@ -323,14 +323,16 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     // TODO: Ew
                     AST_Declaration* decl = nullptr;
                     auto name = this->fileName + "_" + current_scope;
-                    if (has_math) decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, math, name);
+                    if (has_math) {
+                        math->scope = name;
+                        decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, math, name);
+                    }
                     else decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
                     assert(decl);
-                    file->contained.emplace_back(decl);
-                    if (this->scope_map[name]) this->scope_map[name]->contained.emplace_back(decl);
-                    else file->contained.emplace_back(decl);
+                    assert(decl->math || decl->value != "");
                     // Make sure the scanner knows it's been used too!
                     this->usedNames.emplace_back(token.value);
+                    this->add_scoped(name, decl);
                 } else if (the_next_token.type == TokenType::COLON && next_token.type == TokenType::COLON) {
                     // Having another colon here means we might be making a function.
 
@@ -409,7 +411,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     auto function = new AST_Function(token.value, token.line, token.column, arguments, name, TokenType::INVALID);
 
                     // Make sure we're not attempting to redeclare the main function
-                    if (function->name == "main") {  // TODO: This shouldn't be static
+                    if (function->name == "main") {
                         if (file->mainFunction != nullptr) {
                             this->workspace.report_error({ "Attempt to redeclare main function", this->fileName, token.line, token.column });
                             it += 4;
@@ -420,7 +422,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     }
                     // Now that we have our function, give it to the file
                     file->contained.emplace_back(function);
-                    this->scope_map[name] = function;
+                    this->set_scope(name, function);
                 } else if (next_token.type == TokenType::IDENTIFIER) {
                     // Having an identifier here means we're setting a custom type to a variable.
                     // So, we need to have 3 more arguments following.
@@ -478,14 +480,16 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 
                     AST_Declaration* decl = nullptr;
                     auto name = this->fileName + "_" + current_scope;
-                    if (has_math) decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, math, name);
+                    if (has_math) {
+                        math->scope = name;
+                        decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, math, name);
+                    }
                     else decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
                     assert(decl);
-                    file->contained.emplace_back(decl);
-                    if (this->scope_map[name]) this->scope_map[name]->contained.emplace_back(decl);
-                    else file->contained.emplace_back(decl);
+                    assert(decl->math || decl->value != "");
                     // Make sure the scanner knows it's been used too!
                     this->usedNames.emplace_back(token.value);
+                    this->add_scoped(name, decl);
                     it += 4;
                 }
             }
@@ -539,8 +543,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 else decl->value = value_token.value;
 
                 auto name = decl->scope;
-                if (this->scope_map[name]) this->scope_map[name]->contained.emplace_back(decl);
-                else file->contained.emplace_back(decl);
+                file->contained.emplace_back(decl);
             } else if (the_next_token.type == TokenType::LPAREN) {
                 // If we have a left paren, then we MUST be calling a function.
                 // So, lets take everything until ) as arguments.
@@ -567,10 +570,10 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 // Set the iterator
                 it += arguments.size() + 1;
                 // Check if this is a builtin function
+                auto name = this->fileName + "_" + current_scope;
                 AST_FunctionCall* function = nullptr;
                 if (is_builtin(token.value)) function = new AST_Builtin(builtin_map[token.value], arguments);
-                else function = new AST_FunctionCall(token.value, 0, 0, arguments);
-                auto name = this->fileName + "_" + current_scope;
+                else function = new AST_FunctionCall(token.value, 0, 0, arguments, name);
 
                 // Make sure that this isn't being attempted with native_
                 if (Util::starts_with("native_", token.value)) {
@@ -583,8 +586,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     // Otherwise, just mark this as native.
                     function->native = true;
                 }
-                if (this->scope_map[name]) this->scope_map[name]->contained.emplace_back(function);
-                else file->contained.emplace_back(function);
+                this->add_scoped(name, function);
             }
         }
     }

@@ -35,11 +35,13 @@ struct AST_Operation : public AST_Type {
 // TODO: Get rid of this. It's gross.
 struct AST_Math : public AST_Type {
     inline AST_Math() {}
-    inline AST_Math(int line, int column, std::vector<AST_Operation> operations) : line(line), column(column), operations(operations) {}
+    inline AST_Math(const int& line, const int& column, const std::vector<AST_Operation>& operations, const std::string& scope) :
+        line(line), column(column), operations(operations), scope(scope) {}
 
     int line;
     int column;
     std::vector<AST_Operation> operations;
+    std::string scope;
 
     std::string my_name() {
         return "AST_Math";
@@ -105,8 +107,8 @@ struct AST_FunctionCall : public AST_Type {
 protected:
     inline AST_FunctionCall() {}
 public:
-    inline AST_FunctionCall(const std::string& name, const int& line, const int& column, const std::vector<AST_Argument>& arguments) :
-        name(name), line(line), column(column), arguments(arguments) {
+    inline AST_FunctionCall(const std::string& name, const int& line, const int& column, const std::vector<AST_Argument>& arguments, const std::string& scope) :
+        name(name), line(line), column(column), arguments(arguments), scope(scope) {
         this->native = false;
     }
 
@@ -115,6 +117,7 @@ public:
     }
 
     std::string name;
+    std::string scope;
 
     int line;
     int column;
@@ -227,15 +230,18 @@ struct AST_Resolved_Type {
     int line;
     int column;
 
+    std::string scope;
+
     const virtual std::string my_name() = 0;
 };
 
 struct AST_Resolved_Function : public AST_Resolved_Type {
-    AST_Resolved_Function(std::string name, int line, int column, std::vector<AST_Argument> arguments) :
+    AST_Resolved_Function(const std::string& name, const int& line, const int& column, const std::vector<AST_Argument>& arguments, const std::string& scope) :
         arguments(arguments) {
         this->name = name;
         this->line = line;
         this->column = column;
+        this->scope = scope;
     }
 
     std::vector<AST_Argument> arguments;
