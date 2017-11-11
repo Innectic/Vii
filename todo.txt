@@ -3,7 +3,7 @@
 ## This shouldn't be a file, I know.
 
 ### 10/10/17 - Something compiled omg
-
+### 11/9/17  - Implementation of basic math
 
 
 MASSIVE COMPILER BUG: When variables are redeclared, there not recreated AND reassigned, just reassigned.
@@ -21,3 +21,9 @@ Implement array type
 Implement spread (...string) for types
 Imports (Should work on standard lib things too!)
 Implement structs
+
+SMALLER BUGS:
+=============
+
+Comments cannot contain ', " or any operator char.
+Comments are still counted as tokens and can still be evaluated.

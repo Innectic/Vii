@@ -83,19 +83,8 @@ const Token Scanner::read_number() {
 }
 
 const bool Scanner::check_comment() {
-    // Clone the iterator
-    auto i = this->it;
-
-    bool all_have_matched = true;
-
-    // Make sure the iterator starts with the whole comment prefix
-    for (auto& c : this->workspace.comment_prefix) {
-        if (!has_next(i)) return false;
-        all_have_matched = *i == c;
-        i++;
-    }
-
-    return all_have_matched;
+    if (!has_next(this->it)) return false;
+    return *this->it + "" + *(this->it + 1) == "//";
 }
 
 AST_Math* Scanner::do_math(std::vector<Token>* tokens, std::vector<Token>::iterator it, const Token& token) {

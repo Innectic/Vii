@@ -90,7 +90,7 @@ static std::map<std::string, NativeType> builtin_map = {
 };
 
 const static bool is_operator(const TokenType& type) {
-    return type == TokenType::OP_ADD || type == TokenType::OP_SUB; // TODO: Put the things I forgot here /shrug
+    return type == TokenType::OP_ADD || type == TokenType::OP_SUB || type == TokenType::OP_MUL || type == TokenType::OP_DIV;
 }
 
 const static bool is_builtin(const std::string& name) {
