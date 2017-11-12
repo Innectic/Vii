@@ -11,6 +11,7 @@
 #include "file_handler.h"
 #include "util.h"
 #include "export_x64.h"
+#include "verification.h"
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -19,11 +20,13 @@ int main(int argc, char *argv[]) {
     }
 
     auto typer = std::make_unique<Typer>();
+    auto resolver = std::make_unique<Resolver>(*typer.get());
     auto reporter = std::make_unique<Reporter>();
-    auto workspace = std::make_unique<WorkSpace>(*reporter.get(), *typer.get());
+    auto workspace = std::make_unique<WorkSpace>(*reporter.get(), *typer.get(), *resolver.get());
     auto fileHandler = std::make_unique<FileHandler>();
     auto scanner = std::make_unique<Scanner>(*workspace.get());
-
+    auto verification = std::make_unique<Verification>(*workspace.get());
+    
     workspace->set_defaults();
 
     for (auto i = 1; i < argc; i++) {
@@ -84,6 +87,8 @@ int main(int argc, char *argv[]) {
     if (workspace->had_error) std::cout << "Encountered errors. Will not build.";
     else {
         start_time = Util::get_time();
+        auto issues = verification->validate(file->contained);
+        if (issues) return 1;
         converter->go("test.cpp", *file);
         auto conversion_time = Util::get_time() - start_time;
 

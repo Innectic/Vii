@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "token.h"
+#include "typer.h"
 
 struct AST_Type {
     virtual std::string my_name() = 0;
@@ -34,11 +35,13 @@ struct AST_Operation : public AST_Type {
 // TODO: Get rid of this. It's gross.
 struct AST_Math : public AST_Type {
     inline AST_Math() {}
-    inline AST_Math(int line, int column, std::vector<AST_Operation> operations) : line(line), column(column), operations(operations) {}
+    inline AST_Math(const int& line, const int& column, const std::vector<AST_Operation>& operations, const std::string& scope) :
+        line(line), column(column), operations(operations), scope(scope) {}
 
     int line;
     int column;
     std::vector<AST_Operation> operations;
+    std::string scope;
 
     std::string my_name() {
         return "AST_Math";
@@ -104,8 +107,8 @@ struct AST_FunctionCall : public AST_Type {
 protected:
     inline AST_FunctionCall() {}
 public:
-    inline AST_FunctionCall(const std::string& name, const int& line, const int& column, const std::vector<AST_Argument>& arguments) :
-        name(name), line(line), column(column), arguments(arguments) {
+    inline AST_FunctionCall(const std::string& name, const int& line, const int& column, const std::vector<AST_Argument>& arguments, const std::string& scope) :
+        name(name), line(line), column(column), arguments(arguments), scope(scope) {
         this->native = false;
     }
 
@@ -114,6 +117,7 @@ public:
     }
 
     std::string name;
+    std::string scope;
 
     int line;
     int column;
@@ -153,6 +157,7 @@ struct AST_Function : public AST_FunctionCall {
         return "AST_Func";
     }
 
+    std::string contained_scope;
     std::string scope;
     TokenType return_type;
     std::vector<AST_Type*> contained;
@@ -218,5 +223,39 @@ struct AST_SourceFile : public AST_Type {
         }
         // Replace the decl with our new one, if we found the old one
         if (pos > -1) this->contained[pos] = new_decl;
+    }
+};
+
+struct AST_Resolved_Type {
+    std::string name;
+    int line;
+    int column;
+
+    std::string scope;
+
+    const virtual std::string my_name() = 0;
+};
+
+struct AST_Resolved_Function : public AST_Resolved_Type {
+    AST_Resolved_Function(const std::string& name, const int& line, const int& column, const std::vector<AST_Argument>& arguments, const std::string& scope) :
+        arguments(arguments) {
+        this->name = name;
+        this->line = line;
+        this->column = column;
+        this->scope = scope;
+    }
+
+    std::vector<AST_Argument> arguments;
+
+    inline const bool callable(const Typer& typer, const std::vector<TokenType>& args) {
+        // TODO: This will break with default & optional arguments
+        if (arguments.size() != args.size()) return false;
+        for (auto& arg : this->arguments) for (auto& other_arg : args)
+            if (!typer.can_assign_this(arg.type, other_arg)) return false;
+        return true;
+    }
+
+    inline const std::string my_name() {
+        return "resolved function";
     }
 };

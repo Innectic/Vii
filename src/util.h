@@ -6,7 +6,7 @@
 #include <fstream>
 #include <algorithm>
 #include <chrono>
-
+#include <sstream>
 
 #ifdef _WIN32
 #define int64 __int64
@@ -18,11 +18,7 @@
 
 class Util {
 public:
-    const static inline std::string eatSpaces(std::string original) {
-        return std::regex_replace(original, std::regex("^ +| +$|( ) +"), "$1");
-    }
-    
-    const static inline std::vector<std::string> readFileToVector(const std::string& file) {
+    const static inline std::vector<std::string> read_file_to_vector(const std::string& file) {
         std::vector<std::string> lines;
         
         std::ifstream input;
@@ -31,17 +27,9 @@ public:
         if (!input) return lines;
 
         std::string current = "";
-        while (std::getline(input, current)) {
-            lines.emplace_back(current);
-        }
+        while (std::getline(input, current)) lines.emplace_back(current);
         input.close();
         return lines;
-    }
-
-    const static inline std::string join(const std::vector<std::string> joining) {
-        std::string result;
-        for (auto& join : joining) result += join;
-        return result;
     }
 
     const static inline bool is_number(std::string check) {
@@ -54,8 +42,8 @@ public:
         return isdigit(check);
     }
 
-    // TODO: This is pretty bad, since it only works on the one type.
-    const static inline bool vectorContains(std::vector<std::string> vec, std::string check) {
+    template<class T>
+    const static inline bool vector_contains(std::vector<T> vec, T check) {
         for (auto& in : vec) if (in == check) return true;
         return false;
     }
@@ -63,14 +51,6 @@ public:
     const static inline std::string string_to_lower(std::string original) {
         std::transform(original.begin(), original.end(), original.begin(), ::tolower);
         return original;
-    }
-
-    const static inline std::string trim_string(std::string original) {
-        const std::string pattern = " \f\n\r\t\v";
-
-        auto new_string = original.substr(0, original.find_last_not_of(pattern) + 1);
-        new_string = new_string.substr(new_string.find_first_not_of(pattern));
-        return new_string;
     }
 
     const static inline int64 get_time() {
@@ -85,5 +65,21 @@ public:
 
     const static bool starts_with(const std::string& check, const std::string& checking) {
         return checking.substr(0, check.size()) == check;
+    }
+
+    template<class T, class T2>
+    const static bool contains_key(const std::map<T, T2> checking, T key) {
+        auto it = checking.find(key);
+        return it != checking.end();
+    }
+
+    const static std::vector<std::string> split(const std::string& splitting, const char& delim, const int count = 1) {
+        std::vector<std::string> matches;
+
+        std::string part;
+        std::stringstream stream(splitting);
+        while (getline(stream, part, delim)) matches.emplace_back(part);
+
+        return matches;
     }
 };

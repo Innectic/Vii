@@ -127,20 +127,20 @@ AST_Math* Scanner::do_math(std::vector<Token>* tokens, std::vector<Token>::itera
         this->workspace.report_error({ "INTERNAL COMPILER ERROR: Didn't get any operations / operators from expression?!", this->fileName, token.line, token.column });
         return nullptr;
     }
-    return new AST_Math(0, 0, operations);
+    return new AST_Math(0, 0, operations, "");
 }
 
 const bool Scanner::can_use_name(std::string name) {
     // TODO: This needs more checking for the contents of the name too.
     // We don't want names like: `t-h-e_t-h-i-n-g`. 
-    return !Util::vectorContains(this->usedNames, name) && get_keyword_type(name) == KeywordType::INVALID;
+    return !Util::vector_contains(this->usedNames, name) && get_keyword_type(name) == KeywordType::INVALID;
 }
 
 const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bool allow_native) {
     this->fileName = fileName;
     this->allow_native = allow_native;
 
-    std::vector<std::string> contents = Util::readFileToVector(fileName);
+    std::vector<std::string> contents = Util::read_file_to_vector(fileName);
     std::vector<Token> tokens;
     if (contents.size() <= 0) return tokens;
 
@@ -164,10 +164,8 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
                 it++;
                 continue;
             }
-            if (this->check_comment()) {
-                std::cout << "This is a comment" << std::endl;
-                break;
-            } else if (*it == '/' && this->has_next() && *(it + 1) == '*' && !skip_next) {
+            if (this->check_comment()) break;
+            else if (*it == '/' && this->has_next() && *(it + 1) == '*' && !skip_next) {
                 skip_next = true;
                 it++;
                 continue;
@@ -251,8 +249,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
         // Check the type of the token
         
         if (token.type == TokenType::RBRACE) {
-            current_scope = this->fileName;
-            it += 1;
+            current_scope = "";
             continue;
         } else if (token.type == TokenType::IDENTIFIER) {
             // If we have an identifier type, this can be four different things.
@@ -325,15 +322,17 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     auto value_token = *(it + 3);
                     // TODO: Ew
                     AST_Declaration* decl = nullptr;
-                    auto name = this->fileName + "_" + current_scope;
-                    if (has_math) decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, math, name);
+                    auto name = this->fileName + "$" + current_scope;
+                    if (has_math) {
+                        math->scope = name;
+                        decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, math, name);
+                    }
                     else decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
                     assert(decl);
-                    file->contained.emplace_back(decl);
-                    if (this->scope_map[name]) this->scope_map[name]->contained.emplace_back(decl);
-                    else file->contained.emplace_back(decl);
+                    assert(decl->math || decl->value != "");
                     // Make sure the scanner knows it's been used too!
                     this->usedNames.emplace_back(token.value);
+                    this->add_scoped(name, decl);
                 } else if (the_next_token.type == TokenType::COLON && next_token.type == TokenType::COLON) {
                     // Having another colon here means we might be making a function.
 
@@ -354,8 +353,6 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                         it += 4;
                         continue;
                     }
-
-                    current_scope = token.value;
 
                     // Since we have that, everything between that and ) is our arguments.
                     std::vector<AST_Argument> arguments;
@@ -407,12 +404,12 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     // Set the iterator
                     this->next(arguments.size());
 
-                    std::string name = this->fileName + "_" + current_scope;
+                    std::string name = this->fileName + "$" + current_scope;
                     // Now that we have our arguments, lets apply them to a function.
                     auto function = new AST_Function(token.value, token.line, token.column, arguments, name, TokenType::INVALID);
 
                     // Make sure we're not attempting to redeclare the main function
-                    if (function->name == "main") {  // TODO: This shouldn't be static
+                    if (function->name == "main") {
                         if (file->mainFunction != nullptr) {
                             this->workspace.report_error({ "Attempt to redeclare main function", this->fileName, token.line, token.column });
                             it += 4;
@@ -421,37 +418,13 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                         // Set the main function to this
                         file->mainFunction = function;
                     }
-                    // Make sure we're not redecling
-                    bool skip_next = false;
-                    for (auto& contained : file->contained) {
-                        // TODO: Allow REAL function overloading.
-                        if (!is_type<AST_Function*>(contained)) continue;
-                        auto func = static_cast<AST_Function*>(contained);
-                        // Check the arguments
-                        if (func->name == function->name && function->arguments.size() == func->arguments.size()) {
-                            bool same_args = false;
-                            for (auto& arg : function->arguments) {
-                                for (auto& other_arg : func->arguments) {
-                                    if (other_arg.type != arg.type) continue;
-                                    same_args = true;
-                                    break;
-                                }
-                            }
-                            if (same_args) {
-                                this->workspace.report_error({ "Attempt to declare function with same name and args as existing function.", this->fileName, token.line, token.column });
-                                skip_next = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (skip_next) {
-                        it += 4;
-                        continue;
-                    }
                     // Now that we have our function, give it to the file
+                    this->set_scope(name, function);
                     file->contained.emplace_back(function);
-                    this->scope_map[name] = function;
-                } else if (next_token.type == TokenType::IDENTIFIER) {
+
+                    current_scope = function->contained_scope;
+                }
+                else if (next_token.type == TokenType::IDENTIFIER) {
                     // Having an identifier here means we're setting a custom type to a variable.
                     // So, we need to have 3 more arguments following.
 
@@ -507,15 +480,17 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     }
 
                     AST_Declaration* decl = nullptr;
-                    auto name = this->fileName + "_" + current_scope;
-                    if (has_math) decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, math, name);
+                    auto name = this->fileName + "$" + current_scope;
+                    if (has_math) {
+                        math->scope = name;
+                        decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, math, name);
+                    }
                     else decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
                     assert(decl);
-                    file->contained.emplace_back(decl);
-                    if (this->scope_map[name]) this->scope_map[name]->contained.emplace_back(decl);
-                    else file->contained.emplace_back(decl);
+                    assert(decl->math || decl->value != "");
                     // Make sure the scanner knows it's been used too!
                     this->usedNames.emplace_back(token.value);
+                    this->add_scoped(name, decl);
                     it += 4;
                 }
             }
@@ -569,8 +544,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 else decl->value = value_token.value;
 
                 auto name = decl->scope;
-                if (this->scope_map[name]) this->scope_map[name]->contained.emplace_back(decl);
-                else file->contained.emplace_back(decl);
+                file->contained.emplace_back(decl);
             } else if (the_next_token.type == TokenType::LPAREN) {
                 // If we have a left paren, then we MUST be calling a function.
                 // So, lets take everything until ) as arguments.
@@ -595,12 +569,12 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     argument = *argument_it;
                 }
                 // Set the iterator
-                this->next(arguments.size());
+                it += arguments.size() + 1;
                 // Check if this is a builtin function
+                auto name = this->fileName + "$" + current_scope;
                 AST_FunctionCall* function = nullptr;
                 if (is_builtin(token.value)) function = new AST_Builtin(builtin_map[token.value], arguments);
-                else function = new AST_FunctionCall(token.value, 0, 0, arguments);
-                auto name = this->fileName + "_" + current_scope;
+                else function = new AST_FunctionCall(token.value, 0, 0, arguments, name);
 
                 // Make sure that this isn't being attempted with native_
                 if (Util::starts_with("native_", token.value)) {
@@ -613,8 +587,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     // Otherwise, just mark this as native.
                     function->native = true;
                 }
-                if (this->scope_map[name]) this->scope_map[name]->contained.emplace_back(function);
-                else file->contained.emplace_back(function);
+                this->add_scoped(name, function);
             }
         }
     }
