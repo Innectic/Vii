@@ -65,13 +65,23 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                     break;
                 case TokenType::INT:
                     if (decl->math) {
-                        for (auto op : decl->math->operations) stream << op.first_value << token_map[op.operation] << op.second_value;
+                        for (auto i = 0u; i < decl->math->operations.size(); i++) {
+                            auto op = decl->math->operations[i];
+                            auto last = i == decl->math->operations.size() - 1;
+
+                            stream << op.first_value;
+                            if (!op.chain) stream << token_map[op.operation] << op.second_value;
+                            if (!last) stream << token_map[op.operation];
+                        }
                     }
                     else stream << std::stoi(decl->value);
                     break;
                 case TokenType::FLOAT:
                     if (decl->math) {
-                        for (auto op : decl->math->operations) stream << op.first_value << token_map[op.operation] << op.second_value;
+                        for (auto op : decl->math->operations) {
+                            stream << op.first_value;
+                            if (!op.chain) stream << token_map[op.operation] << op.second_value << token_map[op.operation];
+                        }
                     }
                     else stream << std::stof(decl->value);
                     break;
@@ -87,8 +97,6 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                 }
                 stream << ";\n";
             } else if (is_type<AST_Builtin*>(contained)) {
-                // TODO: Do something with a standard lib here, so we can actually
-                // check the types being passed in.
                 auto builtin = static_cast<AST_Builtin*>(contained);
                 std::string ready_line = allow_native ? native_map[builtin->type] : internal_map[builtin->type];
 
@@ -108,7 +116,7 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
 
                 ready_line = Util::replace(ready_line, "<CUSTOM>", arguments);
                 stream << ready_line + "\n";
-            } else if (is_type<AST_FunctionCall*>(contained)) { // TODO: Generalize this with the above one
+            } else if (is_type<AST_FunctionCall*>(contained)) {
                 auto call = static_cast<AST_FunctionCall*>(contained);
                 if (call->native) {
                     if (!this->allow_native) continue;

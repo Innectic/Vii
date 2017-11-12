@@ -17,8 +17,8 @@ const inline static bool is_type(AST_Type* t) {
 
 struct AST_Operation : public AST_Type {
     inline AST_Operation() {}
-    inline AST_Operation(const std::string& first_value, const TokenType& first_type, const std::string& second_value, const TokenType& second_type, const TokenType& operation) :
-        first_value(first_value), first_type(first_type), second_value(second_value), second_type(second_type), operation(operation) {
+    inline AST_Operation(const std::string& first_value, const TokenType& first_type, const std::string& second_value, const TokenType& second_type, const TokenType& operation, const bool chain) :
+        first_value(first_value), first_type(first_type), second_value(second_value), second_type(second_type), operation(operation), chain(chain) {
     }
 
     std::string my_name() {
@@ -30,9 +30,9 @@ struct AST_Operation : public AST_Type {
     std::string second_value;
     TokenType second_type;
     TokenType operation;
+    bool chain;
 };
 
-// TODO: Get rid of this. It's gross.
 struct AST_Math : public AST_Type {
     inline AST_Math() {}
     inline AST_Math(const int& line, const int& column, const std::vector<AST_Operation>& operations, const std::string& scope) :

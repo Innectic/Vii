@@ -93,6 +93,7 @@ AST_Math* Scanner::do_math(std::vector<Token>* tokens, std::vector<Token>::itera
     if (!this->has_next(it, tokens->end()) || !this->has_next(it + 1, tokens->end())) return nullptr;
     std::vector<AST_Operation> operations;
 
+    bool chain = false;
     while (it < tokens->end()) {
         if (!this->has_next(it + 1, tokens->end()) || !this->has_next(it + 2, tokens->end())) break;
         auto current_token = *it;
@@ -117,10 +118,11 @@ AST_Math* Scanner::do_math(std::vector<Token>* tokens, std::vector<Token>::itera
             continue;
         }
 
-        AST_Operation operation = { current_token.value, current_token.type, next_adding.value, next_adding.type, operator_token_real.type };
+        AST_Operation operation = { current_token.value, current_token.type, next_adding.value, next_adding.type, operator_token_real.type, chain };
         operations.emplace_back(operation);
         it += 2;
-        break; // TODO: This only allows 1 + 1, nothing more complex can be done.. Not sure how that will even work yet...
+        if (!is_operator((it + 1)->type)) break;
+        if (!chain) chain = true;
     }
 
     if (operations.size() == 0) {
@@ -130,9 +132,7 @@ AST_Math* Scanner::do_math(std::vector<Token>* tokens, std::vector<Token>::itera
     return new AST_Math(0, 0, operations, "");
 }
 
-const bool Scanner::can_use_name(std::string name) {
-    // TODO: This needs more checking for the contents of the name too.
-    // We don't want names like: `t-h-e_t-h-i-n-g`. 
+const bool Scanner::can_use_name(const std::string& name) {
     return !Util::vector_contains(this->usedNames, name) && get_keyword_type(name) == KeywordType::INVALID;
 }
 
@@ -232,11 +232,6 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
 }
 
 const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
-    // TODO: Fix the stupid hack of a scoping system.
-    // currently, it's based off of the name of the file and the "position"
-    // of the file that it's in (something like a function).
-    // This should probably just become some sort of an enum(?)
-
     AST_SourceFile* file = new AST_SourceFile(this->fileName);
 
     // Start by making sure we even have any tokens to parse.

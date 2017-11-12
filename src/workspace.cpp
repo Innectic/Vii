@@ -8,25 +8,16 @@ const std::vector<std::string> split_string(const std::string& splitting, const 
     current = splitting.find_first_of(delim);
     while (current != std::string::npos) {
         std::string matched = splitting.substr(previous, current - previous);
-        matches.emplace_back(matched);
+        if (matched != "" && matched != " ") matches.emplace_back(matched);
         previous = current + 1;
         current = splitting.find_first_of(delim, previous);
     }
     matches.emplace_back(splitting.substr(previous, current - previous));
 
-    // TODO: Why can't this be in the main loop?
-    // It seems to make the entire function hang and never exit, for some reason.
-    std::vector<std::string> clean;
-    for (auto& dirty : matches) {
-        if (dirty == " " || dirty == "") continue;
-        clean.emplace_back(dirty);
-    }
-
-    return clean;
+    return matches;
 }
 
 void WorkSpace::set_defaults() {
-    // TODO: These are all temp values
     this->block_comment_start= "/*";
     this->block_comment_continue = "*";
     this->block_comment_end = "*/";
@@ -36,7 +27,7 @@ void WorkSpace::set_defaults() {
 }
 
 void WorkSpace::load_configuration() {
-    std::string fileName = this->directory + "/workspace.vii";  // TODO: Maybe this file should be set by a compiler directive. #config ?
+    std::string fileName = this->directory + "/workspace.vii";
 
     std::vector<std::string> contents = Util::read_file_to_vector(this->directory + "/workspace.vii");
     if (contents.size() <= 0) return;

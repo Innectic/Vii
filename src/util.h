@@ -82,4 +82,8 @@ public:
 
         return matches;
     }
+
+    static bool string_contains(const std::string& checking, const std::string& contains) {
+        return checking.find(contains) != std::string::npos;
+    }
 };

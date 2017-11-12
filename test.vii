@@ -1,13 +1,4 @@
-
-testing :: (a: char) {
-    print(a)
-}
-
-testing :: (a: int) {
-    print(a)
-}
-
 main :: () {
-    testing(1)
-    testing('a')
+    test := 4 * 4 + 4 * 4 + 4 - 4 * 4
+    print(test)
 }
