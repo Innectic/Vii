@@ -157,6 +157,7 @@ struct AST_Function : public AST_FunctionCall {
         return "AST_Func";
     }
 
+    std::string contained_scope;
     std::string scope;
     TokenType return_type;
     std::vector<AST_Type*> contained;

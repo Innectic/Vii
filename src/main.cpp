@@ -87,8 +87,8 @@ int main(int argc, char *argv[]) {
     if (workspace->had_error) std::cout << "Encountered errors. Will not build.";
     else {
         start_time = Util::get_time();
-        auto valid = verification->validate(file->contained);
-        if (!valid) return 1;
+        auto issues = verification->validate(file->contained);
+        if (issues) return 1;
         converter->go("test.cpp", *file);
         auto conversion_time = Util::get_time() - start_time;
 

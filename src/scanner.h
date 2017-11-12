@@ -21,7 +21,7 @@ private:
 
     WorkSpace& workspace;
 
-    std::map<std::string, AST_Function*> scope_map;
+    std::map<std::string, std::map<std::string, AST_Function*>> scope_map;
     
     bool allow_native;
 
@@ -58,12 +58,30 @@ public:
         return it < end - 1;
     }
 
-    const inline void set_scope(std::string scope, AST_Function* type) {
-        if (!this->scope_map[scope]) this->scope_map[scope] = type;
+    const inline void set_scope(const std::string& scope, AST_Function* function) {
+        // Create the name of the scope based off the name of the function, and the amount of things using that name
+        // that we already have stored. This should result in something like: testing$0
+        auto current_scope = this->scope_map[function->name];
+        auto function_scope_name = function->name + "$" + std::to_string(current_scope.size());
+        // Set the function's containment scope
+        function->contained_scope = function_scope_name;
+
+        auto scope_parts = Util::split(function->contained_scope, '$');
+        if (scope_parts.size() < 2) return;
+        auto id = scope_parts[1];
+        
+        this->scope_map[function->name][id] = function;
     }
 
     const inline void add_scoped(std::string scope, AST_Type* type) {
-        if (this->scope_map[scope]) this->scope_map[scope]->contained.emplace_back(type);
+        auto scope_parts = Util::split(scope, '$');
+        if (scope_parts.size() < 2) return;
+        auto base_scope = scope_parts[1];
+        auto sub_id = scope_parts[2];
+
+        auto scoped_function = this->scope_map[base_scope][sub_id];
+        std::cout << "This is the target function: " << scoped_function->contained_scope << std::endl;
+        scoped_function->contained.emplace_back(type);
     }
 
     const inline bool next(int amount) {

@@ -6,7 +6,7 @@
 #include <fstream>
 #include <algorithm>
 #include <chrono>
-
+#include <sstream>
 
 #ifdef _WIN32
 #define int64 __int64
@@ -71,5 +71,15 @@ public:
     const static bool contains_key(const std::map<T, T2> checking, T key) {
         auto it = checking.find(key);
         return it != checking.end();
+    }
+
+    const static std::vector<std::string> split(const std::string& splitting, const char& delim, const int count = 1) {
+        std::vector<std::string> matches;
+
+        std::string part;
+        std::stringstream stream(splitting);
+        while (getline(stream, part, delim)) matches.emplace_back(part);
+
+        return matches;
     }
 };
