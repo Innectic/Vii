@@ -80,7 +80,6 @@ public:
         auto sub_id = scope_parts[2];
 
         auto scoped_function = this->scope_map[base_scope][sub_id];
-        std::cout << "This is the target function: " << scoped_function->contained_scope << std::endl;
         scoped_function->contained.emplace_back(type);
     }
 
