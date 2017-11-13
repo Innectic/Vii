@@ -69,9 +69,10 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                             auto op = decl->math->operations[i];
                             auto last = i == decl->math->operations.size() - 1;
 
-                            stream << op.first_value;
-                            if (!op.chain) stream << token_map[op.operation] << op.second_value;
-                            if (!last) stream << token_map[op.operation];
+                            if (op.chain) {
+                                stream << token_map[op.operation] << op.second_value;
+                                if (!last) stream << token_map[op.operation];
+                            } else stream << op.first_value << token_map[op.operation] << op.second_value;
                         }
                     }
                     else stream << std::stoi(decl->value);
