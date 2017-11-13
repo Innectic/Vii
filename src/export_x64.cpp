@@ -71,7 +71,6 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
 
                             if (op.chain) {
                                 stream << token_map[op.operation] << op.second_value;
-                                if (!last) stream << token_map[op.operation];
                             } else stream << op.first_value << token_map[op.operation] << op.second_value;
                         }
                     }
