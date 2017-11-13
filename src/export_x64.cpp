@@ -29,6 +29,16 @@ const std::string Export_x64::name() const {
     return "x64";
 }
 
+const void handle_math_segment(AST_Math* math, std::ofstream& stream) {
+    for (auto i = 0u; i < math->operations.size(); i++) {
+        auto op = math->operations[i];
+        auto last = i == math->operations.size() - 1;
+
+        if (op.chain) stream << token_map[op.operation] << op.second_value;
+        else stream << op.first_value << token_map[op.operation] << op.second_value;
+    }
+}
+
 const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& stream) {
     add_import("<string>", stream);
     add_import("<iostream>", stream);
@@ -64,25 +74,11 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                     stream << "\"" + decl->value + "\"";
                     break;
                 case TokenType::INT:
-                    if (decl->math) {
-                        for (auto i = 0u; i < decl->math->operations.size(); i++) {
-                            auto op = decl->math->operations[i];
-                            auto last = i == decl->math->operations.size() - 1;
-
-                            if (op.chain) {
-                                stream << token_map[op.operation] << op.second_value;
-                            } else stream << op.first_value << token_map[op.operation] << op.second_value;
-                        }
-                    }
+                    if (decl->math) handle_math_segment(decl->math, stream);
                     else stream << std::stoi(decl->value);
                     break;
                 case TokenType::FLOAT:
-                    if (decl->math) {
-                        for (auto op : decl->math->operations) {
-                            stream << op.first_value;
-                            if (!op.chain) stream << token_map[op.operation] << op.second_value << token_map[op.operation];
-                        }
-                    }
+                    if (decl->math) handle_math_segment(decl->math, stream);
                     else stream << std::stof(decl->value);
                     break;
                 case TokenType::CHAR:
