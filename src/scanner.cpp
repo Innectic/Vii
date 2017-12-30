@@ -94,31 +94,30 @@ AST_Math* Scanner::do_math(std::vector<Token>* tokens, std::vector<Token>::itera
     std::vector<AST_Operation> operations;
 
     bool chain = false;
-    while (it < tokens->end()) {
+    while (this->has_next(it, tokens->end())) {
         if (!this->has_next(it + 1, tokens->end()) || !this->has_next(it + 2, tokens->end())) break;
-        auto current_token = *it;
-        auto operator_token_real = *(it + 1);
-        auto next_adding = *(it + 2);
+        auto operator_token = it + 1;
+        auto next_adding = it + 2;
 
-        if (!is_operator(operator_token_real.type)) {
-            this->workspace.report_error({ "Invalid operator type: " + token_map[operator_token_real.type], this->fileName, token.line, token.column });
+        if (!is_operator(operator_token->type)) {
+            this->workspace.report_error({ "Invalid operator type: " + token_map[operator_token->type], this->fileName, token.line, token.column });
             it += 2;
             continue;
         }
 
-        if (!is_numeric(current_token.type)) {
-            this->workspace.report_error({ "Cannot add this type: " + token_map[current_token.type], this->fileName, token.line, token.column });
+        if (!is_numeric(it->type)) {
+            this->workspace.report_error({ "Cannot add this type: " + token_map[it->type], this->fileName, token.line, token.column });
             it += 2;
             continue;
         }
 
-        if (!is_numeric(next_adding.type)) {
-            this->workspace.report_error({ "Cannot add this type: " + token_map[next_adding.type], this->fileName, token.line, token.column });
+        if (!is_numeric(next_adding->type)) {
+            this->workspace.report_error({ "Cannot add this type: " + token_map[next_adding->type], this->fileName, token.line, token.column });
             it += 2;
             continue;
         }
 
-        AST_Operation operation = { current_token.value, current_token.type, next_adding.value, next_adding.type, operator_token_real.type, chain };
+        AST_Operation operation = { it->value, it->type, next_adding->value, next_adding->type, operator_token->type, chain };
         operations.emplace_back(operation);
         it += 2;
         if (!is_operator((it + 1)->type)) break;
@@ -129,7 +128,7 @@ AST_Math* Scanner::do_math(std::vector<Token>* tokens, std::vector<Token>::itera
         this->workspace.report_error({ "INTERNAL COMPILER ERROR: Didn't get any operations / operators from expression?!", this->fileName, token.line, token.column });
         return nullptr;
     }
-    return new AST_Math(0, 0, operations, "");
+    return new AST_Math(token.line, token.column, operations, "");
 }
 
 const bool Scanner::can_use_name(const std::string& name) {
@@ -354,47 +353,58 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     auto argument_it = it + 4;
 
                     auto argument = *argument_it;
-                    // COPYPASTA: This should be a function, was copied from another section
-                    while (argument.type != TokenType::RPAREN && argument_it < tokens.end() - 1) {
+					bool should_be_looking_at_comma = true;
+					// COPYPASTA: This should be a function, was copied from another section
+                    while (argument.type != TokenType::RPAREN && this->has_next(argument_it, tokens.end())) {
                         // Build the AST representation of the argument from the token
-                        
-                        if (argument.type == TokenType::IDENTIFIER && this->has_next(argument_it, tokens.end())) {
-                            auto colon = *(argument_it + 1);
-                            if (colon.type == TokenType::COLON && this->has_next(argument_it + 1, tokens.end())) {
-                                auto type = *(argument_it + 2);
-                                auto real_type = get_type_from_string(type.value);
-                                // Make sure it's a valid type
-                                if (type.type != TokenType::IDENTIFIER || real_type == TokenType::INVALID) {
-                                    ViiError err = {
-                                        "Invalid type: " + type.value,
-                                        file->file_name,
-                                        type.line,
-                                        type.column
-                                    };
-                                    this->workspace.report_error(err);
-                                    argument_it += 2;
-                                    it = argument_it;
-                                    continue;
-                                }
-                                // It is, allow the function to have this argument as this type.
-                                auto arg = new AST_Argument(argument.value, real_type);
-                                arguments.emplace_back(*arg);
-                                argument_it += 3;
-                                argument = *argument_it;
-                                it = argument_it;
-                                continue;
-                            }
-                            std::cout << "A" << std::endl;
-                            argument_it += 3;
-                            argument = *argument_it;
-                            it = argument_it;
-                            continue;
-                        }
-                        std::cout << "B" << std::endl;
-                        argument_it += 3;
-                        argument = *argument_it;
-                        it = argument_it;
-                        continue;
+
+						switch (argument.type) {
+							case TokenType::IDENTIFIER: {
+								if (!should_be_looking_at_comma) {
+									ViiError error = {
+										"Expecting a comma",
+										file->file_name,
+										argument.line,
+										argument.column
+									};
+									this->workspace.report_error(error);
+									continue;
+								}
+								if (!this->has_next(argument_it, tokens.end())) continue;
+								if ((argument_it + 1)->type != TokenType::COLON) continue;
+								if (!this->has_next(argument_it + 1, tokens.end())) continue;
+
+								auto type = argument_it + 2;
+								auto real_type = get_type_from_string(type->value);
+
+								if (type->type != TokenType::IDENTIFIER || real_type == TokenType::INVALID) {
+									ViiError error = {
+										"Invalid type: " + type->value,
+										file->file_name,
+										type->line,
+										type->column
+									};
+									this->workspace.report_error(error);
+									argument_it += 2;
+									it = argument_it;
+									continue;
+								}
+								auto arg = new AST_Argument(argument.value, real_type);
+								arguments.emplace_back(*arg);
+								argument_it += 3;
+								it = argument_it;
+								argument = *argument_it;
+								should_be_looking_at_comma = false;
+								break;
+							}
+							case TokenType::COMMA: {
+								should_be_looking_at_comma = true;
+								break;
+							}
+							default:
+								std::cout << "How did this happen" << std::endl;
+								break;
+						}
                     }
                     // Set the iterator
                     this->next(arguments.size());
@@ -403,9 +413,9 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     // Now that we have our arguments, lets apply them to a function.
                     auto function = new AST_Function(token.value, token.line, token.column, arguments, name, TokenType::INVALID);
 
-                    // Make sure we're not attempting to redeclare the main function
                     if (function->name == "main") {
-                        if (file->mainFunction != nullptr) {
+						// Make sure we're not attempting to redeclare the main function
+						if (file->mainFunction) {
                             this->workspace.report_error({ "Attempt to redeclare main function", this->fileName, token.line, token.column });
                             it += 4;
                             continue;
@@ -554,14 +564,16 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 std::vector<AST_Argument> arguments;
                 auto argument_it = it + 2;
 
-                Token argument = *argument_it;
-                while (argument.type != TokenType::RPAREN && argument_it != tokens.end()) {
+                while (argument_it->type != TokenType::RPAREN && this->has_next(argument_it, tokens.end())) {
+					if (argument_it->type == TokenType::COMMA) {
+						argument_it++;
+						continue;
+					}
                     // Build the AST representation of the argument from the token
-                    AST_Argument* arg = new AST_Argument(argument.value, argument.type);
+                    AST_Argument* arg = new AST_Argument(argument_it->value, argument_it->type);
 
                     arguments.emplace_back(*arg);
                     argument_it++;
-                    argument = *argument_it;
                 }
                 // Set the iterator
                 it += arguments.size() + 1;

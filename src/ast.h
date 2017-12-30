@@ -10,8 +10,8 @@ struct AST_Type {
     virtual std::string my_name() = 0;
 };
 
-template<class T>
-const inline static bool is_type(AST_Type* t) {
+template<class T, typename T2>
+const inline static bool is_type(T2 t) {
     return dynamic_cast<T>(t) != nullptr;
 }
 

@@ -101,7 +101,7 @@ const static bool is_builtin(const std::string& name) {
 }
 
 static std::string get_native(const std::string& name) {
-    std::string using_name = Util::replace(name, "native_", "");
+    auto using_name = Util::replace(name, "native_", "");
     return native_map[builtin_map[using_name]];
 }
 
