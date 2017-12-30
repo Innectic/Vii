@@ -399,6 +399,11 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 							}
 							case TokenType::COMMA: {
 								should_be_looking_at_comma = true;
+                                if (this->has_next(it, tokens.end())) {
+                                    argument_it++;
+                                    it = argument_it;
+                                    argument = *argument_it;
+                                }
 								break;
 							}
 							default:

@@ -55,9 +55,10 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
         std::string return_type = convert_type(function->return_type);
         std::string argument_string = "";
 
-        for (auto& arg : function->arguments) {
-            std::string arg_type = convert_type(arg.type);
-            argument_string += arg_type + " " + arg.value;
+        for (auto arg = function->arguments.begin(); arg < function->arguments.end(); arg++) {
+            std::string arg_type = convert_type(arg->type);
+            argument_string += arg_type + " " + arg->value;
+            if (arg != function->arguments.end() - 1) argument_string += ", ";
         }
 
         stream << return_type + " " + function_name + "(" + argument_string + ") {\n";
@@ -97,17 +98,18 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                 std::string ready_line = allow_native ? native_map[builtin->type] : internal_map[builtin->type];
 
                 std::string arguments;
-                for (auto& arg : builtin->arguments) {
+                for (auto arg = builtin->arguments.begin(); arg < builtin->arguments.end(); arg++) {
                     std::string pre = "";;
                     std::string post = "";
-                    if (arg.type == TokenType::STRING) {
+                    if (arg->type == TokenType::STRING) {
                         pre += "\"";
                         post += "\"";
-                    } else if (arg.type == TokenType::CHAR) {
+                    } else if (arg->type == TokenType::CHAR) {
                         pre += "'";
                         post += "'";
-                    } else if (arg.type == TokenType::FLOAT) post += "F";
-                    arguments += pre + arg.value + post;
+                    } else if (arg->type == TokenType::FLOAT) post += "F";
+                    if (arg != builtin->arguments.end() - 1) post += " , ";
+                    arguments += pre + arg->value + post;
                 }
 
                 ready_line = Util::replace(ready_line, "<CUSTOM>", arguments);
@@ -119,17 +121,19 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                     std::string ready_line = get_native(call->name);
 
                     std::string arguments;
-                    for (auto& arg : call->arguments) {
+                    for (auto arg = call->arguments.begin(); arg < call->arguments.end(); arg++) {
                         std::string pre = "";;
                         std::string post = "";
-                        if (arg.type == TokenType::STRING) {
+                        if (arg->type == TokenType::STRING) {
                             pre += "\"";
                             post += "\"";
-                        } else if (arg.type == TokenType::CHAR) {
+                        } else if (arg->type == TokenType::CHAR) {
                             pre += "'";
                             post += "'";
-                        } else if (arg.type == TokenType::FLOAT) post += "F";
-                        arguments += pre + arg.value + post;
+                        } else if (arg->type == TokenType::FLOAT) post += "F";
+
+                        if (arg != call->arguments.end() - 1) post += " , ";
+                        arguments += pre + arg->value + post;
                     }
 
                     ready_line = Util::replace(ready_line, "<CUSTOM>", arguments);
@@ -137,17 +141,19 @@ const void Export_x64::begin(const AST_SourceFile& source_file, std::ofstream& s
                 } else {
                     // COPYPASTA from the above branch...
                     std::string arguments;
-                    for (auto& arg : call->arguments) {
+                    for (auto arg = call->arguments.begin(); arg < call->arguments.end(); arg++) {
                         std::string pre = "";;
                         std::string post = "";
-                        if (arg.type == TokenType::STRING) {
+                        if (arg->type == TokenType::STRING) {
                             pre += "\"";
                             post += "\"";
-                        } else if (arg.type == TokenType::CHAR) {
+                        } else if (arg->type == TokenType::CHAR) {
                             pre += "'";
                             post += "'";
-                        } else if (arg.type == TokenType::FLOAT) post += "F";
-                        arguments += pre + arg.value + post;
+                        } else if (arg->type == TokenType::FLOAT) post += "F";
+                     
+                        if (arg != call->arguments.end() - 1) post += " , ";
+                        arguments += pre + arg->value + post;
                     }
                     stream << call->name << "(" << arguments << ");\n";
                 }
