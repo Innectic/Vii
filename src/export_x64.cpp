@@ -72,6 +72,7 @@ const void Export_x64::begin(const std::vector<AST_Type*> contained, std::ofstre
 			stream << return_type + " " + function_name + "(" + argument_string + ") {\n";
 			this->begin(function->contained, stream, false, nullptr);
 			stream << "}\n";
+			continue;
 		}
 		else if (is_type<AST_Declaration*>(potential)) {
 			auto decl = static_cast<AST_Declaration*>(potential);

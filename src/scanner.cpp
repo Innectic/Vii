@@ -314,6 +314,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 						auto if_block = new AST_If_Block();
 						if_block->first_block = main_if;
 
+						// TODO: Scope this like a not idiot
 						file->contained.emplace_back(if_block);
 
 						position++;
@@ -514,6 +515,8 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                     }
                     // Now that we have our function, give it to the file
                     this->set_scope(name, function);
+
+					// TODO: go bye-bye?
                     file->contained.emplace_back(function);
 
                     current_scope = function->contained_scope;
@@ -670,8 +673,8 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                     arguments.emplace_back(*arg);
                     argument_it++;
                 }
-                // Set the iterator
-                it += arguments.size() + 1;
+				// Set the iterator
+				it = argument_it;
                 // Check if this is a builtin function
                 auto name = this->fileName + "$" + current_scope;
                 AST_FunctionCall* function = nullptr;
@@ -691,7 +694,6 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                     function->native = true;
                 }
                 this->add_scoped(name, function);
-				file->contained.emplace_back(function);
 			}
         }
 	}
