@@ -144,7 +144,6 @@ struct AST_Builtin : public AST_FunctionCall {
     }
 
     NativeType type;
-    std::vector<AST_Argument> arguments;
 };
 
 struct AST_Function : public AST_FunctionCall {

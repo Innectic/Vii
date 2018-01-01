@@ -21,6 +21,33 @@ const std::string convert_type(const TokenType& type) {
     }
 }
 
+const std::string build_argument_string(AST_FunctionCall* function, bool include_type) {
+	std::string argument_string = "";
+
+	for (auto arg = function->arguments.begin(); arg < function->arguments.end(); arg++) {
+		std::string arg_type = convert_type(arg->type);
+
+		switch (arg->type) {
+			case TokenType::STRING: {
+				if (include_type) argument_string += arg_type + " " + arg->value;
+				else argument_string += "\"" + arg->value + "\"";
+				break;
+			}
+			case TokenType::CHAR: {
+				if (include_type) argument_string += arg_type + " " + arg->value;
+				else argument_string += "'" + arg->value + "'";
+				break;
+			}
+			default: {
+				argument_string += arg->value;
+				break;
+			}
+		}
+		if (arg != function->arguments.end() - 1) argument_string += ", ";
+	}
+	return argument_string;
+}
+
 const void add_import(const std::string& lib, std::ofstream& stream) {
     std::string line = "#include " + lib + "\n";
     stream << line;
@@ -54,27 +81,7 @@ const void Export_x64::begin(const std::vector<AST_Type*> contained, std::ofstre
 	}
 
 	for (auto& potential : contained) {
-		if (is_type<AST_Function*>(potential)) {
-			auto function = static_cast<AST_Function*>(potential);
-			// Check if this is the main function
-			std::string function_name = function->name;
-			if (main_function && main_function == function) function_name = "real_main";
-
-			std::string return_type = convert_type(function->return_type);
-			std::string argument_string = "";
-
-			for (auto arg = function->arguments.begin(); arg < function->arguments.end(); arg++) {
-				std::string arg_type = convert_type(arg->type);
-				argument_string += arg_type + " " + arg->value;
-				if (arg != function->arguments.end() - 1) argument_string += ", ";
-			}
-
-			stream << return_type + " " + function_name + "(" + argument_string + ") {\n";
-			this->begin(function->contained, stream, false, nullptr);
-			stream << "}\n";
-			continue;
-		}
-		else if (is_type<AST_Declaration*>(potential)) {
+		if (is_type<AST_Declaration*>(potential)) {
 			auto decl = static_cast<AST_Declaration*>(potential);
 
 			std::string type = decl->redecl ? "" : convert_type(decl->type);
@@ -107,77 +114,29 @@ const void Export_x64::begin(const std::vector<AST_Type*> contained, std::ofstre
 		} if (is_type<AST_Builtin*>(potential)) {
 			auto builtin = static_cast<AST_Builtin*>(potential);
 			std::string ready_line = allow_native ? native_map[builtin->type] : internal_map[builtin->type];
-
-			// TODO: Generialization
-			std::string arguments;
-			for (auto arg = builtin->arguments.begin(); arg < builtin->arguments.end(); arg++) {
-				std::string pre = "";;
-				std::string post = "";
-				if (arg->type == TokenType::STRING) {
-					pre += "\"";
-					post += "\"";
-				}
-				else if (arg->type == TokenType::CHAR) {
-					pre += "'";
-					post += "'";
-				}
-				else if (arg->type == TokenType::FLOAT) post += "F";
-				if (arg != builtin->arguments.end() - 1) post += " , ";
-				arguments += pre + arg->value + post;
-			}
-
-			ready_line = Util::replace(ready_line, "<CUSTOM>", arguments);
+			ready_line = Util::replace(ready_line, "<CUSTOM>", build_argument_string(builtin, false));
 			stream << ready_line + "\n";
 		}
 		else if (is_type<AST_FunctionCall*>(potential)) {
-			// TODO: Generalization
+			// Are we defining a function?
+			if (is_type<AST_Function*>(potential)) {
+				auto function = static_cast<AST_Function*>(potential);
+				// Check if this is the main function
+				auto function_name = function->name;
+				if (main_function && main_function == function) function_name = "real_main";
+
+				auto return_type = convert_type(function->return_type);
+				stream << return_type + " " + function_name + "(" + build_argument_string(function, true) + ") {\n";
+				
+				this->begin(function->contained, stream, false, nullptr);
+				stream << "}\n";
+				continue;
+			}
+			// Nope, so we're calling one.
 			auto call = static_cast<AST_FunctionCall*>(potential);
-			if (call->native) {
-				if (!this->allow_native) continue;
-				std::string ready_line = get_native(call->name);
-
-				std::string arguments;
-				for (auto arg = call->arguments.begin(); arg < call->arguments.end(); arg++) {
-					std::string pre = "";;
-					std::string post = "";
-					if (arg->type == TokenType::STRING) {
-						pre += "\"";
-						post += "\"";
-					}
-					else if (arg->type == TokenType::CHAR) {
-						pre += "'";
-						post += "'";
-					}
-					else if (arg->type == TokenType::FLOAT) post += "F";
-
-					if (arg != call->arguments.end() - 1) post += " , ";
-					arguments += pre + arg->value + post;
-				}
-
-				ready_line = Util::replace(ready_line, "<CUSTOM>", arguments);
-				stream << ready_line + "\n";
-			}
-			else {
-				// COPYPASTA from the above branch...
-				std::string arguments;
-				for (auto arg = call->arguments.begin(); arg < call->arguments.end(); arg++) {
-					std::string pre = "";;
-					std::string post = "";
-					if (arg->type == TokenType::STRING) {
-						pre += "\"";
-						post += "\"";
-					}
-					else if (arg->type == TokenType::CHAR) {
-						pre += "'";
-						post += "'";
-					}
-					else if (arg->type == TokenType::FLOAT) post += "F";
-
-					if (arg != call->arguments.end() - 1) post += " , ";
-					arguments += pre + arg->value + post;
-				}
-				stream << call->name << "(" << arguments << ");\n";
-			}
+			if (call->native && !this->allow_native) continue;
+			
+			stream << call->name << "(" << build_argument_string(call, false) << ");\n";
 		}
 		else if (is_type<AST_If_Block*>(potential)) {
 			auto if_block = static_cast<AST_If_Block*>(potential);
@@ -187,7 +146,6 @@ const void Export_x64::begin(const std::vector<AST_Type*> contained, std::ofstre
 			this->begin(*if_block->first_block->contained, stream, true);
 			stream << "}\n";
 			// TODO: Else if / else
-
 		}
 	}
 	if (!allow_native && should_import) stream << FILE_TEMPLATE;

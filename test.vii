@@ -3,6 +3,11 @@ test :: (a: string) {
     print(a)
 }
 
+thing :: (a: string) {
+    print(a)
+}
+
 main :: () {
     test("testing")
+    thing("Test")
 }
