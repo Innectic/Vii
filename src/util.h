@@ -83,7 +83,14 @@ public:
         return matches;
     }
 
-    static bool string_contains(const std::string& checking, const std::string& contains) {
+    const static bool string_contains(const std::string& checking, const std::string& contains) {
         return checking.find(contains) != std::string::npos;
     }
+
+	const static std::string trim(const std::string& trimming) {
+		std::string cleaned = trimming;
+		while (cleaned.size() && isspace(cleaned.front())) cleaned.erase(cleaned.begin());
+		while (cleaned.size() && isspace(cleaned.back())) cleaned.pop_back();
+		return cleaned;
+	}
 };

@@ -89,13 +89,13 @@ const bool Scanner::check_comment() {
     return current == '/' && next == '/';
 }
 
-AST_Math* Scanner::do_math(std::vector<Token>* tokens, std::vector<Token>::iterator it, const Token& token) {
-    if (!this->has_next(it, tokens->end()) || !this->has_next(it + 1, tokens->end())) return nullptr;
+AST_Math* Scanner::do_math(std::vector<Token>::iterator end, std::vector<Token>::iterator it, const Token& token) {
+    if (!this->has_next(it, end) || !this->has_next(it + 1, end)) return nullptr;
     std::vector<AST_Operation> operations;
 
     bool chain = false;
-    while (this->has_next(it, tokens->end())) {
-        if (!this->has_next(it + 1, tokens->end()) || !this->has_next(it + 2, tokens->end())) break;
+    while (this->has_next(it, end)) {
+        if (!this->has_next(it + 1, end) || !this->has_next(it + 2, end)) break;
         auto operator_token = it + 1;
         auto next_adding = it + 2;
 
@@ -230,19 +230,103 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
     return tokens;
 }
 
-const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
-    AST_SourceFile* file = new AST_SourceFile(this->fileName);
+AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
+	return this->parse(tokens.begin(), tokens.end());
+}
+
+AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<Token>::iterator end) {
+	AST_SourceFile* file = new AST_SourceFile(this->fileName);
 
     // Start by making sure we even have any tokens to parse.
-    if (tokens.size() == 0) return file;
     std::string current_scope = "";
 
     // We have things to check, so lets just start going through.
-    for (auto it = tokens.begin(); it < tokens.end() - 1; ++it) {
+    for (auto it = start; it < end - 1; ++it) {
         auto token = *it;
-        // Check the type of the token
         
-        if (token.type == TokenType::RBRACE) {
+		// Check if it's a keyword.
+		auto keyword_type = get_keyword_type(token.value);
+		if (keyword_type != KeywordType::INVALID) {
+			// Since this is a keyword, then we need to figure out
+			// what kind it is, and how to proceed.
+			//
+			switch (keyword_type) {
+				case KeywordType::IF: {
+					// Make sure there's at least a possible conditional
+
+					if (!this->has_next(it, end)) {
+						// If statement is missing conditional.
+						ViiError error = {
+							"If statement is missing condition.",
+							this->fileName,
+							token.line,
+							token.column
+						};
+						this->workspace.report_error(error);
+						continue;
+					}
+					// We potentially have a conditional!
+					auto position = it + 1;
+					//
+					// Essentially, we're trying to match this:
+					//
+					// if [conditional] {
+					//     // something
+					// }
+					//
+					// Both of these are valid.
+					//
+					std::string conditional = (it - 1)->value;
+					std::vector<AST_Type*> contained;
+
+					auto finished_conditional = false;
+
+					while (this->has_next(position, end)) {
+						// If we're still trying to finish the conditional, then we want to just add on to it.
+						// However, if we have the conditional then we just need to pull the body of the statement.
+						//
+						if (!finished_conditional) {
+							if (position->type == TokenType::LBRACE) {
+								// We've finished the conditional, time to get the body.
+								finished_conditional = true;
+								continue;
+							}
+
+							if (is_conditional_operator(position->type)) conditional += conditional_operator_as_string(position->type);
+							else conditional += position->value + " ";
+							position++;
+							continue;
+						}
+						// Since the conditional is finished, lets take the body.
+						if (position->type == TokenType::RBRACE) break;
+						AST_SourceFile* result = this->parse(position + 1, end);
+
+						for (auto a : result->contained) std::cout << a->my_name() << std::endl;
+
+						conditional = Util::trim(conditional);
+						auto main_if = new AST_If(
+							position->line,
+							position->column,
+							conditional,
+							result
+						);
+
+						auto if_block = new AST_If_Block();
+						if_block->first_block = main_if;
+
+						file->contained.emplace_back(if_block);
+
+						position++;
+					}
+
+					it = position;
+					continue;
+				}
+			}
+		}
+
+		// Check the type of the token
+		if (token.type == TokenType::RBRACE) {
             current_scope = "";
             continue;
         } else if (token.type == TokenType::IDENTIFIER) {
@@ -254,11 +338,11 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
             //   - Variable decleration
             //
             // So, lets see what we have after this, to assess what we're
-            // even doing with this.
+            // even doing.
             //
 
             // Before we can do so, lets make sure we even have things after this
-            if (!this->has_next(it, tokens.end())) {
+            if (!this->has_next(it, end)) {
                 // We don't have anything next, so we need to display a friendly error.
                 this->workspace.report_error({ "Incomplete identifier", this->fileName, token.line, token.column });
                 continue;
@@ -278,7 +362,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 // to that, if the type is valid.
                 //
 
-                if (!this->has_next(it + 1, tokens.end())) {
+                if (!this->has_next(it + 1, end)) {
                     this->workspace.report_error({ "Incomplete variable decleration", this->fileName, token.line, token.column });
                     it += 3;
                     continue;
@@ -288,7 +372,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 auto next_token = *(it + 2);
                 if (next_token.type == TokenType::ASSIGN) {
                     // Since it's an assign, we need to do one more check - Make sure there's a value!
-                    if (!this->has_next(it + 2, tokens.end())) {
+                    if (!this->has_next(it + 2, end)) {
                         this->workspace.report_error({ "Missing value on variable decleration", this->fileName, token.line, token.column });
                         it += 3;
                         continue;
@@ -305,7 +389,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     if (is_operator((it + 4)->type)) {
                         // TODO: This won't allow things like idents to be used for evaluating things.
                         // We'll do math to set the value of this.
-                        auto evaluated = this->do_math(&tokens, it + 3, token);
+                        auto evaluated = this->do_math(end, it + 3, token);
                         if (evaluated) {
                             has_math = true;
                             math = evaluated;
@@ -322,7 +406,8 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                         decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, math, name);
                     }
                     else decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
-                    assert(decl);
+                    // Make sure everything exists.
+					assert(decl);
                     assert(decl->math || decl->value != "");
                     // Make sure the scanner knows it's been used too!
                     this->usedNames.emplace_back(token.value);
@@ -331,7 +416,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     // Having another colon here means we might be making a function.
 
                     // Make sure that we have something more to check.
-                    if (!this->has_next(it + 2, tokens.end()) || !this->has_next(it + 3, tokens.end())) {
+                    if (!this->has_next(it + 2, end) || !this->has_next(it + 3, end)) {
                         // We don't have at least two more, which we need.
                         this->workspace.report_error({ "Incomplete function decleration", this->fileName, token.line, token.column });
                         it += 4;
@@ -355,9 +440,8 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     auto argument = *argument_it;
 					bool should_be_looking_at_comma = true;
 					// COPYPASTA: This should be a function, was copied from another section
-                    while (argument.type != TokenType::RPAREN && this->has_next(argument_it, tokens.end())) {
+                    while (argument.type != TokenType::RPAREN && this->has_next(argument_it, end)) {
                         // Build the AST representation of the argument from the token
-
 						switch (argument.type) {
 							case TokenType::IDENTIFIER: {
 								if (!should_be_looking_at_comma) {
@@ -370,9 +454,9 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 									this->workspace.report_error(error);
 									continue;
 								}
-								if (!this->has_next(argument_it, tokens.end())) continue;
+								if (!this->has_next(argument_it, end)) continue;
 								if ((argument_it + 1)->type != TokenType::COLON) continue;
-								if (!this->has_next(argument_it + 1, tokens.end())) continue;
+								if (!this->has_next(argument_it + 1, end)) continue;
 
 								auto type = argument_it + 2;
 								auto real_type = get_type_from_string(type->value);
@@ -399,7 +483,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
 							}
 							case TokenType::COMMA: {
 								should_be_looking_at_comma = true;
-                                if (this->has_next(it, tokens.end())) {
+                                if (this->has_next(it, end)) {
                                     argument_it++;
                                     it = argument_it;
                                     argument = *argument_it;
@@ -443,14 +527,14 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     if (is_operator((it + 5)->type)) {
                         // TODO: This won't allow things like idents to be used for evaluating things.
                         // We'll do math to set the value of this.
-                        auto evaluated = this->do_math(&tokens, it + 4, token);
+                        auto evaluated = this->do_math(end, it + 4, token);
                         if (evaluated) {
                             has_math = true;
                             math = evaluated;
                         }
                     }
 
-                    if (!this->has_next(it + 1, tokens.end())) {
+                    if (!this->has_next(it + 1, end)) {
                         this->workspace.report_error({ "Expected '=', but found nothing", this->fileName, token.line, token.column });
                         it += 4;
                         continue;
@@ -467,7 +551,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     }
 
                     // Since the type exists, lets see if we have a value.
-                    if (!this->has_next(it + 3, tokens.end())) {
+                    if (!this->has_next(it + 3, end)) {
                         this->workspace.report_error({ "Cannot initialize variable without a value", this->fileName, token.line, token.column });
                         it += 4;
                         continue;
@@ -496,7 +580,8 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                         decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, math, name);
                     }
                     else decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
-                    assert(decl);
+                    // Checks
+					assert(decl);
                     assert(decl->math || decl->value != "");
                     // Make sure the scanner knows it's been used too!
                     this->usedNames.emplace_back(token.value);
@@ -513,15 +598,16 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 if (is_operator((it + 3)->type)) {
                     // TODO: This won't allow things like idents to be used for evaluating things.
                     // We'll do math to set the value of this.
-                    auto evaluated = this->do_math(&tokens, it + 2, token);
+                    auto evaluated = this->do_math(end, it + 2, token);
                     if (evaluated) {
                         has_math = true;
                         math = evaluated;
-                    }
-                }
+						assert(math);
+					}
+				}
 
                 // Before we can, lets make sure we have something to actually assign it to
-                if (!this->has_next(it + 1, tokens.end())) {
+                if (!this->has_next(it + 1, end)) {
                     this->workspace.report_error({ "Cannot reassign variable without value", this->fileName, token.line, token.column });
                     it += 2;
                     continue;
@@ -553,6 +639,10 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 if (has_math) decl->math = math;
                 else decl->value = value_token.value;
 
+				// Checks
+				assert(decl);
+				assert(decl->math || decl->value != "");
+
                 auto name = decl->scope;
                 file->contained.emplace_back(decl);
             } else if (the_next_token.type == TokenType::LPAREN) {
@@ -560,7 +650,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 // So, lets take everything until ) as arguments.
 
                 // But before we can do that, we need to make sure we even *have* args to do that with.
-                if (!this->has_next(it + 1, tokens.end())) {
+                if (!this->has_next(it + 1, end)) {
                     this->workspace.report_error({ "Expected (, found nothing", this->fileName, token.line, token.column });
                     it += 2;
                     continue;
@@ -569,7 +659,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 std::vector<AST_Argument> arguments;
                 auto argument_it = it + 2;
 
-                while (argument_it->type != TokenType::RPAREN && this->has_next(argument_it, tokens.end())) {
+                while (argument_it->type != TokenType::RPAREN && this->has_next(argument_it, end)) {
 					if (argument_it->type == TokenType::COMMA) {
 						argument_it++;
 						continue;
@@ -587,6 +677,7 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                 AST_FunctionCall* function = nullptr;
                 if (is_builtin(token.value)) function = new AST_Builtin(builtin_map[token.value], arguments);
                 else function = new AST_FunctionCall(token.value, 0, 0, arguments, name);
+				assert(function);
 
                 // Make sure that this isn't being attempted with native_
                 if (Util::starts_with("native_", token.value)) {
@@ -600,8 +691,9 @@ const AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
                     function->native = true;
                 }
                 this->add_scoped(name, function);
-            }
+				file->contained.emplace_back(function);
+			}
         }
-    }
+	}
     return file;
 }

@@ -7,56 +7,56 @@
 #ifdef _WIN32
 #include <stdio.h>
 #include <direct.h>
-#define GetCurrentDir _getcwd
+#define get_current_dir _getcwd
 #endif
 #ifdef __linux__
 #include <unistd.h>
-#define GetCurrentDir getcwd
+#define get_current_dir getcwd
 #endif
 
 class FileHandler {
 private:
-    inline const std::vector<std::string> checkPath(const std::experimental::filesystem::v1::directory_entry& entry) const {
-        std::vector<std::string> discoveredFiles;
+    inline const std::vector<std::string> check_path(const std::experimental::filesystem::v1::directory_entry& entry) const {
+        std::vector<std::string> discovered_files;
         for (auto& name : entry.path().filename()) {
             // We only want to take the `.vii` files.
             if (name.extension() == ".vii") {
-                std::string wholeName = entry.path().parent_path().string();
-                wholeName.append("/").append(entry.path().root_directory().string()).append(name.string());
-                discoveredFiles.emplace_back(wholeName);
+                std::string whole_name = entry.path().parent_path().string();
+                whole_name.append("/").append(entry.path().root_directory().string()).append(name.string());
+				discovered_files.emplace_back(whole_name);
             }
         }
-        return discoveredFiles;
+        return discovered_files;
     }
 
-    inline const std::vector<std::string> recurseFiles(const std::string& directory) const {
+    inline const std::vector<std::string> recurse_files(const std::string& directory) const {
         using namespace std::experimental::filesystem;
 
-        std::vector<std::string> discoveredFiles;
+        std::vector<std::string> discovered_files;
         for (directory_entry entry : recursive_directory_iterator(directory))
-            for (auto& in : this->checkPath(entry))
-                discoveredFiles.emplace_back(in);
-        return discoveredFiles;
+            for (auto& in : this->check_path(entry))
+				discovered_files.emplace_back(in);
+        return discovered_files;
     }
 
-    inline const std::vector<std::string> getInDirectory(const std::string& directory) const {
+    inline const std::vector<std::string> get_in_directory(const std::string& directory) const {
         using namespace std::experimental::filesystem;
 
-        std::vector<std::string> discoveredFiles;
+        std::vector<std::string> discovered_files;
         for (directory_entry entry : directory_iterator(directory))
-            for (auto& in : this->checkPath(entry))
-                discoveredFiles.emplace_back(in);
-        return discoveredFiles;
+            for (auto& in : this->check_path(entry))
+				discovered_files.emplace_back(in);
+        return discovered_files;
     }
 
 public:
-    const inline std::vector<std::string> getFilesInDirectory(bool recurse, std::string directory) const {
-        return recurse ? this->recurseFiles(directory) : this->getInDirectory(directory);
+    const inline std::vector<std::string> get_files_in_directory(bool recurse, std::string directory) const {
+        return recurse ? this->recurse_files(directory) : this->get_in_directory(directory);
     }
 
-    const inline std::string getCurrentDirectory() const {
-        char currentPath[9999];  // TODO: This really shouldn't be a constant value set by us, it should come from the OS
-        if (!GetCurrentDir(currentPath, sizeof(currentPath))) return "";
-        return currentPath;
+    const inline std::string get_current_directory() const {
+        char current_path[9999];
+        if (!get_current_dir(current_path, sizeof(current_path))) return "";
+        return current_path;
     }
 };

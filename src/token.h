@@ -95,6 +95,20 @@ const static bool is_operator(const TokenType& type) {
     return type == TokenType::OP_ADD || type == TokenType::OP_SUB || type == TokenType::OP_MUL || type == TokenType::OP_DIV;
 }
 
+const static bool is_conditional_operator(const TokenType& type) {
+	return type == TokenType::ASSIGN;
+}
+
+const static std::string conditional_operator_as_string(const TokenType& type) {
+	// TODO: Make this not bad
+	switch (type) {
+		case TokenType::ASSIGN:
+			return "=";
+		default:
+			return "invalid";
+	}
+}
+
 const static bool is_builtin(const std::string& name) {
     for (auto& entry : builtin_map) if (entry.first == name) return true;
     return false;

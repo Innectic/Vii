@@ -68,6 +68,10 @@ struct AST_Declaration : public AST_Type {
         line(line), column(column), type(type), name(name), math(math), scope(scope), redecl(redecl) {
 
     }
+
+	inline ~AST_Declaration() {
+		delete this->math;
+	}
     
     std::string my_name() {
         return "AST_Decl";
@@ -153,6 +157,11 @@ struct AST_Function : public AST_FunctionCall {
         this->native = false;
     }
 
+	inline ~AST_Function() {
+		for (auto contain : this->contained) delete contain;
+		this->contained.empty();
+	}
+
     std::string my_name() {
         return "AST_Func";
     }
@@ -183,6 +192,10 @@ struct AST_SourceFile : public AST_Type {
 
         this->mainFunction = nullptr;
     }
+
+	inline ~AST_SourceFile() {
+		delete this->mainFunction;
+	}
 
     std::string my_name() {
         return "AST_SourceFile";
@@ -237,7 +250,7 @@ struct AST_Resolved_Type {
 };
 
 struct AST_Resolved_Function : public AST_Resolved_Type {
-    AST_Resolved_Function(const std::string& name, const int& line, const int& column, const std::vector<AST_Argument>& arguments, const std::string& scope) :
+    inline AST_Resolved_Function(const std::string& name, const int& line, const int& column, const std::vector<AST_Argument>& arguments, const std::string& scope) :
         arguments(arguments) {
         this->name = name;
         this->line = line;
@@ -258,4 +271,42 @@ struct AST_Resolved_Function : public AST_Resolved_Type {
     inline const std::string my_name() {
         return "resolved function";
     }
+};
+
+struct AST_If : public AST_Type {
+	int line;
+	int column;
+
+	std::string conditional;
+	AST_SourceFile* contained;
+
+	inline AST_If(const int& line, const int& column, const std::string& conditional, AST_SourceFile* contained) :
+		line(line), column(column), conditional(conditional), contained(contained) {
+	}
+
+	inline ~AST_If() {
+		delete contained;
+	}
+
+	std::string my_name() {
+		return "if statement";
+	}
+};
+
+struct AST_If_Block : public AST_Type {
+	AST_If* first_block;
+	std::vector<AST_If*> else_if_block;
+	AST_If* else_block;
+
+	inline ~AST_If_Block() {
+		delete this->first_block;
+		delete this->else_block;
+
+		for (auto elif : this->else_if_block) delete elif;
+		this->else_if_block.empty();
+	}
+
+	std::string my_name() {
+		return "if block";
+	}
 };

@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
     auto resolver = std::make_unique<Resolver>(*typer.get());
     auto reporter = std::make_unique<Reporter>();
     auto workspace = std::make_unique<WorkSpace>(*reporter.get(), *typer.get(), *resolver.get());
-    auto fileHandler = std::make_unique<FileHandler>();
+    auto file_handler = std::make_unique<FileHandler>();
     auto scanner = std::make_unique<Scanner>(*workspace.get());
     auto verification = std::make_unique<Verification>(*workspace.get());
     
@@ -37,14 +37,14 @@ int main(int argc, char *argv[]) {
         if (argv[i + 1]) next = argv[i + 1];
 
         if (current == "-w") {
-            workspace->directory = fileHandler->getCurrentDirectory();
-            workspace->original_files = fileHandler->getFilesInDirectory(true, workspace->directory);
+            workspace->directory = file_handler->get_current_directory();
+            workspace->original_files = file_handler->get_files_in_directory(true, workspace->directory);
         }
         else if (current == "-stdc") {
             // This means we're compiling the standard lib.
             // So we don't want to do anything with the user's code.
             auto converter = std::make_unique<Export_x64>(true);
-            auto files = fileHandler->getFilesInDirectory(true, "lib");
+            auto files = file_handler->get_files_in_directory(true, "lib");
 
             std::map<std::string, std::vector<Token>> tokens;
             std::vector<AST_SourceFile*> parsed;
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
             // Compile each file
             for (auto& file : files) tokens[file] = scanner->tokenize(file, true);
             auto end_time = Util::get_time();
-            std::cout << "\033[1;36m> \033[0;32mFrontend time (s): " << ((double)(end_time - start_time) / 1000000000) << "\033[0m" << std::endl;
+            std::cout << "\033[1;36m> \033[0;32mFrontend time (s): " << ((double) (end_time - start_time) / 1000000000) << "\033[0m" << std::endl;
             
             start_time = Util::get_time();
             for (auto& entry : tokens) {
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
                 else converter->go(name, *f);
             }
             end_time = Util::get_time();
-            std::cout << "\033[1;36m> \033[0;32mBackend time  (s): " << ((double)(end_time - start_time) / 1000000000) << "\033[0m" << std::endl;
+            std::cout << "\033[1;36m> \033[0;32mBackend time  (s): " << ((double) (end_time - start_time) / 1000000000) << "\033[0m" << std::endl;
             
             return 0;
         }
