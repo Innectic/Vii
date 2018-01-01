@@ -19,12 +19,12 @@ AST_Resolved_Function* Resolver::attempt_function_resolution(const std::vector<A
 
     auto resolved_types = registered[name];
     for (auto resolved : resolved_types) {
-        bool did_resolve = false;
+        bool did_resolve = true;
         if (resolved->arguments.size() != arguments.size()) continue;
         for (auto res_argument : resolved->arguments) {
             for (auto given_argument : arguments) {
-                if (res_argument.type == given_argument.type) {
-                    did_resolve = true;
+                if (res_argument.type != given_argument.type) {
+                    did_resolve = false;
                     continue;
                 } else if (given_argument.type == TokenType::IDENTIFIER) {
                     // If it's an ident, then lets checkout the type of the ident.

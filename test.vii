@@ -7,7 +7,12 @@ thing :: (a: string) {
     print(a)
 }
 
+thing :: () {
+    print("Testing all the things")
+}
+
 main :: () {
     test("testing")
     thing("Test")
+    thing()
 }
