@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
             // This means we're compiling the standard lib.
             // So we don't want to do anything with the user's code.
             auto converter = std::make_unique<Export_x64>(true);
-            auto files = file_handler->get_files_in_directory(true, "lib");
+            auto files = file_handler->get_files_in_directory(true, "src/lib");
 
             std::map<std::string, std::vector<Token>> tokens;
             std::vector<AST_SourceFile*> parsed;
