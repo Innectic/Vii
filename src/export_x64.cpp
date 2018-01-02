@@ -25,24 +25,24 @@ const std::string build_argument_string(AST_FunctionCall* function, bool include
 	std::string argument_string = "";
 
 	for (auto arg = function->arguments.begin(); arg < function->arguments.end(); arg++) {
-		std::string arg_type = convert_type(arg->type);
-
-		switch (arg->type) {
-			case TokenType::STRING: {
-				if (include_type) argument_string += arg_type + " " + arg->value;
-				else argument_string += "\"" + arg->value + "\"";
-				break;
-			}
-			case TokenType::CHAR: {
-				if (include_type) argument_string += arg_type + " " + arg->value;
-				else argument_string += "'" + arg->value + "'";
-				break;
-			}
-			default: {
-				argument_string += arg->value;
-				break;
+		if (include_type) {
+			auto arg_type = convert_type(arg->type);
+			argument_string += arg_type + " ";
+		}
+		std::string prefix = "";
+		std::string suffix = "";
+		if (!include_type) {
+			if (arg->type == TokenType::STRING) {
+				std::cout << "string" << std::endl;
+				prefix = "\"";
+				suffix = "\"";
+			} else if (arg->type == TokenType::CHAR) {
+				std::cout << "char" << std::endl;
+				prefix = "'";
+				suffix = "'";
 			}
 		}
+		argument_string += prefix + arg->value + suffix;
 		if (arg != function->arguments.end() - 1) argument_string += ", ";
 	}
 	return argument_string;
@@ -134,8 +134,15 @@ const void Export_x64::begin(const std::vector<AST_Type*> contained, std::ofstre
 			}
 			// Nope, so we're calling one.
 			auto call = static_cast<AST_FunctionCall*>(potential);
-			if (call->native && !this->allow_native) continue;
-			
+			if (call->native) {
+				if (!this->allow_native) {
+					std::cout << "Cannot define or call a native method unless this is the std lib." << std::endl;
+					continue;
+				}
+				auto definition = get_native(call->name);
+				stream << Util::replace(definition, "<CUSTOM>", build_argument_string(call, false)) << ";\n";
+				continue;
+			}
 			stream << call->name << "(" << build_argument_string(call, false) << ");\n";
 		}
 		else if (is_type<AST_If_Block*>(potential)) {
