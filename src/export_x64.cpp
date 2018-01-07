@@ -154,7 +154,6 @@ const void Export_x64::begin(const std::vector<AST_Type*> contained, std::ofstre
 			// TODO: Else if / else
 		}
 	}
-	if (!allow_native) stream << FILE_TEMPLATE;
 }
 
 const void Export_x64::go(const std::string& destination_file, const AST_SourceFile& source_file) {
@@ -168,4 +167,5 @@ const void Export_x64::go(const std::string& destination_file, const AST_SourceF
 
 	// Export the AST tree to C++ code.
     this->begin(source_file, stream);
+	if (!allow_native) stream << FILE_TEMPLATE;
 }
