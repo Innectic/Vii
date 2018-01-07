@@ -33,11 +33,9 @@ const std::string build_argument_string(AST_FunctionCall* function, bool include
 		std::string suffix = "";
 		if (!include_type) {
 			if (arg->type == TokenType::STRING) {
-				std::cout << "string" << std::endl;
 				prefix = "\"";
 				suffix = "\"";
 			} else if (arg->type == TokenType::CHAR) {
-				std::cout << "char" << std::endl;
 				prefix = "'";
 				suffix = "'";
 			}
@@ -150,7 +148,7 @@ const void Export_x64::begin(const std::vector<AST_Type*> contained, std::ofstre
 
 			// Export the main if
 			stream << "if (" << if_block->first_block->conditional << ") {\n";
-			this->begin(*if_block->first_block->contained, stream, true);
+			this->begin(*if_block->first_block->contained, stream, false);
 			stream << "}\n";
 			// TODO: Else if / else
 		}

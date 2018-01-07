@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
             
             start_time = Util::get_time();
             for (auto& entry : tokens) {
-                const AST_SourceFile* f = scanner->parse(entry.second);
+                const AST_SourceFile* f = scanner->parse(entry.second, true);
             
                 auto name = Util::replace(entry.first, "lib/", "");
                 name = Util::replace(name, ".vii", ".cpp");
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
     auto end_time = Util::get_time() - start_time;
     
     start_time = Util::get_time();
-    const AST_SourceFile* file = scanner->parse(tokens);
+    const AST_SourceFile* file = scanner->parse(tokens, true);
     auto end_parse = Util::get_time() - start_time;
 
     if (workspace->had_error) std::cout << "Encountered errors. Will not build.";

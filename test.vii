@@ -3,16 +3,12 @@ test :: (a: string) {
     print(a)
 }
 
-thing :: (a: string) {
-    print(a)
-}
-
-thing :: () {
-    print("Testing all the things")
+test :: () {
+    test("Blah")
 }
 
 main :: () {
-    test("testing")
-    thing("Test")
-    thing()
+    print("A")
+    test("Testing")
+    test()
 }

@@ -230,11 +230,11 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
     return tokens;
 }
 
-AST_SourceFile* Scanner::parse(std::vector<Token>& tokens) {
-	return this->parse(tokens.begin(), tokens.end());
+AST_SourceFile* Scanner::parse(std::vector<Token>& tokens, bool scoped) {
+	return this->parse(tokens.begin(), tokens.end(), scoped);
 }
 
-AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<Token>::iterator end) {
+AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<Token>::iterator end, bool scoped) {
 	AST_SourceFile* file = new AST_SourceFile(this->fileName);
 
     // Start by making sure we even have any tokens to parse.
@@ -299,7 +299,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 						}
 						// Since the conditional is finished, lets take the body.
 						if (position->type == TokenType::RBRACE) break;
-						AST_SourceFile* result = this->parse(position + 1, end);
+						AST_SourceFile* result = this->parse(position + 1, end, false);
 
 						for (auto a : result->contained) std::cout << a->my_name() << std::endl;
 
@@ -314,8 +314,9 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 						auto if_block = new AST_If_Block();
 						if_block->first_block = main_if;
 
-						// TODO: Scope this like a not idiot
-						file->contained.emplace_back(if_block);
+						// TODO
+						if (scoped) {}
+						else file->contained.emplace_back(if_block);
 
 						position++;
 					}
@@ -412,7 +413,8 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                     assert(decl->math || decl->value != "");
                     // Make sure the scanner knows it's been used too!
                     this->usedNames.emplace_back(token.value);
-                    this->add_scoped(name, decl);
+                    if (scoped) this->add_scoped(name, decl);
+					else file->contained.emplace_back(decl);
                 } else if (the_next_token.type == TokenType::COLON && next_token.type == TokenType::COLON) {
                     // Having another colon here means we might be making a function.
 
@@ -436,30 +438,29 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 
                     // Since we have that, everything between that and ) is our arguments.
                     std::vector<AST_Argument> arguments;
-                    auto argument_it = it + 4;
+                    it += 4;
 
-                    auto argument = *argument_it;
 					bool should_be_looking_at_comma = true;
 					// COPYPASTA: This should be a function, was copied from another section
-                    while (argument.type != TokenType::RPAREN && this->has_next(argument_it, end)) {
+                    while (it->type != TokenType::RPAREN && this->has_next(it, end)) {
                         // Build the AST representation of the argument from the token
-						switch (argument.type) {
+						switch (it->type) {
 							case TokenType::IDENTIFIER: {
 								if (!should_be_looking_at_comma) {
 									ViiError error = {
 										"Expecting a comma",
 										file->file_name,
-										argument.line,
-										argument.column
+										it->line,
+										it->column
 									};
 									this->workspace.report_error(error);
 									continue;
 								}
-								if (!this->has_next(argument_it, end)) continue;
-								if ((argument_it + 1)->type != TokenType::COLON) continue;
-								if (!this->has_next(argument_it + 1, end)) continue;
+								if (!this->has_next(it, end)) continue;
+								if ((it + 1)->type != TokenType::COLON) continue;
+								if (!this->has_next(it + 1, end)) continue;
 
-								auto type = argument_it + 2;
+								auto type = it + 2;
 								auto real_type = get_type_from_string(type->value);
 
 								if (type->type != TokenType::IDENTIFIER || real_type == TokenType::INVALID) {
@@ -470,25 +471,18 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 										type->column
 									};
 									this->workspace.report_error(error);
-									argument_it += 2;
-									it = argument_it;
+									it += 2;
 									continue;
 								}
-								auto arg = new AST_Argument(argument.value, real_type);
+								auto arg = new AST_Argument(it->value, real_type);
 								arguments.emplace_back(*arg);
-								argument_it += 3;
-								it = argument_it;
-								argument = *argument_it;
+								it += 3;
 								should_be_looking_at_comma = false;
 								break;
 							}
 							case TokenType::COMMA: {
 								should_be_looking_at_comma = true;
-                                if (this->has_next(it, end)) {
-                                    argument_it++;
-                                    it = argument_it;
-                                    argument = *argument_it;
-                                }
+                                if (this->has_next(it, end)) it ++;
 								break;
 							}
 							default:
@@ -514,7 +508,8 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                         file->mainFunction = function;
                     }
                     // Now that we have our function, give it to the file
-                    this->set_scope(name, function);
+					if (scoped) this->set_scope(name, function);
+					else file->contained.emplace_back(function);
 
 					// TODO: go bye-bye?
                     file->contained.emplace_back(function);
@@ -588,8 +583,9 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                     assert(decl->math || decl->value != "");
                     // Make sure the scanner knows it's been used too!
                     this->usedNames.emplace_back(token.value);
-                    this->add_scoped(name, decl);
-                    it += 4;
+                    if (scoped) this->add_scoped(name, decl);
+					else file->contained.emplace_back(decl);
+					it += 4;
                 }
             }
             else if (the_next_token.type == TokenType::ASSIGN) {
@@ -647,7 +643,8 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 				assert(decl->math || decl->value != "");
 
                 auto name = decl->scope;
-                file->contained.emplace_back(decl);
+				if (scoped) {}
+				else file->contained.emplace_back(decl);
             } else if (the_next_token.type == TokenType::LPAREN) {
                 // If we have a left paren, then we MUST be calling a function.
                 // So, lets take everything until ) as arguments.
@@ -660,21 +657,19 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                 }
 
                 std::vector<AST_Argument> arguments;
-                auto argument_it = it + 2;
+                it += 2;
 
-                while (argument_it->type != TokenType::RPAREN && this->has_next(argument_it, end)) {
-					if (argument_it->type == TokenType::COMMA) {
-						argument_it++;
+                while (it->type != TokenType::RPAREN && this->has_next(it, end)) {
+					if (it->type == TokenType::COMMA) {
+						it++;
 						continue;
 					}
                     // Build the AST representation of the argument from the token
-                    AST_Argument* arg = new AST_Argument(argument_it->value, argument_it->type);
+                    AST_Argument* arg = new AST_Argument(it->value, it->type);
 
                     arguments.emplace_back(*arg);
-                    argument_it++;
+                    it++;
                 }
-				// Set the iterator
-				it = argument_it;
                 // Check if this is a builtin function
                 auto name = this->fileName + "$" + current_scope;
                 AST_FunctionCall* function = nullptr;
@@ -693,7 +688,8 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                     // Otherwise, just mark this as native.
                     function->native = true;
                 }
-                this->add_scoped(name, function);
+				if (scoped) this->add_scoped(name, function);
+				else file->contained.emplace_back(function);
 			}
         }
 	}
