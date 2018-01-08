@@ -448,7 +448,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 							case TokenType::IDENTIFIER: {
 								if (!should_be_looking_at_comma) {
 									ViiError error = {
-										"Expecting a comma",
+										"Expecting a comma between arguments.",
 										file->file_name,
 										it->line,
 										it->column
@@ -659,16 +659,26 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                 std::vector<AST_Argument> arguments;
                 it += 2;
 
+				bool expecting_comma = false;
                 while (it->type != TokenType::RPAREN && this->has_next(it, end)) {
-					if (it->type == TokenType::COMMA) {
-						it++;
-						continue;
-					}
-                    // Build the AST representation of the argument from the token
-                    AST_Argument* arg = new AST_Argument(it->value, it->type);
+					if (expecting_comma) {
+						if (it->type == TokenType::COMMA) {
+							// Expecting a comma, found one.
+							it++;
+							continue;
+						} else {
+							// Expecting a comma, didn't find one.
+							this->workspace.report_error({ "Expected a comma between arguments.", this->fileName, token.line, token.column });
+							it++;
+							break;
+						}
+					} else {
+						// Function call's argument, nothing special here.
+						AST_Argument* arg = new AST_Argument(it->value, it->type);
 
-                    arguments.emplace_back(*arg);
-                    it++;
+						arguments.emplace_back(*arg);
+						it++;
+					}
                 }
                 // Check if this is a builtin function
                 auto name = this->fileName + "$" + current_scope;
