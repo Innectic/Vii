@@ -93,25 +93,27 @@ AST_Math* Scanner::do_math(std::vector<Token>::iterator end, std::vector<Token>:
     if (!this->has_next(it, end) || !this->has_next(it + 1, end)) return nullptr;
     std::vector<AST_Operation> operations;
 
+	auto typer = this->workspace.typer;
+
     bool chain = false;
     while (this->has_next(it, end)) {
         if (!this->has_next(it + 1, end) || !this->has_next(it + 2, end)) break;
         auto operator_token = it + 1;
         auto next_adding = it + 2;
 
-        if (!is_operator(operator_token->type)) {
+        if (!typer.is_operator(operator_token->type)) {
             this->workspace.report_error({ "Invalid operator type: " + token_map[operator_token->type], this->fileName, token.line, token.column });
             it += 2;
             continue;
         }
 
-        if (!is_numeric(it->type)) {
+        if (!typer.is_numeric(it->type)) {
             this->workspace.report_error({ "Cannot add this type: " + token_map[it->type], this->fileName, token.line, token.column });
             it += 2;
             continue;
         }
 
-        if (!is_numeric(next_adding->type)) {
+        if (!typer.is_numeric(next_adding->type)) {
             this->workspace.report_error({ "Cannot add this type: " + token_map[next_adding->type], this->fileName, token.line, token.column });
             it += 2;
             continue;
@@ -120,7 +122,7 @@ AST_Math* Scanner::do_math(std::vector<Token>::iterator end, std::vector<Token>:
         AST_Operation operation = { it->value, it->type, next_adding->value, next_adding->type, operator_token->type, chain };
         operations.emplace_back(operation);
         it += 2;
-        if (!is_operator((it + 1)->type)) break;
+        if (!typer.is_operator((it + 1)->type)) break;
         if (!chain) chain = true;
     }
 
@@ -132,12 +134,14 @@ AST_Math* Scanner::do_math(std::vector<Token>::iterator end, std::vector<Token>:
 }
 
 const bool Scanner::can_use_name(const std::string& name) {
-    return !Util::vector_contains(this->usedNames, name) && get_keyword_type(name) == KeywordType::INVALID;
+    return !Util::vector_contains(this->usedNames, name) && this->workspace.typer.get_keyword_type(name) == KeywordType::INVALID;
 }
 
 const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bool allow_native) {
     this->fileName = fileName;
     this->allow_native = allow_native;
+
+	auto typer = this->workspace.typer;
 
     std::vector<std::string> contents = Util::read_file_to_vector(fileName);
     std::vector<Token> tokens;
@@ -198,7 +202,7 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
             }
 
             // Get the type of the character we're currently looking at
-            auto type = get_token_type(a);
+            auto type = typer.get_token_type(a);
 
             // If it's an ident, that means it's not something we have.
             // So, add that to our currently found (for later use) string.
@@ -221,7 +225,7 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
             column++;
         }
         if (current != "") {
-            auto type = get_token_type(current);
+            auto type = this->workspace.typer.get_token_type(current);
             Token remaining_token = { type, current, line_num, column };
             tokens.emplace_back(remaining_token);
         }
@@ -237,6 +241,8 @@ AST_SourceFile* Scanner::parse(std::vector<Token>& tokens, bool scoped) {
 AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<Token>::iterator end, bool scoped) {
 	AST_SourceFile* file = new AST_SourceFile(this->fileName);
 
+	auto typer = this->workspace.typer;
+
     // Start by making sure we even have any tokens to parse.
     std::string current_scope = "";
 
@@ -245,7 +251,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
         auto token = *it;
         
 		// Check if it's a keyword.
-		auto keyword_type = get_keyword_type(token.value);
+		auto keyword_type = typer.get_keyword_type(token.value);
 		if (keyword_type != KeywordType::INVALID) {
 			// Since this is a keyword, then we need to figure out
 			// what kind it is, and how to proceed.
@@ -253,7 +259,6 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 			switch (keyword_type) {
 				case KeywordType::IF: {
 					// Make sure there's at least a possible conditional
-
 					if (!this->has_next(it, end)) {
 						// If statement is missing conditional.
 						ViiError error = {
@@ -274,8 +279,6 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 					//     // something
 					// }
 					//
-					// Both of these are valid.
-					//
 					std::string conditional = (it - 1)->value;
 					std::vector<AST_Type*> contained;
 
@@ -292,7 +295,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 								continue;
 							}
 
-							if (is_conditional_operator(position->type)) conditional += conditional_operator_as_string(position->type);
+							if (typer.is_conditional_operator(position->type)) conditional += typer.conditional_operator_as_string(position->type);
 							else conditional += position->value + " ";
 							position++;
 							continue;
@@ -388,7 +391,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 
                     auto has_math = false;
                     AST_Math* math = nullptr;
-                    if (is_operator((it + 4)->type)) {
+                    if (typer.is_operator((it + 4)->type)) {
                         // TODO: This won't allow things like idents to be used for evaluating things.
                         // We'll do math to set the value of this.
                         auto evaluated = this->do_math(end, it + 3, token);
@@ -461,7 +464,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 								if (!this->has_next(it + 1, end)) continue;
 
 								auto type = it + 2;
-								auto real_type = get_type_from_string(type->value);
+								auto real_type = typer.get_type_from_string(type->value);
 
 								if (type->type != TokenType::IDENTIFIER || real_type == TokenType::INVALID) {
 									ViiError error = {
@@ -522,7 +525,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 
                     auto has_math = false;
                     AST_Math* math = nullptr;
-                    if (is_operator((it + 5)->type)) {
+                    if (typer.is_operator((it + 5)->type)) {
                         // TODO: This won't allow things like idents to be used for evaluating things.
                         // We'll do math to set the value of this.
                         auto evaluated = this->do_math(end, it + 4, token);
@@ -540,7 +543,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 
                     auto type_token = *(it + 2);
                     // Lets make sure the type we have even exists.
-                    auto new_type = get_type_from_string(type_token.value);
+                    auto new_type = typer.get_type_from_string(type_token.value);
                     if (new_type == TokenType::INVALID) {
                         // The type isn't a thing
                         this->workspace.report_error({ "Invalid type: '" + type_token.value + "'", this->fileName, token.line, token.column });
@@ -594,7 +597,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 
                 auto has_math = false;
                 AST_Math* math = nullptr;
-                if (is_operator((it + 3)->type)) {
+                if (typer.is_operator((it + 3)->type)) {
                     // TODO: This won't allow things like idents to be used for evaluating things.
                     // We'll do math to set the value of this.
                     auto evaluated = this->do_math(end, it + 2, token);
@@ -627,7 +630,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                 auto value_token = *(it + 2);
 
                 // Make sure they're the same types
-                if (!this->workspace.typer.can_assign_this(original_decl->type, value_token.type)) {
+                if (!typer.can_assign_this(original_decl->type, value_token.type)) {
                     this->workspace.report_error({ "Cannot set variable '" + token.value + "', type " + token_map[original_decl->type] + ", to type of " +
                         token_map[value_token.type] + "", this->fileName, token.line, token.column });
                     it += 2;
@@ -683,7 +686,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                 // Check if this is a builtin function
                 auto name = this->fileName + "$" + current_scope;
                 AST_FunctionCall* function = nullptr;
-                if (is_builtin(token.value)) function = new AST_Builtin(builtin_map[token.value], arguments);
+                if (typer.is_builtin(token.value)) function = new AST_Builtin(builtin_map[token.value], arguments);
                 else function = new AST_FunctionCall(token.value, 0, 0, arguments, name);
 				assert(function);
 

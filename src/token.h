@@ -91,52 +91,6 @@ static std::map<std::string, NativeType> builtin_map = {
     { "print", NativeType::PRINT }
 };
 
-const static bool is_operator(const TokenType& type) {
-    return type == TokenType::OP_ADD || type == TokenType::OP_SUB || type == TokenType::OP_MUL || type == TokenType::OP_DIV;
-}
-
-const static bool is_conditional_operator(const TokenType& type) {
-	return type == TokenType::ASSIGN;
-}
-
-const static std::string conditional_operator_as_string(const TokenType& type) {
-	// TODO: Make this not bad
-	switch (type) {
-		case TokenType::ASSIGN:
-			return "=";
-		default:
-			return "invalid";
-	}
-}
-
-const static bool is_builtin(const std::string& name) {
-    for (auto& entry : builtin_map) if (entry.first == name) return true;
-    return false;
-}
-
-static std::string get_native(const std::string& name) {
-    auto using_name = Util::replace(name, "native_", "");
-    return native_map[builtin_map[using_name]];
-}
-
-static TokenType get_token_type(const std::string& checking) {
-    if (checking == "true" || checking == "false") return TokenType::BOOL;
-    // Check each pair and see if we have a keyword that matches.
-    for (auto& entry : token_map) if (entry.second == checking) return entry.first;
-    // If not, it's just an identifier.
-    return TokenType::IDENTIFIER;
-}
-
-static TokenType get_type_from_string(const std::string& checking) {
-    if (checking == "true" || checking == "false") return TokenType::BOOL;
-    for (auto& entry : type_map) if (entry.first == checking) return entry.second;
-    return TokenType::INVALID;
-}
-
-const static bool is_numeric(const TokenType& type) {
-    return type == TokenType::INT || type == TokenType::FLOAT;
-}
-
 struct Token {
     TokenType type;
     std::string value;
@@ -159,8 +113,3 @@ static std::map<std::string, KeywordType> keywords = {
     { "true", KeywordType::TRUE },
     { "false", KeywordType::FALSE },
 };
-
-static KeywordType get_keyword_type(std::string keyword) {
-    for (auto& entry : keywords) if (entry.first == keyword) return entry.second;
-    return KeywordType::INVALID;
-}

@@ -53,7 +53,7 @@ const void add_import(const std::string& lib, std::ofstream& stream) {
     stream << line;
 }
 
-Export_x64::Export_x64(bool allow_native) : allow_native(allow_native) {}
+Export_x64::Export_x64(bool allow_native, const Typer& typer) : allow_native(allow_native), typer(typer) {}
 
 const std::string Export_x64::name() const {
     return "x64";
@@ -137,7 +137,7 @@ const void Export_x64::begin(const std::vector<AST_Type*> contained, AST_Functio
 					std::cout << "Cannot define or call a native method unless this is the std lib." << std::endl;
 					continue;
 				}
-				auto definition = get_native(call->name);
+				auto definition = typer.get_native(call->name);
 				this->stream << Util::replace(definition, "<CUSTOM>", build_argument_string(call, false)) << ";\n";
 				continue;
 			}
