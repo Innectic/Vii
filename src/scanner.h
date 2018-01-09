@@ -39,7 +39,7 @@ public:
 
 	const std::vector<Token> tokenize(const std::string& filename, const bool allow_native);
 	
-	AST_SourceFile* parse(std::vector<Token>::iterator start, std::vector<Token>::iterator end, bool scoped);
+	AST_SourceFile* parse(std::vector<Token>::iterator& start, std::vector<Token>::iterator& end, bool scoped);
 	AST_SourceFile* parse(std::vector<Token>& tokens, bool scoped);
 
     const inline bool has_next() {

@@ -6,18 +6,18 @@ const std::string FILE_TEMPLATE = "int main(int argc, char* argv[]) { real_main(
 
 const std::string convert_type(const TokenType& type) {
     switch (type) {
-    case TokenType::INT:
-        return "int";
-    case TokenType::STRING:
-        return "std::string";
-    case TokenType::CHAR:
-        return "char";
-    case TokenType::FLOAT:
-        return "float";
-    case TokenType::BOOL:
-        return "bool";
-    default:
-        return "void";
+		case TokenType::INT:
+			return "int";
+		case TokenType::STRING:
+			return "std::string";
+		case TokenType::CHAR:
+			return "char";
+		case TokenType::FLOAT:
+			return "float";
+		case TokenType::BOOL:
+			return "bool";
+		default:
+			return "void";
     }
 }
 
@@ -81,26 +81,26 @@ const void Export_x64::begin(const std::vector<AST_Type*> contained, AST_Functio
 			this->stream << type << " " << decl->name << " = ";
 
 			switch (decl->type) {
-			case TokenType::STRING:
-				this->stream << "\"" << decl->value << "\"";
-				break;
-			case TokenType::INT:
-				if (decl->math) handle_math_segment(decl->math, this->stream);
-				else this->stream << std::stoi(decl->value);
-				break;
-			case TokenType::FLOAT:
-				if (decl->math) handle_math_segment(decl->math, this->stream);
-				else this->stream << std::stof(decl->value);
-				break;
-			case TokenType::CHAR:
-				this->stream << "'" << decl->value << "'";
-				break;
-			case TokenType::BOOL:
-				this->stream << decl->value;
-				break;
-			default:
-				std::cout << "INTERNAL COMPILER ERROR: HOW DID AN INVALID TYPE GET TO THIS STAGE HOLY COW SOMETHING IS BROKEN! '" << token_map[decl->type] << "'" << std::endl;
-				break;
+				case TokenType::STRING:
+					this->stream << "\"" << decl->value << "\"";
+					break;
+				case TokenType::INT:
+					if (decl->math) handle_math_segment(decl->math, this->stream);
+					else this->stream << std::stoi(decl->value);
+					break;
+				case TokenType::FLOAT:
+					if (decl->math) handle_math_segment(decl->math, this->stream);
+					else this->stream << std::stof(decl->value);
+					break;
+				case TokenType::CHAR:
+					this->stream << "'" << decl->value << "'";
+					break;
+				case TokenType::BOOL:
+					this->stream << decl->value;
+					break;
+				default:
+					std::cout << "INTERNAL COMPILER ERROR: HOW DID AN INVALID TYPE GET TO THIS STAGE HOLY COW SOMETHING IS BROKEN! '" << token_map[decl->type] << "'" << std::endl;
+					break;
 			}
 			this->stream << ";\n}\n";
 		} if (is_type<AST_Builtin*>(potential)) {

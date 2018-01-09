@@ -86,7 +86,7 @@ const bool Scanner::check_comment() {
     return *it == '/' && next == '/';
 }
 
-AST_Math* Scanner::do_math(std::vector<Token>::iterator end, std::vector<Token>::iterator it, const Token& token) {
+AST_Math* Scanner::do_math(std::vector<Token>::iterator& end, std::vector<Token>::iterator& it, const Token& token) {
     if (!this->has_next(it, end) || !this->has_next(it + 1, end)) return nullptr;
     std::vector<AST_Operation> operations;
 
@@ -301,8 +301,6 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 						if (position->type == TokenType::RBRACE) break;
 						AST_SourceFile* result = this->parse(position + 1, end, false);
 
-						for (auto a : result->contained) std::cout << a->my_name() << std::endl;
-
 						conditional = Util::trim(conditional);
 						auto main_if = new AST_If(
 							position->line,
@@ -314,8 +312,8 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 						auto if_block = new AST_If_Block();
 						if_block->first_block = main_if;
 
-						// TODO
-						if (scoped) {}
+						auto name = this->file_name + "$" + current_scope;
+						if (scoped) this->add_scoped(name, if_block);
 						else file->contained.emplace_back(if_block);
 
 						position++;
