@@ -17,6 +17,8 @@ private:
     std::string::iterator it;
     std::string::iterator end;
 
+	std::vector<Token>::iterator hack;
+
     std::string file_name;
 
     WorkSpace& workspace;
@@ -25,7 +27,7 @@ private:
     
     bool allow_native;
 
-    AST_Math* do_math(std::vector<Token>::iterator end, std::vector<Token>::iterator it, const Token& token);
+    AST_Math* do_math(std::vector<Token>::iterator& end, std::vector<Token>::iterator& it, const Token& token);
 public:
     std::vector<std::string> used_names;
     Scanner(WorkSpace& workspace);
@@ -39,7 +41,7 @@ public:
 
 	const std::vector<Token> tokenize(const std::string& filename, const bool allow_native);
 	
-	AST_SourceFile* parse(std::vector<Token>::iterator& start, std::vector<Token>::iterator& end, bool scoped);
+	AST_SourceFile* parse(std::vector<Token>::iterator start, std::vector<Token>::iterator end, bool scoped);
 	AST_SourceFile* parse(std::vector<Token>& tokens, bool scoped);
 
     const inline bool has_next() {

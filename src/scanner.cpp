@@ -245,8 +245,9 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 
     // We have things to check, so lets just start going through.
     for (auto it = start; it < end - 1; ++it) {
-        auto token = *it;
-        
+		this->hack = it;
+		auto token = *it;
+
 		// Check if it's a keyword.
 		auto keyword_type = typer.get_keyword_type(token.value);
 		if (keyword_type != KeywordType::INVALID) {
@@ -297,11 +298,13 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 							position++;
 							continue;
 						}
+						conditional = Util::trim(conditional);
+						
 						// Since the conditional is finished, lets take the body.
 						if (position->type == TokenType::RBRACE) break;
-						AST_SourceFile* result = this->parse(position + 1, end, false);
+						auto result = this->parse(position + 1, end, false);
+						position = this->hack; // HACK
 
-						conditional = Util::trim(conditional);
 						auto main_if = new AST_If(
 							position->line,
 							position->column,
