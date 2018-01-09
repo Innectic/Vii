@@ -49,8 +49,7 @@ const std::string build_argument_string(AST_FunctionCall* function, bool include
 }
 
 const void add_import(const std::string& lib, std::ofstream& stream) {
-    std::string line = "#include " + lib + "\n";
-    stream << line;
+	stream << "#include " << lib << "\n";
 }
 
 Export_x64::Export_x64(bool allow_native, const Typer& typer) : allow_native(allow_native), typer(typer) {}
@@ -79,11 +78,11 @@ const void Export_x64::begin(const std::vector<AST_Type*> contained, AST_Functio
 			assert(decl);
 
 			std::string type = decl->redecl ? "" : convert_type(decl->type);
-			this->stream << type + " " + decl->name + " = ";
+			this->stream << type << " " << decl->name << " = ";
 
 			switch (decl->type) {
 			case TokenType::STRING:
-				this->stream << "\"" + decl->value + "\"";
+				this->stream << "\"" << decl->value << "\"";
 				break;
 			case TokenType::INT:
 				if (decl->math) handle_math_segment(decl->math, this->stream);
@@ -94,7 +93,7 @@ const void Export_x64::begin(const std::vector<AST_Type*> contained, AST_Functio
 				else this->stream << std::stof(decl->value);
 				break;
 			case TokenType::CHAR:
-				this->stream << "'" + decl->value + "'";
+				this->stream << "'" << decl->value << "'";
 				break;
 			case TokenType::BOOL:
 				this->stream << decl->value;
@@ -103,15 +102,14 @@ const void Export_x64::begin(const std::vector<AST_Type*> contained, AST_Functio
 				std::cout << "INTERNAL COMPILER ERROR: HOW DID AN INVALID TYPE GET TO THIS STAGE HOLY COW SOMETHING IS BROKEN! '" << token_map[decl->type] << "'" << std::endl;
 				break;
 			}
-			this->stream << ";\n";
-			this->stream << "}\n";
+			this->stream << ";\n}\n";
 		} if (is_type<AST_Builtin*>(potential)) {
 			auto builtin = static_cast<AST_Builtin*>(potential);
 			assert(builtin);
 
 			std::string ready_line = allow_native ? native_map[builtin->type] : internal_map[builtin->type];
 			ready_line = Util::replace(ready_line, "<CUSTOM>", build_argument_string(builtin, false));
-			this->stream << ready_line + "\n";
+			this->stream << ready_line << "\n";
 		}
 		else if (is_type<AST_FunctionCall*>(potential)) {
 			// Are we defining a function?
@@ -122,7 +120,7 @@ const void Export_x64::begin(const std::vector<AST_Type*> contained, AST_Functio
 				auto function_name = main_function && main_function == function ? "real_main" : function->name;
 				
 				auto return_type = convert_type(function->return_type);
-				this->stream << return_type + " " + function_name + "(" + build_argument_string(function, true) + ") {\n";
+				this->stream << return_type << " " << function_name << "(" << build_argument_string(function, true) << ") {\n";
 				
 				this->begin(function->contained, nullptr);
 				this->stream << "}\n";

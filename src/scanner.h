@@ -17,7 +17,7 @@ private:
     std::string::iterator it;
     std::string::iterator end;
 
-    std::string fileName;
+    std::string file_name;
 
     WorkSpace& workspace;
 
@@ -27,7 +27,7 @@ private:
 
     AST_Math* do_math(std::vector<Token>::iterator end, std::vector<Token>::iterator it, const Token& token);
 public:
-    std::vector<std::string> usedNames;
+    std::vector<std::string> used_names;
     Scanner(WorkSpace& workspace);
     ~Scanner();
 

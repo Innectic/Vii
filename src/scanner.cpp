@@ -12,11 +12,9 @@ Scanner::~Scanner() {
 const Token Scanner::read_string(const char& delim) {
     bool escaped = false;
     bool taking = false;
-
     bool was_terminated = true;
     
     std::string found = "";
-
     Token token = { TokenType::INVALID, "" };
 
     while (it <= this->end) {
@@ -84,9 +82,8 @@ const Token Scanner::read_number() {
 
 const bool Scanner::check_comment() {
     if (!has_next(this->it)) return false;
-    auto current = *it;
     auto next = *(it + 1);
-    return current == '/' && next == '/';
+    return *it == '/' && next == '/';
 }
 
 AST_Math* Scanner::do_math(std::vector<Token>::iterator end, std::vector<Token>::iterator it, const Token& token) {
@@ -102,19 +99,19 @@ AST_Math* Scanner::do_math(std::vector<Token>::iterator end, std::vector<Token>:
         auto next_adding = it + 2;
 
         if (!typer.is_operator(operator_token->type)) {
-            this->workspace.report_error({ "Invalid operator type: " + token_map[operator_token->type], this->fileName, token.line, token.column });
+            this->workspace.report_error({ "Invalid operator type: " + token_map[operator_token->type], this->file_name, token.line, token.column });
             it += 2;
             continue;
         }
 
         if (!typer.is_numeric(it->type)) {
-            this->workspace.report_error({ "Cannot add this type: " + token_map[it->type], this->fileName, token.line, token.column });
+            this->workspace.report_error({ "Cannot add this type: " + token_map[it->type], this->file_name, token.line, token.column });
             it += 2;
             continue;
         }
 
         if (!typer.is_numeric(next_adding->type)) {
-            this->workspace.report_error({ "Cannot add this type: " + token_map[next_adding->type], this->fileName, token.line, token.column });
+            this->workspace.report_error({ "Cannot add this type: " + token_map[next_adding->type], this->file_name, token.line, token.column });
             it += 2;
             continue;
         }
@@ -127,23 +124,23 @@ AST_Math* Scanner::do_math(std::vector<Token>::iterator end, std::vector<Token>:
     }
 
     if (operations.size() == 0) {
-        this->workspace.report_error({ "INTERNAL COMPILER ERROR: Didn't get any operations / operators from expression?!", this->fileName, token.line, token.column });
+        this->workspace.report_error({ "INTERNAL COMPILER ERROR: Didn't get any operations / operators from expression?!", this->file_name, token.line, token.column });
         return nullptr;
     }
     return new AST_Math(token.line, token.column, operations, "");
 }
 
 const bool Scanner::can_use_name(const std::string& name) {
-    return !Util::vector_contains(this->usedNames, name) && this->workspace.typer.get_keyword_type(name) == KeywordType::INVALID;
+    return !Util::vector_contains(this->used_names, name) && this->workspace.typer.get_keyword_type(name) == KeywordType::INVALID;
 }
 
-const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bool allow_native) {
-    this->fileName = fileName;
+const std::vector<Token> Scanner::tokenize(const std::string& file_name, const bool allow_native) {
+    this->file_name = file_name;
     this->allow_native = allow_native;
 
 	auto typer = this->workspace.typer;
 
-    std::vector<std::string> contents = Util::read_file_to_vector(fileName);
+    std::vector<std::string> contents = Util::read_file_to_vector(file_name);
     std::vector<Token> tokens;
     if (contents.size() <= 0) return tokens;
 
@@ -176,10 +173,10 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
                 auto token = this->read_string(*it);
                 if (token.type == TokenType::INVALID) {
                     if (token.value == "") {
-                        this->workspace.report_error({ "Char must contain only one character.", this->fileName, 0, column });
+                        this->workspace.report_error({ "Char must contain only one character.", this->file_name, 0, column });
                         continue;
                     }
-                    this->workspace.report_error({ "String / char was never terminated.", this->fileName, 0, column });
+                    this->workspace.report_error({ "String / char was never terminated.", this->file_name, 0, column });
                     continue;
                 }
                 tokens.emplace_back(token);
@@ -187,7 +184,7 @@ const std::vector<Token> Scanner::tokenize(const std::string& fileName, const bo
             } else if (Util::is_number(*it)) {
                 auto token = this->read_number();
                 if (token.type == TokenType::INVALID) {
-                    this->workspace.report_error({ "Number cannot contain multiple '.'", this->fileName, 0, column });
+                    this->workspace.report_error({ "Number cannot contain multiple '.'", this->file_name, 0, column });
                     continue;
                 }
                 tokens.emplace_back(token);
@@ -239,7 +236,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>& tokens, bool scoped) {
 }
 
 AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<Token>::iterator end, bool scoped) {
-	AST_SourceFile* file = new AST_SourceFile(this->fileName);
+	AST_SourceFile* file = new AST_SourceFile(this->file_name);
 
 	auto typer = this->workspace.typer;
 
@@ -263,7 +260,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 						// If statement is missing conditional.
 						ViiError error = {
 							"If statement is missing condition.",
-							this->fileName,
+							this->file_name,
 							token.line,
 							token.column
 						};
@@ -349,7 +346,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
             // Before we can do so, lets make sure we even have things after this
             if (!this->has_next(it, end)) {
                 // We don't have anything next, so we need to display a friendly error.
-                this->workspace.report_error({ "Incomplete identifier", this->fileName, token.line, token.column });
+                this->workspace.report_error({ "Incomplete identifier", this->file_name, token.line, token.column });
                 continue;
             }
 
@@ -368,7 +365,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                 //
 
                 if (!this->has_next(it + 1, end)) {
-                    this->workspace.report_error({ "Incomplete variable decleration", this->fileName, token.line, token.column });
+                    this->workspace.report_error({ "Incomplete variable decleration", this->file_name, token.line, token.column });
                     it += 3;
                     continue;
                 }
@@ -378,13 +375,13 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                 if (next_token.type == TokenType::ASSIGN) {
                     // Since it's an assign, we need to do one more check - Make sure there's a value!
                     if (!this->has_next(it + 2, end)) {
-                        this->workspace.report_error({ "Missing value on variable decleration", this->fileName, token.line, token.column });
+                        this->workspace.report_error({ "Missing value on variable decleration", this->file_name, token.line, token.column });
                         it += 3;
                         continue;
                     }
                     // Make sure that this name hasn't been used
                     if (!this->can_use_name(token.value)) {
-                        this->workspace.report_error({ "Variable name '" + token.value + "' is already in use", this->fileName, token.line, token.column });
+                        this->workspace.report_error({ "Variable name '" + token.value + "' is already in use", this->file_name, token.line, token.column });
                         it += 3;
                         continue;
                     }
@@ -405,7 +402,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                     auto value_token = *(it + 3);
                     // TODO: Ew
                     AST_Declaration* decl = nullptr;
-                    auto name = this->fileName + "$" + current_scope;
+                    auto name = this->file_name + "$" + current_scope;
                     if (has_math) {
                         math->scope = name;
                         decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, math, name);
@@ -415,7 +412,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 					assert(decl);
                     assert(decl->math || decl->value != "");
                     // Make sure the scanner knows it's been used too!
-                    this->usedNames.emplace_back(token.value);
+                    this->used_names.emplace_back(token.value);
                     if (scoped) this->add_scoped(name, decl);
 					else file->contained.emplace_back(decl);
                 } else if (the_next_token.type == TokenType::COLON && next_token.type == TokenType::COLON) {
@@ -424,7 +421,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                     // Make sure that we have something more to check.
                     if (!this->has_next(it + 2, end) || !this->has_next(it + 3, end)) {
                         // We don't have at least two more, which we need.
-                        this->workspace.report_error({ "Incomplete function decleration", this->fileName, token.line, token.column });
+                        this->workspace.report_error({ "Incomplete function decleration", this->file_name, token.line, token.column });
                         it += 4;
                         continue;
                     }
@@ -434,7 +431,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 
                     // Make sure we actually have what we need to make a function
                     if (first_next.type != TokenType::LPAREN) {
-                        this->workspace.report_error({ "Function decleration is missing argument block", this->fileName, token.line, token.column });
+                        this->workspace.report_error({ "Function decleration is missing argument block", this->file_name, token.line, token.column });
                         it += 4;
                         continue;
                     }
@@ -496,14 +493,14 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                     // Set the iterator
                     this->next(arguments.size());
 
-                    std::string name = this->fileName + "$" + current_scope;
+                    std::string name = this->file_name + "$" + current_scope;
                     // Now that we have our arguments, lets apply them to a function.
                     auto function = new AST_Function(token.value, token.line, token.column, arguments, name, TokenType::INVALID);
 
                     if (function->name == "main") {
 						// Make sure we're not attempting to redeclare the main function
 						if (file->mainFunction) {
-                            this->workspace.report_error({ "Attempt to redeclare main function", this->fileName, token.line, token.column });
+                            this->workspace.report_error({ "Attempt to redeclare main function", this->file_name, token.line, token.column });
                             it += 4;
                             continue;
                         }
@@ -536,7 +533,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                     }
 
                     if (!this->has_next(it + 1, end)) {
-                        this->workspace.report_error({ "Expected '=', but found nothing", this->fileName, token.line, token.column });
+                        this->workspace.report_error({ "Expected '=', but found nothing", this->file_name, token.line, token.column });
                         it += 4;
                         continue;
                     }
@@ -546,14 +543,14 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                     auto new_type = typer.get_type_from_string(type_token.value);
                     if (new_type == TokenType::INVALID) {
                         // The type isn't a thing
-                        this->workspace.report_error({ "Invalid type: '" + type_token.value + "'", this->fileName, token.line, token.column });
+                        this->workspace.report_error({ "Invalid type: '" + type_token.value + "'", this->file_name, token.line, token.column });
                         it += 4;
                         continue;
                     }
 
                     // Since the type exists, lets see if we have a value.
                     if (!this->has_next(it + 3, end)) {
-                        this->workspace.report_error({ "Cannot initialize variable without a value", this->fileName, token.line, token.column });
+                        this->workspace.report_error({ "Cannot initialize variable without a value", this->file_name, token.line, token.column });
                         it += 4;
                         continue;
                     }
@@ -569,13 +566,13 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                     // Make sure that the types match
                     if (!this->workspace.typer.can_assign_this(new_type, value_token.type)) {
                         this->workspace.report_error({ "Cannot assign type '" + token_map[new_type] + "' from type '" + token_map[value_token.type] + "'",
-                            this->fileName, token.line, token.column });
+                            this->file_name, token.line, token.column });
                         it += 4;
                         continue;
                     }
 
                     AST_Declaration* decl = nullptr;
-                    auto name = this->fileName + "$" + current_scope;
+                    auto name = this->file_name + "$" + current_scope;
                     if (has_math) {
                         math->scope = name;
                         decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, math, name);
@@ -585,7 +582,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 					assert(decl);
                     assert(decl->math || decl->value != "");
                     // Make sure the scanner knows it's been used too!
-                    this->usedNames.emplace_back(token.value);
+                    this->used_names.emplace_back(token.value);
                     if (scoped) this->add_scoped(name, decl);
 					else file->contained.emplace_back(decl);
 					it += 4;
@@ -610,13 +607,13 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 
                 // Before we can, lets make sure we have something to actually assign it to
                 if (!this->has_next(it + 1, end)) {
-                    this->workspace.report_error({ "Cannot reassign variable without value", this->fileName, token.line, token.column });
+                    this->workspace.report_error({ "Cannot reassign variable without value", this->file_name, token.line, token.column });
                     it += 2;
                     continue;
                 }
                 // Since we have a value, lets see if the variable even exists
                 if (this->can_use_name(token.value)) {
-                    this->workspace.report_error({ "Cannot reassign variable '" + token.value + "', does not exist", this->fileName, token.line, token.column });
+                    this->workspace.report_error({ "Cannot reassign variable '" + token.value + "', does not exist", this->file_name, token.line, token.column });
                     it += 2;
                     continue;
                 }
@@ -624,7 +621,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                 // Since we have both the value and a variable, set it.
                 auto original_decl = file->get_decl(token.value);
                 if (!original_decl) {
-                    this->workspace.report_error({ "Internal compiler error: Found name that doesn't exist: " + token.value, this->fileName, token.line, token.column });
+                    this->workspace.report_error({ "Internal compiler error: Found name that doesn't exist: " + token.value, this->file_name, token.line, token.column });
                     break;
                 }
                 auto value_token = *(it + 2);
@@ -632,7 +629,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                 // Make sure they're the same types
                 if (!typer.can_assign_this(original_decl->type, value_token.type)) {
                     this->workspace.report_error({ "Cannot set variable '" + token.value + "', type " + token_map[original_decl->type] + ", to type of " +
-                        token_map[value_token.type] + "", this->fileName, token.line, token.column });
+                        token_map[value_token.type] + "", this->file_name, token.line, token.column });
                     it += 2;
                     continue;
                 }
@@ -654,7 +651,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 
                 // But before we can do that, we need to make sure we even *have* args to do that with.
                 if (!this->has_next(it + 1, end)) {
-                    this->workspace.report_error({ "Expected (, found nothing", this->fileName, token.line, token.column });
+                    this->workspace.report_error({ "Expected (, found nothing", this->file_name, token.line, token.column });
                     it += 2;
                     continue;
                 }
@@ -671,7 +668,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 							continue;
 						} else {
 							// Expecting a comma, didn't find one.
-							this->workspace.report_error({ "Expected a comma between arguments.", this->fileName, token.line, token.column });
+							this->workspace.report_error({ "Expected a comma between arguments.", this->file_name, token.line, token.column });
 							it++;
 							break;
 						}
@@ -684,7 +681,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 					}
                 }
                 // Check if this is a builtin function
-                auto name = this->fileName + "$" + current_scope;
+                auto name = this->file_name + "$" + current_scope;
                 AST_FunctionCall* function = nullptr;
                 if (typer.is_builtin(token.value)) function = new AST_Builtin(builtin_map[token.value], arguments);
                 else function = new AST_FunctionCall(token.value, 0, 0, arguments, name);
@@ -695,7 +692,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                     if (!this->allow_native) {
                         // This isn't allowed. native_ is reserved for compiler directives
                         // that refer back to an action within C++.
-                        this->workspace.report_error({ "Cannot declare function with native_ prefix", this->fileName, token.line, token.column });
+                        this->workspace.report_error({ "Cannot declare function with native_ prefix", this->file_name, token.line, token.column });
                         continue;
                     }
                     // Otherwise, just mark this as native.
