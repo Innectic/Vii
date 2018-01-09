@@ -193,7 +193,7 @@ const std::vector<Token> Scanner::tokenize(const std::string& file_name, const b
             std::string a;
             a += *it;
 
-            if (a == " " || a == "") {
+            if (a == " " || a == "" || a == "\t") {
                 it++;
                 continue;
             }

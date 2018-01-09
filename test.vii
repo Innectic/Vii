@@ -1,6 +1,6 @@
 main :: () {
-    test := true
-    testing := false
-    print(test)
-    print(testing)
+	test := true
+	testing := false
+	print(test)
+	print(testing)
 }
