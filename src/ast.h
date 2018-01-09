@@ -309,3 +309,16 @@ struct AST_If_Block : public AST_Type {
 		return "if block";
 	}
 };
+
+struct AST_Bool : public AST_Type {
+
+	std::string my_name() {
+		return "ast bool";
+	}
+
+	bool value;
+
+	inline AST_Bool(bool value) : value(value) {
+
+	}
+};

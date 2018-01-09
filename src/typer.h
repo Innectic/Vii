@@ -20,14 +20,14 @@ public:
 		return type == TokenType::INT || type == TokenType::FLOAT;
 	}
 
-	const inline TokenType get_type_from_string(const std::string& checking) const {
-		if (checking == "true" || checking == "false") return TokenType::BOOL;
+	const inline TokenType get_type_from_string(const std::string& checking) {
+		if (this->is_token_boolean(checking)) return TokenType::BOOL;
 		for (auto& entry : type_map) if (entry.first == checking) return entry.second;
 		return TokenType::INVALID;
 	}
 
-	const inline TokenType get_token_type(const std::string& checking) const {
-		if (checking == "true" || checking == "false") return TokenType::BOOL;
+	const inline TokenType get_token_type(const std::string& checking) {
+		if (this->is_token_boolean(checking)) return TokenType::BOOL;
 		for (auto& entry : token_map) if (entry.second == checking) return entry.first;
 		return TokenType::IDENTIFIER;
 	}
@@ -65,5 +65,13 @@ public:
 			default:
 				return "invalid";
 		}
+	}
+
+	const inline bool string_to_bool(const std::string& converting) {
+		return converting == "true" ? true : false;
+	}
+
+	const inline bool is_token_boolean(const std::string& checking) {
+		return checking == "true" || checking == "false";
 	}
 };

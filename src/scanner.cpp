@@ -325,6 +325,18 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 					it = position;
 					continue;
 				}
+				case KeywordType::TRUE:
+				case KeywordType::FALSE: {
+					assert(typer.is_token_boolean(it->value));
+					auto value = typer.string_to_bool(it->value);
+
+					auto ast_bool = new AST_Bool(value);
+					auto name = this->file_name + "$" + current_scope;
+
+					if (scoped) this->add_scoped(name, ast_bool);
+					else file->contained.emplace_back(ast_bool);
+					continue;
+				}
 			}
 		}
 

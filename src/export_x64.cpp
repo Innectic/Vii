@@ -102,7 +102,7 @@ const void Export_x64::begin(const std::vector<AST_Type*> contained, AST_Functio
 					std::cout << "INTERNAL COMPILER ERROR: HOW DID AN INVALID TYPE GET TO THIS STAGE HOLY COW SOMETHING IS BROKEN! '" << token_map[decl->type] << "'" << std::endl;
 					break;
 			}
-			this->stream << ";\n}\n";
+			this->stream << ";\n";
 		} if (is_type<AST_Builtin*>(potential)) {
 			auto builtin = static_cast<AST_Builtin*>(potential);
 			assert(builtin);

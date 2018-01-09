@@ -14,3 +14,7 @@ print :: (message: int) {
 print :: (message: float) {
     native_print(message);
 }
+
+print :: (state: bool) {
+    native_print(state);
+}
