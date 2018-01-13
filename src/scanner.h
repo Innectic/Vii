@@ -72,7 +72,7 @@ public:
         this->scope_map[function->name][id] = function;
     }
 
-    const inline void add_scoped(std::string scope, AST_Type* type) {
+    const inline void add_scoped(const std::string& scope, AST_Type* type) {
         auto scope_parts = Util::split(scope, '$');
         if (scope_parts.size() < 2) return;
         auto base_scope = scope_parts[1];

@@ -69,8 +69,7 @@ public:
 
     template<class T, class T2>
     const static bool contains_key(const std::map<T, T2> checking, T key) {
-        auto it = checking.find(key);
-        return it != checking.end();
+        return checking.find(key) != checking.end();
     }
 
     const static std::vector<std::string> split(const std::string& splitting, const char& delim, const int count = 1) {
@@ -88,7 +87,7 @@ public:
     }
 
 	const static std::string trim(const std::string& trimming) {
-		std::string cleaned = trimming;
+		auto cleaned = trimming;
 		while (cleaned.size() && isspace(cleaned.front())) cleaned.erase(cleaned.begin());
 		while (cleaned.size() && isspace(cleaned.back())) cleaned.pop_back();
 		return cleaned;

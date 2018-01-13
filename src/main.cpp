@@ -22,12 +22,12 @@ int main(int argc, char *argv[]) {
     }
 
     auto typer = std::make_unique<Typer>();
-    auto resolver = std::make_unique<Resolver>(*typer.get());
+    auto resolver = std::make_unique<Resolver>(*typer);
     auto reporter = std::make_unique<Reporter>();
-    auto workspace = std::make_unique<WorkSpace>(*reporter.get(), *typer.get(), *resolver.get());
+    auto workspace = std::make_unique<WorkSpace>(*reporter, *typer, *resolver);
     auto file_handler = std::make_unique<FileHandler>();
-    auto scanner = std::make_unique<Scanner>(*workspace.get());
-    auto verification = std::make_unique<Verification>(*workspace.get());
+    auto scanner = std::make_unique<Scanner>(*workspace);
+    auto verification = std::make_unique<Verification>(*workspace);
     
     workspace->set_defaults();
 
@@ -41,8 +41,7 @@ int main(int argc, char *argv[]) {
         if (current == "-w") {
             workspace->directory = file_handler->get_current_directory();
             workspace->original_files = file_handler->get_files_in_directory(true, workspace->directory);
-        }
-        else if (current == "-stdc") {
+        } else if (current == "-stdc") {
             // This means we're compiling the standard lib.
             // So we don't want to do anything with the user's code.
             auto converter = std::make_unique<Export_x64>(true, *typer);

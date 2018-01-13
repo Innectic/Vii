@@ -14,15 +14,18 @@
 #define get_current_dir getcwd
 #endif
 
+using namespace std::experimental::filesystem;
+
 class FileHandler {
 private:
-    inline const std::vector<std::string> check_path(const std::experimental::filesystem::v1::directory_entry& entry) const {
+    inline const std::vector<std::string> check_path(const directory_entry& entry) const {
         std::vector<std::string> discovered_files;
         for (auto& name : entry.path().filename()) {
             // We only want to take the `.vii` files.
             if (name.extension() == ".vii") {
-                std::string whole_name = entry.path().parent_path().string();
-                whole_name.append("/").append(entry.path().root_directory().string()).append(name.string());
+                auto whole_name = 
+					entry.path().parent_path().string() + "/" + entry.path().root_directory().string() +
+					name.string();
 				discovered_files.emplace_back(whole_name);
             }
         }
@@ -30,28 +33,26 @@ private:
     }
 
     inline const std::vector<std::string> recurse_files(const std::string& directory) const {
-        using namespace std::experimental::filesystem;
-
         std::vector<std::string> discovered_files;
-        for (directory_entry entry : recursive_directory_iterator(directory))
+        for (auto entry : recursive_directory_iterator(directory))
             for (auto& in : this->check_path(entry))
 				discovered_files.emplace_back(in);
         return discovered_files;
     }
 
     inline const std::vector<std::string> get_in_directory(const std::string& directory) const {
-        using namespace std::experimental::filesystem;
-
         std::vector<std::string> discovered_files;
-        for (directory_entry entry : directory_iterator(directory))
+        for (auto entry : directory_iterator(directory))
             for (auto& in : this->check_path(entry))
 				discovered_files.emplace_back(in);
         return discovered_files;
     }
 
 public:
-    const inline std::vector<std::string> get_files_in_directory(bool recurse, std::string directory) const {
-        return recurse ? this->recurse_files(directory) : this->get_in_directory(directory);
+    const inline std::vector<std::string> get_files_in_directory(const bool recurse, const std::string& directory) const {
+        return recurse ?
+			this->recurse_files(directory) :
+			this->get_in_directory(directory);
     }
 
     const inline std::string get_current_directory() const {

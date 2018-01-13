@@ -1,6 +1,15 @@
 main :: () {
-	test := true
-	testing := false
-	print(test)
-	print(testing)
+    test := true
+    if test {
+        print("Testing")
+    }
+
+    testing := false
+    if testing {
+        print("Broke")
+    }
+
+    if true {
+        print("rseiotnareiotlarwuoglwowkhdv")
+    }
 }
