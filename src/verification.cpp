@@ -32,7 +32,26 @@ const bool Verification::validate(const std::vector<AST_Type*>& contained) {
                 had_issues = true;
                 continue;
             }
-        }
+		} else if (is_type<AST_Declaration*>(component)) {
+			auto decl = static_cast<AST_Declaration*>(component);
+			auto resolved = new AST_Resolved_Variable(decl->name, decl->line, decl->column, decl->scope, decl);
+			auto registered = this->workspace.resolver.register_variable(resolved);
+			// TODO: This breaks with redecl
+			// TODO: This breaks with redecl
+			// TODO: This breaks with redecl
+			// TODO: This breaks with redecl
+			// TODO: This breaks with redecl
+			// TODO: This breaks with redecl
+			// TODO: This breaks with redecl
+			// TODO: This breaks with redecl
+			// TODO: This breaks with redecl
+			// TODO: This breaks with redecl
+			// TODO: This breaks with redecl
+			// TODO: This breaks with redecl
+			// TODO: This breaks with redecl
+			// TODO: This breaks with redecl
+			// TODO: This breaks with redecl
+		}
     }
     return had_issues;
 }

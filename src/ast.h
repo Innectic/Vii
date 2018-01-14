@@ -2,7 +2,9 @@
 
 #include <string>
 #include <vector>
+#include <cassert>
 
+#include "util.h"
 #include "token.h"
 #include "typer.h"
 
@@ -270,6 +272,31 @@ struct AST_Resolved_Function : public AST_Resolved_Type {
     inline const std::string my_name() {
         return "resolved function";
     }
+};
+
+struct AST_Resolved_Variable : public AST_Resolved_Type {
+	AST_Declaration* decl;
+
+	inline AST_Resolved_Variable(const std::string& name, const int& line, const int& column, const std::string& scope, AST_Declaration* decl) {
+		this->name = name;
+		this->line = line;
+		this->column = column;
+		this->scope = scope;
+		this->decl = decl;
+	}
+
+	inline const std::string my_name() {
+		return "resolved variable";
+	}
+
+	inline const bool scope_can_access_me(const std::string& scope) {
+		auto scope_parts = Util::split(scope, '$');
+		auto my_scope_parts = Util::split(this->scope, '$');
+		// If we exist in the global scope, then anything can access me.
+		if (my_scope_parts[1] == "global") return true;
+		if (Util::lists_are_same(scope_parts, my_scope_parts)) return true;
+		return false;
+	}
 };
 
 struct AST_If : public AST_Type {

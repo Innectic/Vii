@@ -676,6 +676,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                 while (it->type != TokenType::RPAREN && this->has_next(it, end)) {
 					if (expecting_comma) {
 						if (it->type == TokenType::COMMA) {
+							expecting_comma = false;
 							// Expecting a comma, found one.
 							it++;
 							continue;
@@ -690,6 +691,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
 						AST_Argument* arg = new AST_Argument(it->value, it->type);
 
 						arguments.emplace_back(*arg);
+						expecting_comma = true;
 						it++;
 					}
                 }

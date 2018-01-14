@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <chrono>
 #include <sstream>
+#include <map>
 
 #ifdef _WIN32
 #define int64 __int64
@@ -91,5 +92,12 @@ public:
 		while (cleaned.size() && isspace(cleaned.front())) cleaned.erase(cleaned.begin());
 		while (cleaned.size() && isspace(cleaned.back())) cleaned.pop_back();
 		return cleaned;
+	}
+
+	template<class T>
+	const static bool lists_are_same(const std::vector<T>& first, const std::vector<T>& second) {
+		if (first.size() != second.size()) return false;
+		for (auto i = 0u; i < first.size(); i++) if (first[i] != second[i]) return false;
+		return true;
 	}
 };

@@ -1,15 +1,23 @@
+
+a :: () {
+	print("Test")
+}
+
+a :: (b: string) {
+	print(b)
+}
+
+a :: (b: string, c: string) {
+	print(b)
+	print(c)
+}
+
 main :: () {
-    test := true
-    if test {
-        print("Testing")
-    }
+	test := "THing"
+	testing := "arsteinrst"
 
-    testing := false
-    if testing {
-        print("Broke")
-    }
-
-    if true {
-        print("rseiotnareiotlarwuoglwowkhdv")
-    }
+	print("Hi")
+	a()
+	a("Thing")
+	a(test, testing)
 }

@@ -22,9 +22,9 @@ int main(int argc, char *argv[]) {
     }
 
     auto typer = std::make_unique<Typer>();
-    auto resolver = std::make_unique<Resolver>(*typer);
-    auto reporter = std::make_unique<Reporter>();
-    auto workspace = std::make_unique<WorkSpace>(*reporter, *typer, *resolver);
+	auto reporter = std::make_unique<Reporter>();
+	auto resolver = std::make_unique<Resolver>(*typer, *reporter);
+	auto workspace = std::make_unique<WorkSpace>(*reporter, *typer, *resolver);
     auto file_handler = std::make_unique<FileHandler>();
     auto scanner = std::make_unique<Scanner>(*workspace);
     auto verification = std::make_unique<Verification>(*workspace);
