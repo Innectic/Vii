@@ -15,7 +15,7 @@ const Token Scanner::read_string(const char& delim) {
     bool was_terminated = true;
     
     std::string found = "";
-    Token token = { TokenType::INVALID, "" };
+    Token token = { TokenType::INVALID, "", 0, 0, ASTFlag::TOKEN };
 
     while (it <= this->end) {
         if (it == this->end && *(it - 1) != delim) {
@@ -48,6 +48,7 @@ const Token Scanner::read_string(const char& delim) {
     if (token.type == TokenType::CHAR && token.value.size() != 1) {
         token.type = TokenType::INVALID;
         token.value = "";
+		token.flag = ASTFlag::UNPROCESSED;
     }
 
     return token;
@@ -58,7 +59,7 @@ const Token Scanner::read_number() {
     bool encountered_dot = false;
     bool invalid = false;
 
-    Token token = { TokenType::INVALID, "0" };
+    Token token = { TokenType::INVALID, "0", 0, 0, ASTFlag::UNPROCESSED };
 
     while (it < this->end) {
         if (*it == '.') {
@@ -75,7 +76,8 @@ const Token Scanner::read_number() {
     if (!invalid) {
         token.value = found;
         token.type = encountered_dot ? TokenType::FLOAT : TokenType::INT;
-    }
+		token.flag = ASTFlag::TOKEN;
+	}
     return token;
 }
 
@@ -97,6 +99,9 @@ AST_Math* Scanner::do_math(std::vector<Token>::iterator& end, std::vector<Token>
         auto operator_token = it + 1;
         auto next_adding = it + 2;
 
+		assert(operator_token->flag == ASTFlag::SCAN);
+		assert(next_adding->flag == ASTFlag::SCAN);
+
         if (!typer.is_operator(operator_token->type)) {
             this->workspace.report_error({ "Invalid operator type: " + token_map[operator_token->type], this->file_name, token.line, token.column });
             it += 2;
@@ -116,6 +121,7 @@ AST_Math* Scanner::do_math(std::vector<Token>::iterator& end, std::vector<Token>
         }
 
         AST_Operation operation = { it->value, it->type, next_adding->value, next_adding->type, operator_token->type, chain };
+		operation.flag = ASTFlag::SCAN;
         operations.emplace_back(operation);
         it += 2;
         if (!typer.is_operator((it + 1)->type)) break;
@@ -178,7 +184,8 @@ const std::vector<Token> Scanner::tokenize(const std::string& file_name, const b
                     this->workspace.report_error({ "String / char was never terminated.", this->file_name, 0, column });
                     continue;
                 }
-                tokens.emplace_back(token);
+				token.flag = ASTFlag::TOKEN;
+				tokens.emplace_back(token);
                 continue;
             } else if (Util::is_number(*it)) {
                 auto token = this->read_number();
@@ -186,6 +193,7 @@ const std::vector<Token> Scanner::tokenize(const std::string& file_name, const b
                     this->workspace.report_error({ "Number cannot contain multiple '.'", this->file_name, 0, column });
                     continue;
                 }
+				token.flag = ASTFlag::TOKEN;
                 tokens.emplace_back(token);
                 continue;
             }
@@ -209,12 +217,12 @@ const std::vector<Token> Scanner::tokenize(const std::string& file_name, const b
             }
 
             if (current != "" && current != " ") {
-                Token identToken = { TokenType::IDENTIFIER, current, line_num, column };
+                Token identToken = { TokenType::IDENTIFIER, current, line_num, column, ASTFlag::TOKEN };
                 tokens.emplace_back(identToken);
                 current = "";
             }
 
-            Token token = { type, "", line_num, column };
+            Token token = { type, "", line_num, column, ASTFlag::TOKEN };
             tokens.emplace_back(token);
             
             it++;
@@ -222,7 +230,7 @@ const std::vector<Token> Scanner::tokenize(const std::string& file_name, const b
         }
         if (current != "") {
             auto type = this->workspace.typer.get_token_type(current);
-            Token remaining_token = { type, current, line_num, column };
+            Token remaining_token = { type, current, line_num, column, ASTFlag::TOKEN };
             tokens.emplace_back(remaining_token);
         }
         line_num++;
@@ -246,6 +254,9 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
     for (auto it = start; it < end - 1; ++it) {
 		this->hack = it;
 		auto token = *it;
+
+		assert(token.flag == ASTFlag::TOKEN);
+		token.flag = ASTFlag::SCAN;
 
 		// Check if it's a keyword.
 		auto keyword_type = typer.get_keyword_type(token.value);
@@ -421,6 +432,8 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                     }
                     else decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
                     // Make sure everything exists.
+
+					decl->flag = ASTFlag::SCAN;
 					assert(decl);
                     assert(decl->math || decl->value != "");
                     // Make sure the scanner knows it's been used too!
@@ -520,6 +533,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                         file->mainFunction = function;
                     }
                     // Now that we have our function, give it to the file
+					function->flag = ASTFlag::SCAN;
 					if (scoped) this->set_scope(name, function);
 					else file->contained.emplace_back(function);
 
@@ -591,6 +605,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                     }
                     else decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
                     // Checks
+					decl->flag = ASTFlag::SCAN;
 					assert(decl);
                     assert(decl->math || decl->value != "");
                     // Make sure the scanner knows it's been used too!
@@ -649,7 +664,7 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                 // Types are the same, and the variable exists. Time to finally set it.
                 if (has_math) decl->math = math;
                 else decl->value = value_token.value;
-
+				decl->flag = ASTFlag::SCAN;
 				// Checks
 				assert(decl);
 				assert(decl->math || decl->value != "");

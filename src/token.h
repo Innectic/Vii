@@ -3,6 +3,15 @@
 #include <map>
 #include "util.h"
 
+enum class ASTFlag {
+	UNPROCESSED = 0,
+	TOKEN,
+	SCAN,
+	OPTIMIZED_OUT,
+	OPTIMIZED,
+	EXPORTED
+};
+
 enum class TokenType {
     INVALID,
     END_OF_FILE,
@@ -95,8 +104,10 @@ struct Token {
     TokenType type;
     std::string value;
 
-    int line;
+	int line;
     int column;
+
+	ASTFlag flag;
 };
 
 enum class KeywordType {

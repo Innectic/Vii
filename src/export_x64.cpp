@@ -73,6 +73,8 @@ const void Export_x64::begin(const AST_SourceFile& source_file) {
 
 const void Export_x64::begin(const std::vector<AST_Type*> contained, AST_Function* main_function) {
 	for (auto& potential : contained) {
+		// assert(potential->flag == ASTFlag::SCAN);
+
 		if (is_type<AST_Declaration*>(potential)) {
 			auto decl = static_cast<AST_Declaration*>(potential);
 			assert(decl);

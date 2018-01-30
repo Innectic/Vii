@@ -8,15 +8,6 @@
 #include "token.h"
 #include "typer.h"
 
-enum class ASTFlag : uint32_t {
-	UNPROCESSED = 0,
-	TOKEN,
-	SCAN,
-	OPTIMIZED_OUT,
-	OPTIMIZED,
-	EXPORTED
-};
-
 struct AST_Type {
 	ASTFlag flag;
     virtual int id() = 0;
