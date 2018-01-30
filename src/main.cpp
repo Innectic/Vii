@@ -15,20 +15,10 @@
 #include "export_x64.h"
 #include "verification.h"
 
+#include "std/list.h"
 #include "std/string.h"
 
 int main(int argc, char *argv[]) {
-	ViiString string("testing");
-	std::cout << string << std::endl;
-
-	string = "dank";
-	std::cout << string << std::endl;
-	
-	std::cout << (string == std::string("dank")) << std::endl;
-	std::cout << (string != std::string("memes")) << std::endl;
-
-	return 0;
-
     if (argc < 2) {
         std::cout << "   ERROR: Must supply at least one file to compile" << std::endl;
         return -1;
