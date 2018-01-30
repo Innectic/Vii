@@ -430,7 +430,10 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                         math->scope = name;
                         decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, math, name);
                     }
-                    else decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
+					else {
+						decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
+						decl->math = nullptr;
+					}
                     // Make sure everything exists.
 
 					decl->flag = ASTFlag::SCAN;
@@ -603,7 +606,10 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                         math->scope = name;
                         decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, math, name);
                     }
-                    else decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
+					else {
+						decl = new AST_Declaration(token.line, token.column, value_token.type, token.value, value_token.value, name);
+						decl->math = nullptr;
+					}
                     // Checks
 					decl->flag = ASTFlag::SCAN;
 					assert(decl);
@@ -663,7 +669,10 @@ AST_SourceFile* Scanner::parse(std::vector<Token>::iterator start, std::vector<T
                 auto decl = new AST_Declaration(token.line, token.column, original_decl->type, original_decl->name, nullptr, original_decl->scope, true);
                 // Types are the same, and the variable exists. Time to finally set it.
                 if (has_math) decl->math = math;
-                else decl->value = value_token.value;
+				else {
+					decl->value = value_token.value;
+					decl->math = nullptr;
+				}
 				decl->flag = ASTFlag::SCAN;
 				// Checks
 				assert(decl);

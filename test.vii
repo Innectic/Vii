@@ -1,23 +1,12 @@
 
-a :: () {
-	print("Test")
-}
-
-a :: (b: string) {
-	print(b)
-}
-
 a :: (b: string, c: string) {
 	print(b)
 	print(c)
 }
 
 main :: () {
-	test := "THing"
+	test := "a"
 	testing := 1
 
-	print("Hi")
-	a()
-	a("Thing")
 	a(test, testing)
 }
