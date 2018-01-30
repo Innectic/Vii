@@ -19,4 +19,40 @@ public:
 
 	bool starts_with(const ViiString& checking);
 	bool ends_with(const ViiString& checking);
+
+	inline bool operator==(const ViiString& other) {
+		return this->str == other.str;
+	}
+
+	inline bool operator==(const std::string& other) {
+		return this->str == other;
+	}
+
+	inline bool operator!=(const ViiString& other) {
+		return this->str != other.str;
+	}
+
+	inline bool operator!=(const std::string& other) {
+		return this->str != other;
+	}
+
+	inline ViiString operator+=(const std::string adding) {
+		this->str += adding;
+		return *this;
+	}
+
+	inline ViiString operator+=(const ViiString& adding) {
+		this->str += adding.str;
+		return *this;
+	}
+	
+	inline ViiString operator=(const ViiString& value) {
+		this->str = value.str;
+		return *this;
+	}
 };
+
+static std::ostream& operator<<(std::ostream& stream, const ViiString& other) {
+	stream << other.str;
+	return stream;
+}
