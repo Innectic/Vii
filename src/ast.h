@@ -8,8 +8,18 @@
 #include "token.h"
 #include "typer.h"
 
+enum class ASTFlag {
+	UNPROCESSED = 1,
+	TOKEN = 2,
+	SCAN = 4,
+	OPTIMIZED_OUT = 8,
+	OPTIMIZED = 16,
+	EXPORTED = 32
+};
+
 struct AST_Type {
-    virtual std::string my_name() = 0;
+	ASTFlag flag;
+    virtual int id() = 0;
 };
 
 template<class T, typename T2>
@@ -23,9 +33,11 @@ struct AST_Operation : public AST_Type {
         first_value(first_value), first_type(first_type), second_value(second_value), second_type(second_type), operation(operation), chain(chain) {
     }
 
-    std::string my_name() {
-        return "AST_Operation";
-    }
+	ASTFlag flag = ASTFlag::UNPROCESSED;
+
+	int id() {
+		return 0; // only here for poly
+	}
 
     std::string first_value;
     TokenType first_type;
@@ -45,9 +57,11 @@ struct AST_Math : public AST_Type {
     std::vector<AST_Operation> operations;
     std::string scope;
 
-    std::string my_name() {
-        return "AST_Math";
-    }
+	ASTFlag flag = ASTFlag::UNPROCESSED;
+
+	int id() {
+		return 0; // only here for poly
+	}
 };
 
 struct AST_Declaration : public AST_Type {
@@ -74,10 +88,12 @@ struct AST_Declaration : public AST_Type {
 	inline ~AST_Declaration() {
 		delete this->math;
 	}
-    
-    std::string my_name() {
-        return "AST_Decl";
-    }
+
+	ASTFlag flag = ASTFlag::UNPROCESSED;
+
+	int id() {
+		return 0; // only here for poly
+	}
 
     int line;
     int column;
@@ -101,9 +117,11 @@ struct AST_Argument : public AST_Type {
 
     }
 
-    std::string my_name() {
-        return "AST_Arg";
-    }
+	ASTFlag flag = ASTFlag::UNPROCESSED;
+
+	int id() {
+		return 0; // only here for poly
+	}
 
     std::string value;
     TokenType type;
@@ -118,9 +136,11 @@ public:
         this->native = false;
     }
 
-    std::string my_name() {
-        return "AST_FuncCall";
-    }
+	ASTFlag flag = ASTFlag::UNPROCESSED;
+
+	int id() {
+		return 0; // only here for poly
+	}
 
     std::string name;
     std::string scope;
@@ -140,10 +160,11 @@ struct AST_Builtin : public AST_FunctionCall {
         this->type = type;
     }
 
+	ASTFlag flag = ASTFlag::UNPROCESSED;
 
-    std::string my_name() {
-        return "AST_Builtin";
-    }
+	int id() {
+		return 0; // only here for poly
+	}
 
     NativeType type;
 };
@@ -163,9 +184,11 @@ struct AST_Function : public AST_FunctionCall {
 		this->contained.empty();
 	}
 
-    std::string my_name() {
-        return "AST_Func";
-    }
+	ASTFlag flag = ASTFlag::UNPROCESSED;
+
+	int id() {
+		return 0; // only here for poly
+	}
 
     std::string contained_scope;
     std::string scope;
@@ -198,9 +221,11 @@ struct AST_SourceFile : public AST_Type {
 		delete this->mainFunction;
 	}
 
-    std::string my_name() {
-        return "AST_SourceFile";
-    }
+	ASTFlag flag = ASTFlag::UNPROCESSED;
+
+	int id() {
+		return 0; // only here for poly
+	}
 
     std::string file_name;
     int total_comments;
@@ -247,7 +272,10 @@ struct AST_Resolved_Type {
 
     std::string scope;
 
-    const virtual std::string my_name() = 0;
+
+	ASTFlag flag;
+
+	virtual int id() = 0;
 };
 
 struct AST_Resolved_Function : public AST_Resolved_Type {
@@ -269,9 +297,11 @@ struct AST_Resolved_Function : public AST_Resolved_Type {
         return true;
     }
 
-    inline const std::string my_name() {
-        return "resolved function";
-    }
+	ASTFlag flag = ASTFlag::UNPROCESSED;
+
+	int id() {
+		return 0; // only here for poly
+	}
 };
 
 struct AST_Resolved_Variable : public AST_Resolved_Type {
@@ -285,8 +315,10 @@ struct AST_Resolved_Variable : public AST_Resolved_Type {
 		this->decl = decl;
 	}
 
-	inline const std::string my_name() {
-		return "resolved variable";
+	ASTFlag flag = ASTFlag::UNPROCESSED;
+
+	int id() {
+		return 0; // only here for poly
 	}
 
 	inline const bool scope_can_access_me(const std::string& scope) {
@@ -314,8 +346,10 @@ struct AST_If : public AST_Type {
 		delete contained;
 	}
 
-	std::string my_name() {
-		return "if statement";
+	ASTFlag flag = ASTFlag::UNPROCESSED;
+
+	int id() {
+		return 0; // only here for poly
 	}
 };
 
@@ -332,15 +366,19 @@ struct AST_If_Block : public AST_Type {
 		this->else_if_block.empty();
 	}
 
-	std::string my_name() {
-		return "if block";
+	ASTFlag flag = ASTFlag::UNPROCESSED;
+
+	int id() {
+		return 0; // only here for poly
 	}
 };
 
 struct AST_Bool : public AST_Type {
 
-	std::string my_name() {
-		return "ast bool";
+	ASTFlag flag = ASTFlag::UNPROCESSED;
+
+	int id() {
+		return 0; // only here for poly
 	}
 
 	bool value;
