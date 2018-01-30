@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <regex>
 
 class ViiString {
 private:
@@ -19,6 +20,12 @@ public:
 
 	bool starts_with(const ViiString& checking);
 	bool ends_with(const ViiString& checking);
+
+	ViiString trim();
+	ViiString replace(ViiString replacing, ViiString with);
+
+	ViiString lower();
+	ViiString upper();
 
 	inline bool operator==(const ViiString& other) {
 		return this->str == other.str;

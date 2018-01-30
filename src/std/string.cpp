@@ -32,3 +32,30 @@ bool ViiString::ends_with(const ViiString& checking) {
 	auto start_pos = this->str.length() - checking.str.length();
 	return this->str.substr(start_pos) == checking.str;
 }
+
+ViiString ViiString::trim() {
+	auto cleaned = this->str;
+
+	while (cleaned.size() && isspace(cleaned.front())) cleaned.erase(cleaned.begin());
+	while (cleaned.size() && isspace(cleaned.back())) cleaned.pop_back();
+
+	return cleaned;
+}
+
+ViiString ViiString::replace(ViiString replacing, ViiString with) {
+	auto replaced = this->str;
+	replaced = std::regex_replace(replaced, std::regex(replacing.str), with.str);
+	return replaced;
+}
+
+ViiString ViiString::upper() {
+	auto current = this->str;
+	std::transform(current.begin(), current.end(), current.begin(), ::toupper);
+	return current;
+}
+
+ViiString ViiString::lower() {
+	auto current = this->str;
+	std::transform(current.begin(), current.end(), current.begin(), ::tolower);
+	return current;
+}
