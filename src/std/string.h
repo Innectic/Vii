@@ -2,6 +2,9 @@
 
 #include <string>
 #include <vector>
+#include <fstream>
+#include <sstream>
+#include <iostream>
 
 class ViiString {
 private:
@@ -12,5 +15,5 @@ public:
 	ViiString(const char* str);
 
 	bool contains(const ViiString& contains);
-	std::vector<ViiString> split(const ViiString& by, const int limit = 0);
+	std::vector<ViiString> split(const char& by, const int limit = 0);
 };

@@ -12,8 +12,12 @@ bool ViiString::contains(const ViiString& contains) {
 	return this->str.find(contains.str) != std::string::npos;
 }
 
-std::vector<ViiString> ViiString::split(const ViiString& by, const int limit) {
+std::vector<ViiString> ViiString::split(const char& by, const int limit) {
 	std::vector<ViiString> matches;
+
+	std::string part;
+	std::stringstream stream(this->str);
+	while (getline(stream, part, by)) matches.emplace_back(ViiString(part));
 
 	return matches;
 }
