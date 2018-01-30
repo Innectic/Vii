@@ -8,6 +8,7 @@ Some of the goals are:
 - Huge projects shouldn't take forever to compile.
 - Library management should be easy
 - Multiple export backends: x64, LLVM, etc
+- Simple standard lib, don't bloat it with BS
 - Easy to debug, no `printf` debugging should be needed
 - Simple to contribute, and add features
 
@@ -16,6 +17,12 @@ Some of the goals are:
 Write good code if you want to contribute. Don't manage your own memory, if you can avoid it. If you can't avoid it, please just do it properly
 
 If you want to know how things should be written, just look at how some of the code in the repo has been written.
+
+# Discussion
+
+Come discuss things with us on Discord!
+
+https://discord.gg/DAyj4Vr
 
 # Compiling
 

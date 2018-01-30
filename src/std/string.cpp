@@ -21,3 +21,14 @@ std::vector<ViiString> ViiString::split(const char& by, const int limit) {
 
 	return matches;
 }
+
+bool ViiString::starts_with(const ViiString& checking) {
+	return this->str.substr(0, checking.str.size()) == checking.str;
+}
+
+bool ViiString::ends_with(const ViiString& checking) {
+	if (checking.str.length() > this->str.length()) return false;
+
+	auto start_pos = this->str.length() - checking.str.length();
+	return this->str.substr(start_pos) == checking.str;
+}
