@@ -14,7 +14,7 @@ a :: (b: string, c: string) {
 
 main :: () {
 	test := "THing"
-	testing := "arsteinrst"
+	testing := 1
 
 	print("Hi")
 	a()

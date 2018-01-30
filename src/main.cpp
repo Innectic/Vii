@@ -15,6 +15,9 @@
 #include "export_x64.h"
 #include "verification.h"
 
+#include "std/list.h"
+#include "std/string.h"
+
 int main(int argc, char *argv[]) {
     if (argc < 2) {
         std::cout << "   ERROR: Must supply at least one file to compile" << std::endl;
@@ -78,7 +81,7 @@ int main(int argc, char *argv[]) {
     auto total_time = Util::get_time();
 
     auto start_time = Util::get_time();
-    std::vector<Token> tokens = scanner->tokenize("test.vii", false);
+    auto tokens = scanner->tokenize("test.vii", false);
     auto end_time = Util::get_time() - start_time;
     
     start_time = Util::get_time();

@@ -4,17 +4,21 @@ print :: (message: string) {
 }
 
 print :: (message: char) {
-    native_print(message);
+    native_print(message)
 }
 
 print :: (message: int) {
-    native_print(message);
+    native_print(message)
 }
 
 print :: (message: float) {
-    native_print(message);
+    native_print(message)
 }
 
 print :: (state: bool) {
-    native_print(state);
+	if state == true {
+		native_print("true")
+	} else {
+		native_print("false")
+	}
 }

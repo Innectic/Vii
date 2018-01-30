@@ -27,8 +27,7 @@ const Token Scanner::read_string(const char& delim) {
         if (escaped) {
             found += *it;
             escaped = false;
-        }
-        else if (*it == '\\' && this->has_next() && *(it + 1) == delim) escaped = true;
+        } else if (*it == '\\' && this->has_next() && *(it + 1) == delim) escaped = true;
         else if (*it == delim) {
             if (!escaped && taking) {
                 taking = false;
