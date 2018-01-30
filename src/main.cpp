@@ -16,7 +16,7 @@
 #include "verification.h"
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
+	if (argc < 2) {
         std::cout << "   ERROR: Must supply at least one file to compile" << std::endl;
         return -1;
     }

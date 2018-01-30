@@ -8,13 +8,13 @@
 #include "token.h"
 #include "typer.h"
 
-enum class ASTFlag {
-	UNPROCESSED = 1,
-	TOKEN = 2,
-	SCAN = 4,
-	OPTIMIZED_OUT = 8,
-	OPTIMIZED = 16,
-	EXPORTED = 32
+enum class ASTFlag : uint32_t {
+	UNPROCESSED = 0,
+	TOKEN,
+	SCAN,
+	OPTIMIZED_OUT,
+	OPTIMIZED,
+	EXPORTED
 };
 
 struct AST_Type {
