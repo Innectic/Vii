@@ -40,7 +40,10 @@ public:
     TokenType type;
     Flag flag;
 
-    Token(TokenType type, Flag flag) : type(type), flag(flag) {}
+    int column;
+    int line;
+
+    Token(TokenType type, Flag flag, int line, int column) : type(type), flag(flag), line(line), column(column) {}
 };
 
 const static TokenType get_token_type(const char& ch) {
