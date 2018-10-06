@@ -13,5 +13,5 @@ public:
     ~Scanner();
 
     std::vector<Token> tokenize(const std::string& file);
-    void parse();  // TODO: This should return something real
+    ASTProject* parse(const std::vector<Token>& tokens);  // TODO: This should return something real
 };

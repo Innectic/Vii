@@ -6,7 +6,8 @@
 int main(void) {
     auto scanner = new Scanner();
 
-    scanner->tokenize("testing.vii");
+    auto tokens = scanner->tokenize("testing.vii");
+    auto parsed = scanner->parse(tokens);
 
     delete scanner;
 
