@@ -31,8 +31,7 @@ std::vector<Token> Scanner::tokenize(const std::string& file) {
 
             // Get the type of the token. If it isn't a "special" token type, like `/`, then it will just be `IDENTIFIER`
             auto token_type = get_token_type(it);
-            auto reserved_type = get_reserved_type(it);
-            tokens.emplace_back(Token(token_type, reserved_type, Flag::SCANNED, line, column));
+            tokens.emplace_back(Token(token_type, ReservedTokenType::NONE, Flag::SCANNED, line, column));
             column++;
         }
         line++;
@@ -44,14 +43,14 @@ std::vector<Token> Scanner::tokenize(const std::string& file) {
 std::vector<Token> pull_tokens_until_delim(const std::vector<Token>& tokens, TokenType type) {
     std::vector<Token> found;
     For (tokens) {
-        if (it->type == type) break;
-        found.emplace_back(*it);
+        if (it.type == type) break;
+        found.emplace_back(it);
     }
     return found;
 }
 
-std::vector<Token> Scanner::parse(const std::vector<Token>& tokens, bool within_another_scope) {
-    std::vector<Token> tokens;
+std::vector<ASTType*> Scanner::parse(const std::vector<Token>& tokens, bool within_another_scope) {
+    std::vector<ASTType*> result;
 
     for (auto i = tokens.begin(); i < tokens.end(); i++) {
         auto it = *i;
@@ -95,8 +94,8 @@ std::vector<Token> Scanner::parse(const std::vector<Token>& tokens, bool within_
                 // Now that we know how the variable will be assigned, we can actually make the
                 // assignment meta information.
                 auto to = *(typeStyle == TypeOfType::INFERRED ? i + 3 : i + 4);
-                auto assignment = new ASTAssignment(it, to, typeStyle);
-                this->store_ast_segment(assignment);
+                ASTType* assignment = new ASTAssignment(it, to, typeStyle);
+                result.emplace_back(assignment);
             }
         } else if (it.type == TokenType::RESERVED) {
             // If this is a reserved type, then this is a language keyword.
@@ -104,7 +103,7 @@ std::vector<Token> Scanner::parse(const std::vector<Token>& tokens, bool within_
                 // First, we need to make sure we're not trying to make a struct in a struct.
                 if (within_another_scope) {
                     // TODO: Put an error here.
-                    return tokens;
+                    return result;
                 }
                 // Since we're not trying to put a struct in a struct, we can move on to parsing
                 // the components of the struct.
@@ -116,6 +115,5 @@ std::vector<Token> Scanner::parse(const std::vector<Token>& tokens, bool within_
             }
         }
     }
-
-    return tokens;
+    return result;
 }

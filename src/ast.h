@@ -4,15 +4,6 @@
 #include <vector>
 #include <string>
 
-struct ASTProject {
-public:
-    std::map<std::string, std::vector<Token>> stored;
-
-    inline void store_ast_segment(std::string file, ASTType* segment) {
-        this->types.emplace_back(segment);
-    }
-};
-
 struct ASTType {
 public:
     virtual std::string to_string() = 0;
@@ -24,6 +15,15 @@ enum class TypeOfType {
     GIVEN
 };
 
+struct ASTProject {
+public:
+    std::vector<ASTType*> types;
+
+    inline void store_ast_segment(std::string file, ASTType* segment) {
+        this->types.emplace_back(segment);
+    }
+};
+
 struct ASTAssignment : public ASTType {
 private:
     Token& assigning;
@@ -33,7 +33,7 @@ public:
     inline ASTAssignment(Token& assigning, Token& to, TypeOfType type) : assigning(assigning), to(to), typeStyle(type) {}
 
     inline std::string to_string() {
-        return "WE ARE (RE)ASSIGNING A VARIABLE WEE)";
+        return "WE ARE (RE)ASSIGNING A VARIABLE WEE";
     }
 };
 
@@ -51,4 +51,4 @@ public:
 struct ASTStruct : public ASTType {
  private:
     
-}
+};
