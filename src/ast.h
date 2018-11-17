@@ -7,11 +7,34 @@
 struct ASTProject {
 public:
     std::map<std::string, std::vector<Token>> stored;
+
+    inline void store_ast_segment(std::string file, ASTType* segment) {
+        this->types.emplace_back(segment);
+    }
 };
 
 struct ASTType {
 public:
     virtual std::string to_string() = 0;
+};
+
+enum class TypeOfType {
+    UNKNOWN,
+    INFERRED,
+    GIVEN
+};
+
+struct ASTAssignment : public ASTType {
+private:
+    Token& assigning;
+    Token& to;
+    TypeOfType typeStyle;
+public:
+    inline ASTAssignment(Token& assigning, Token& to, TypeOfType type) : assigning(assigning), to(to), typeStyle(type) {}
+
+    inline std::string to_string() {
+        return "WE ARE (RE)ASSIGNING A VARIABLE WEE)";
+    }
 };
 
 struct ASTDeclaration : public ASTType {
@@ -24,3 +47,8 @@ public:
         return token.line + "(" + std::to_string(token.column) + "): " + std::to_string((int) token.type) + std::to_string((int) token.flag);
     }
 };
+
+struct ASTStruct : public ASTType {
+ private:
+    
+}

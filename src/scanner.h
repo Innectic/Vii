@@ -7,6 +7,7 @@
 class Scanner {
 private:
     std::string file;
+    std::vector<ASTType*> types;
 
 public:
     Scanner();

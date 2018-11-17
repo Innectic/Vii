@@ -11,5 +11,19 @@ int main(void) {
 
     delete scanner;
 
+    For(tokens) {
+        std::cout << ((int) it.type) << std::endl;
+    }
+    std::cin.get();
+
+    For(parsed->stored) {
+        std::cout << it.first << std::endl;
+
+        For(it.second) {
+            std::cout << "    - " << ((int) it.type) << std::endl;
+        }
+    }
+    std::cin.get();
+
     return 0;
 }
