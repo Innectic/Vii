@@ -1,6 +1,5 @@
 
 enum class Flag {
-    UNPROCESSED,
     SCANNED,
     PARSED,
     OPTIMIZED_AWAY,
@@ -32,18 +31,25 @@ enum class TokenType {
     RPAREN,
 
     SINGLE_QUOTE,
-    DOUBLE_QUOTE
+    DOUBLE_QUOTE,
+    RESERVED
+};
+
+enum class ReservedTokenType {
+    NONE,
+    STRUCT
 };
 
 struct Token {
 public:
+    ReservedTokenType reserved;
     TokenType type;
     Flag flag;
 
     int column;
     int line;
 
-    Token(TokenType type, Flag flag, int line, int column) : type(type), flag(flag), line(line), column(column) {}
+Token(TokenType type, ReservedTokenType reserved, Flag flag, int line, int column) : type(type), flag(flag), line(line), column(column), reserved(reserved) {}
 };
 
 const static TokenType get_token_type(const char& ch) {

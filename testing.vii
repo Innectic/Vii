@@ -1,1 +1,18 @@
-a := "thing"
+
+struct Test {
+    a: String;
+    b: i32;
+    pub c: i8;
+
+    test :: (thing: String) {
+        printf("%", thing);
+    }
+
+    testing :: (a: String) -> String {
+        return a.upper();
+    }
+}
+
+test = Test();
+test.test("Things");
+test.test(test.testing("test"));

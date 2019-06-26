@@ -6,9 +6,20 @@
 int main(void) {
     auto scanner = new Scanner();
 
-    scanner->tokenize("testing.vii");
+    auto tokens = scanner->tokenize("testing.vii");
+    auto parsed = scanner->parse(tokens, false);
 
     delete scanner;
+
+    For(tokens) {
+        std::cout << ((int) it.type) << std::endl;
+    }
+    std::cin.get();
+
+    For(parsed) {
+        std::cout << it << std::endl;
+    }
+    std::cin.get();
 
     return 0;
 }
